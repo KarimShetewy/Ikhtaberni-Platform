@@ -1,0 +1,86 @@
+{% extends "auth/layout_minimal.html" %} 
+
+{% block title %}
+    إنشاء حساب - اختر دورك
+{% endblock %}
+
+{% block content_minimal %}
+<div class="card" style="margin-top: 0; padding: 30px 40px;">
+    <h2 style="font-weight: 600; margin-bottom: 15px; font-size: 1.8rem;">انضم إلى منصة اختبرني</h2>
+    <p style="font-size: 1em; color: #555; margin-bottom: 25px;">
+        مرحباً بك! يرجى تحديد الدور الذي ترغب في التسجيل به للمتابعة.
+    </p>
+
+    <form id="roleSelectionForm" method="POST" action="{{ url_for('choose_signup_role') }}">
+        <div class="role-selection-box-container">
+            <label class="role-selection-box" id="studentRoleBox" for="role_student">
+                <input type="radio" name="role" value="student" id="role_student" class="role-radio" required>
+                <span class="custom-radio-indicator"></span>
+                <i class="fas fa-user-graduate fa-2x"></i>
+                <h3>أنا طالب</h3>
+                <p>أبحث عن اختبارات لتقييم فهمي وتطوير مستواي الدراسي.</p>
+            </label>
+
+            <label class="role-selection-box" id="teacherRoleBox" for="role_teacher">
+                <input type="radio" name="role" value="teacher" id="role_teacher" class="role-radio" required>
+                <span class="custom-radio-indicator"></span>
+                <i class="fas fa-chalkboard-teacher fa-2x"></i>
+                <h3>أنا معلم</h3>
+                <p>أرغب في إنشاء اختبارات تفاعلية وتتبع أداء طلابي بفعالية.</p>
+            </label>
+        </div>
+
+        <div class="submit-button-container">
+            <button type="submit" class="btn-create-account">المتابعة كـ<span id="selectedRoleText"></span></button>
+        </div>
+    </form>
+
+    <p class="login-link" style="margin-top: 25px;">
+        لديك حساب بالفعل؟ <a href="{{ url_for('login_page') }}">تسجيل الدخول</a> {# <--- تم التعديل هنا #}
+    </p>
+</div>
+{% endblock content_minimal %}
+
+{% block scripts_extra_minimal %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const studentRoleBox = document.getElementById('studentRoleBox');
+        const teacherRoleBox = document.getElementById('teacherRoleBox');
+        const studentRadio = document.getElementById('role_student');
+        const teacherRadio = document.getElementById('role_teacher');
+        const selectedRoleTextSpan = document.getElementById('selectedRoleText');
+        const form = document.getElementById('roleSelectionForm');
+
+        function updateSelectedVisuals() {
+            if (studentRadio && teacherRadio && studentRoleBox && teacherRoleBox) {
+                studentRoleBox.classList.remove('selected');
+                teacherRoleBox.classList.remove('selected');
+                let roleDisplayName = '';
+                if (studentRadio.checked) {
+                    studentRoleBox.classList.add('selected');
+                    roleDisplayName = 'طالب';
+                } else if (teacherRadio.checked) {
+                    teacherRoleBox.classList.add('selected');
+                    roleDisplayName = 'معلم';
+                }
+                if(selectedRoleTextSpan) selectedRoleTextSpan.textContent = roleDisplayName ? ` (${roleDisplayName})` : '';
+            }
+        }
+        if(studentRoleBox) studentRoleBox.addEventListener('click', function () { if(studentRadio) studentRadio.checked = true; updateSelectedVisuals(); });
+        if(teacherRoleBox) teacherRoleBox.addEventListener('click', function () { if(teacherRadio) teacherRadio.checked = true; updateSelectedVisuals(); });
+        if(studentRadio) studentRadio.addEventListener('change', updateSelectedVisuals);
+        if(teacherRadio) teacherRadio.addEventListener('change', updateSelectedVisuals);
+        updateSelectedVisuals(); 
+
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                const selectedRole = document.querySelector('input[name="role"]:checked');
+                if (!selectedRole) {
+                    event.preventDefault(); 
+                    alert('يرجى اختيار دورك (طالب أو معلم) للمتابعة.'); 
+                }
+            });
+        }
+    });
+</script>
+{% endblock scripts_extra_minimal %}

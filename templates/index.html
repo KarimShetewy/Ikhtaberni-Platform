@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    اختبرني - منصتك للتقييم الذكي
+{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <h1>قيم فهمك، عزز معرفتك</h1>
+    <p class="subtitle">
+        أنشئ اختبارات تفاعلية كمعلم، أو تحدَّ نفسك كطالب. اكتشف قوة التقييم المخصص والممتع مع منصة "اختبرني".
+    </p>
+    
+    <div class="hero-animation-placeholder">
+        <i class="fas fa-file-signature fa-5x" style="opacity: 0.5;"></i>
+    </div>
+
+    <a href="{{ url_for('choose_signup_role') }}" class="cta-button" style="margin-top: 30px;">
+        <i class="fas fa-rocket"></i> ابدأ تجربتك الآن!
+    </a>
+</div>
+{% endblock %}
+
+{% block head_extra %}
+<style>
+    .hero-section .fa-file-signature {
+        animation: pulseAnimation 2s infinite ease-in-out;
+    }
+    @keyframes pulseAnimation {
+        0% { transform: scale(1); opacity: 0.5; }
+        50% { transform: scale(1.1); opacity: 0.7; }
+        100% { transform: scale(1); opacity: 0.5; }
+    }
+</style>
+{% endblock %}

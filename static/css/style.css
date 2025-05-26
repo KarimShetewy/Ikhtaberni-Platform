@@ -1,0 +1,483 @@
+/* static/css/style.css - النسخة الكاملة جدًا (بدون اختصارات) */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap');
+
+/* -------------------------------------------------------------------------- */
+/*                            1. المتغيرات العامة (Variables)                     */
+/* -------------------------------------------------------------------------- */
+:root {
+    --primary-color: #FFC107; /* اصفر ذهبي - للروابط، الأزرار الرئيسية، والتمييز */
+    --secondary-color: #6c757d; /* رمادي محايد - للنصوص الثانوية أو الحدود */
+    --success-color: #28a745; /* أخضر - لرسائل النجاح أو الأزرار الإيجابية */
+    --danger-color: #dc3545; /* أحمر - لرسائل الخطأ أو الأزرار السلبية */
+    --warning-color: #FFC107; /* نفسه اللون الأساسي (الأصفر) - للتحذيرات أو التمييز */
+    
+    --light-color: #f8f9fa;  /* لون فاتح جدًا (أقرب للأبيض) - للنصوص على الخلفيات الداكنة ولبعض خلفيات العناصر */
+    --off-white-bg: #f4f6f9; /* خلفية فاتحة مائلة للرمادي - لصفحات النماذج ذات التخطيط المبسّط */
+    
+    --dark-text-color: #212529;   /* أسود أو رمادي داكن - للنصوص على الخلفيات الفاتحة */
+    --light-text-color: #f1f1f1; /* لون فاتح (أفتح قليلاً من --light-color) - للنصوص على الخلفيات الديناميكية الداكنة */
+    --placeholder-text-color: #6c757d; /* لون النص المؤقت في الحقول */
+
+    --card-bg-color: #ffffff;    /* خلفية البطاقات البيضاء الافتراضية */
+    --card-border-color: #e0e0e0; /* لون حد البطاقات */
+    --card-shadow: 0 6px 20px rgba(0,0,0,0.12); /* ظل البطاقات */
+
+    --font-family: 'Cairo', sans-serif; /* الخط الأساسي للموقع */
+
+    /* ألوان الخلفية الديناميكية المتدرجة (لصفحة الهبوط الرئيسية) */
+    --bg-grad-yellow-dark-start: #FFB300;  /* أصفر كهرماني / ذهبي داكن */
+    --bg-grad-yellow-mid: #FFCA28;    /* أصفر ذهبي أفتح قليلاً (للتدرج) */
+    --bg-grad-black-end: #101010;     /* أسود فاحم (أقرب للأسود النقي) */
+
+    /* ألوان الهيدر المبسّط لصفحات المصادقة وإنشاء الحساب */
+    --minimal-header-bg-color: #ffffff;
+    --minimal-header-border-color: #e0e0e0;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                            2. الإعدادات العامة (Global Resets & Defaults)      */
+/* -------------------------------------------------------------------------- */
+* {
+    box-sizing: border-box; /* يجعل حساب العرض والارتفاع يشمل الحشو والحدود */
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth; /* تمرير سلس عند النقر على الروابط الداخلية (ancors) */
+}
+
+body {
+    font-family: var(--font-family);
+    line-height: 1.65; /* تباعد أسطر جيد للقراءة */
+    color: var(--light-text-color); /* لون النص الافتراضي على الخلفية الديناميكية */
+    background: linear-gradient(-45deg, 
+                var(--bg-grad-yellow-dark-start), 
+                var(--bg-grad-yellow-mid), 
+                var(--bg-grad-black-end),
+                var(--bg-grad-black-end), /* لجعل الجزء الأسود أطول في التدرج */
+                var(--bg-grad-yellow-mid),
+                var(--bg-grad-yellow-dark-start) 
+                );
+    background-size: 400% 400%;
+    animation: gradientBG 22s ease infinite; /* حركة خلفية بطيئة وسلسة */
+    display: flex;
+    flex-direction: column; /* لجعل الفوتر يبقى في الأسفل */
+    min-height: 100vh; /* ضمان أن الصفحة تملأ ارتفاع الشاشة على الأقل */
+    text-align: right; /* اتجاه النص الافتراضي من اليمين لليسار */
+    overflow-x: hidden; /* منع ظهور شريط تمرير أفقي غير مرغوب فيه */
+}
+/* كلاس خاص لصفحات مثل إنشاء الحساب وتسجيل الدخول (minimal layout) */
+body.minimal-page-bg { 
+    background: var(--off-white-bg) !important; /* تجاوز الخلفية الديناميكية بخلفية فاتحة ثابتة */
+    color: var(--dark-text-color) !important; /* تغيير لون النص الافتراضي ليناسب الخلفية الفاتحة */
+    animation: none !important; /* إيقاف أنيميشن الخلفية الديناميكية */
+}
+
+@keyframes gradientBG { 
+    0% { background-position: 0% 50%; } 
+    50% { background-position: 100% 50%; } 
+    100% { background-position: 0% 50%; } 
+}
+
+a { /* تنسيق عام للروابط */
+    color: var(--primary-color); /* اللون الأساسي للموقع */
+    text-decoration: none; /* إزالة الخط السفلي الافتراضي */
+    transition: color 0.2s ease-in-out;
+}
+a:hover {
+    color: var(--warning-color); /* لون أفتح قليلاً عند التحويم */
+    text-decoration: underline; /* إضافة خط سفلي عند التحويم */
+}
+
+img { /* جعل الصور متجاوبة بشكل افتراضي */
+    max-width: 100%;
+    height: auto;
+    display: block; /* إزالة المسافات البيضاء أسفل الصور المضمنة */
+}
+
+/* -------------------------------------------------------------------------- */
+/*                            3. الشريط العلوي (Header)                         */
+/* -------------------------------------------------------------------------- */
+
+/* --- الهيدر الرئيسي (لصفحة الهبوط والصفحات العادية) --- */
+header.main-header {
+    background: rgba(10, 10, 10, 0.8); /* خلفية داكنة شفافة قليلاً */
+    color: var(--light-text-color);
+    padding: 1rem 2.5rem; /* حشو داخلي */
+    width: 100%;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.45); /* ظل أسفل الهيدر */
+    position: sticky; /* جعله يلتصق بأعلى الصفحة عند التمرير */
+    top: 0;
+    z-index: 1020; /* لضمان ظهوره فوق العناصر الأخرى */
+    display: flex; /* استخدام flexbox لتوزيع العناصر */
+    justify-content: space-between; /* مسافة بين اللوجو وقائمة التنقل */
+    align-items: center; /* محاذاة العناصر عموديًا في المنتصف */
+}
+header.main-header .logo a {
+    font-size: 1.9rem; 
+    font-weight: 700; 
+    color: var(--light-text-color);
+    text-decoration: none;
+    transition: color 0.25s ease;
+}
+header.main-header .logo a:hover {
+    color: var(--warning-color); /* تغيير لون اللوجو عند التحويم */
+}
+header.main-header .main-nav a { /* لروابط مثل "تسجيل الدخول" */
+    color: var(--light-text-color);
+    text-decoration: none;
+    margin-right: 25px; /* مسافة يمين كل رابط (لـ RTL) */
+    font-size: 0.95em; 
+    font-weight: 500;
+    transition: color 0.25s ease, text-decoration 0.25s ease;
+}
+header.main-header .main-nav a:not(.btn-signup):hover { /* استثناء زر "إنشاء حساب" من هذا التأثير */
+    color: var(--warning-color);
+    text-decoration: underline; 
+    text-underline-offset: 4px; /* إبعاد الخط قليلاً عن النص */
+}
+header.main-header .main-nav .btn-signup { /* زر "إنشاء حساب" بشكل مميز */
+    background-color: var(--warning-color); /* لون الزر الأصفر */
+    color: var(--dark-text-color); /* نص داكن ليتناسب مع الخلفية الصفراء */
+    padding: 9px 20px; 
+    border-radius: 6px; 
+    transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+header.main-header .main-nav .btn-signup:hover {
+    background-color: #FFD54F; /* درجة أفتح من الأصفر عند التحويم */
+    color: var(--dark-text-color);
+    transform: translateY(-2px); /* تأثير رفع طفيف */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* --- الهيدر المبسّط (لصفحات المصادقة مثل اختيار الدور ونماذج التسجيل) --- */
+/* هذا يُطبق عندما يكون لـ <body> الكلاس 'minimal-page-bg' */
+body.minimal-page-bg header.simplified-header-for-auth { 
+    background-color: var(--minimal-header-bg-color); 
+    border-bottom: 1px solid var(--minimal-header-border-color);
+    padding: 1.5rem 0;
+    text-align: center; /* توسيط اللوجو */
+    width: 100%;
+    margin-bottom: 30px; 
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    position: sticky; 
+    top: 0;
+    z-index: 999; /* z-index أقل من الهيدر الرئيسي إذا كان هناك تداخل محتمل */
+}
+body.minimal-page-bg header.simplified-header-for-auth .logo-minimal-auth a { /* الكلاس الخاص باللوجو في هذا الهيدر */
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--dark-text-color); 
+    text-decoration: none;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                            4. حاويات المحتوى الرئيسية                      */
+/* -------------------------------------------------------------------------- */
+/* حاوية المحتوى الرئيسية للصفحة (مثل صفحة الهبوط) */
+.container.main-page-content {
+    max-width: 1100px; /* أقصى عرض للمحتوى */
+    margin: 20px auto; /* توسيط وتوفير هوامش */
+    padding: 0 20px; /* حشو أفقي */
+    flex-grow: 1; /* ليجعل المحتوى يأخذ المساحة المتاحة بين الهيدر والفوتر */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* توسيط المحتوى عموديًا إذا كان قصيرًا */
+    align-items: center; /* توسيط المحتوى أفقيًا */
+}
+/* حاوية المحتوى للصفحات ذات التخطيط المبسّط (مثل صفحات المصادقة) */
+body.minimal-page-bg .content-wrapper-auth {
+     max-width: 580px; /* عرض أضيق لصفحات النماذج */
+     margin: 0 auto 50px auto; /* توسيط مع هامش سفلي كبير */
+     padding: 0 15px;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                            5. قسم الهيرو (Hero Section - لـ index.html)        */
+/* -------------------------------------------------------------------------- */
+.hero-section {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 70px 20px; color: var(--light-text-color); 
+    flex-grow: 1; min-height: calc(100vh - 170px); /* (ارتفاع الشاشة - (ارتفاع الهيدر + ارتفاع الفوتر)) تقريبًا */
+}
+.hero-section h1 { 
+    font-size: 3.8rem; font-weight: 900; margin-bottom: 25px; 
+    text-shadow: 2px 2px 12px rgba(0,0,0,0.75); line-height: 1.25; 
+}
+.hero-section p.subtitle { 
+    font-size: 1.45rem; margin-bottom: 35px; max-width: 750px; 
+    line-height: 1.75; text-shadow: 1px 1px 8px rgba(0,0,0,0.65); 
+}
+.hero-section .cta-button { 
+    background-color: var(--warning-color); color: var(--dark-text-color); 
+    padding: 16px 40px; font-size: 1.25rem; font-weight: 700; text-decoration: none; 
+    border-radius: 8px; transition: all 0.25s ease; 
+    box-shadow: 0 4px 18px rgba(0,0,0,0.35); display: inline-block; 
+}
+.hero-section .cta-button:hover { 
+    background-color: #FFD54F; color: var(--dark-text-color); 
+    transform: translateY(-3px) scale(1.03); box-shadow: 0 6px 22px rgba(0,0,0,0.4); 
+}
+.hero-animation-placeholder { 
+    margin-top: 45px; width: 100%; max-width: 450px; height: 280px; 
+    background-color: rgba(255,255,255,0.07); border: 2px dashed var(--warning-color); 
+    border-radius: 10px; display: flex; align-items: center; justify-content: center; 
+    font-style: italic; color: var(--warning-color); 
+}
+.hero-animation-placeholder img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+/* أنيميشن لأيقونة في الهيرو سكشن (اختياري) */
+@keyframes pulseAnimation {
+    0% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 0.5; }
+}
+.hero-section .fa-file-signature { /* إذا استخدمت هذه الأيقونة */
+    animation: pulseAnimation 2s infinite ease-in-out;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                            6. التذييل (Footer)                             */
+/* -------------------------------------------------------------------------- */
+footer.main-footer { 
+    text-align: center; padding: 1.5rem; background: rgba(0, 0, 0, 0.85); 
+    color: var(--light-text-color); margin-top: auto; width: 100%; font-size: 0.9em; 
+}
+/* إخفاء الفوتر في الصفحات ذات التخطيط المبسّط */
+body.minimal-page-bg footer.main-footer { 
+    display: none !important; 
+}
+
+/* -------------------------------------------------------------------------- */
+/*                            7. رسائل التنبيه (Flash Messages)                */
+/* -------------------------------------------------------------------------- */
+.flash-messages-container { 
+    position: fixed; top: 90px; /* تعديل ليناسب ارتفاع الهيدر اللاصق */
+    left: 50%; transform: translateX(-50%); 
+    z-index: 2020; /* ليكون فوق الهيدر إذا لزم الأمر */
+    width: auto; max-width: 90%; 
+    display: flex; flex-direction: column; align-items: center; 
+    pointer-events: none; /* لمنع التفاعل مع الحاوية الشفافة نفسها */
+}
+/* تعديل موقع رسائل التنبيه في الصفحات المبسّطة لتكون ضمن تدفق المحتوى */
+body.minimal-page-bg .flash-messages-container { 
+    position: static; transform: none; left: auto; top: auto; 
+    max-width:100%; /* تأخذ عرض الحاوية .content-wrapper-auth */
+    margin-bottom: 20px; 
+    padding: 0; /* إزالة الحشو الافتراضي إذا كان يأتي من هنا */
+}
+.alert { 
+    padding: 1rem 1.5rem; margin-bottom: 1rem; border: 1px solid transparent; 
+    border-radius: .35rem; position: relative; box-shadow: 0 3px 12px rgba(0,0,0,0.2); 
+    color: var(--dark-text-color); /* نص داكن افتراضيًا للتنبيهات */
+    opacity: 0.97; 
+    transition: opacity 0.3s ease-out, transform 0.4s ease-out; 
+    min-width: 320px; max-width: 600px; text-align: center; 
+    pointer-events: all; /* السماح بالنقر على محتوى التنبيه وزر الإغلاق */
+}
+.alert-success { background-color: #d1e7dd; border-color: #badbcc; color: #0f5132;}
+.alert-danger  { background-color: #f8d7da; border-color: #f5c2c7; color: #842029;}
+.alert-warning { background-color: #fff3cd; border-color: #ffe69c; color: #664d03;}
+.alert-info    { background-color: #cff4fc; border-color: #b6effb; color: #055160;}
+.close-alert-btn { 
+    position: absolute; top: 50%; left: 15px; right: auto; transform: translateY(-50%); 
+    padding: 0.5rem 0.8rem; color: inherit; background-color: transparent; border: none; 
+    opacity: 0.6; font-size: 1.3rem; line-height: 1; cursor: pointer; transition: opacity 0.2s ease; 
+}
+.close-alert-btn:hover { opacity: 1; }
+
+/* -------------------------------------------------------------------------- */
+/*                            8. البطاقات (Cards) - عام وخاص                    */
+/* -------------------------------------------------------------------------- */
+/* تنسيق عام للبطاقات (يُطبق بشكل خاص في صفحات minimal-page-bg) */
+body.minimal-page-bg .card { 
+    background: var(--card-bg-color); 
+    color: var(--dark-text-color); 
+    padding: 35px 45px; 
+    border-radius: 10px; 
+    box-shadow: var(--card-shadow); 
+    margin: 0 auto 20px auto; /* التوسيط والهامش السفلي */
+    width: 100%; 
+    /* max-width يتم التحكم به من كلاسات البطاقات الفرعية أو .content-wrapper-auth */
+    text-align: center; 
+    border: 1px solid var(--card-border-color); 
+}
+body.minimal-page-bg .card h2 { /* لـ h2 داخل أي بطاقة في minimal layout */
+    color: var(--dark-text-color); 
+    margin-bottom: 20px; 
+    font-size: 1.9rem; 
+    font-weight: 700; 
+}
+
+/* --- Role Selection Signup Page Card Styles --- */
+/* هذه التنسيقات تُطبق على العناصر داخل .card في صفحة choose_role_signup.html */
+.role-selection-box-container { display: flex; justify-content: center; gap: 25px; margin: 35px 0; flex-wrap: wrap; }
+.role-selection-box { border: 2px solid #d1d5db; background-color: #f9fafb; color: var(--dark-text-color); border-radius: 10px; padding: 35px 30px; width: 100%; max-width: 300px; text-align: center; cursor: pointer; transition: all 0.25s ease-in-out; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+.role-selection-box:hover { transform: translateY(-5px); box-shadow: 0 8px 18px rgba(0,0,0,0.1); border-color: #adb5bd;}
+.role-selection-box.selected { border-color: var(--warning-color); background-color: #FFFDE7; box-shadow: 0 6px 20px rgba(255, 193, 7, 0.25); transform: translateY(-2px); }
+.role-selection-box i { font-size: 2.8rem; color: var(--warning-color); margin-bottom: 18px; }
+.role-selection-box h3 { font-size: 1.35rem; color: var(--dark-text-color); margin-bottom: 10px; font-weight: 600; }
+.role-selection-box p { font-size: 0.9rem; color: #555; line-height: 1.65; margin-bottom: 0; }
+.role-radio { position: absolute; top: 15px; left: 15px; opacity: 0; width: 0; height: 0; }
+.custom-radio-indicator { position: absolute; top: 20px; left: 20px; height: 22px; width: 22px; background-color: #e0e0e0; border: 1px solid #ced4da; border-radius: 50%; transition: all 0.2s ease; }
+.role-selection-box.selected .custom-radio-indicator { background-color: var(--warning-color); border-color: var(--warning-color); }
+.custom-radio-indicator::after { content: ""; position: absolute; display: none; left: 7px; top: 4px; width: 5px; height: 10px; border: solid var(--dark-text-color); border-width: 0 3px 3px 0; transform: rotate(45deg); }
+.role-selection-box.selected .custom-radio-indicator::after { display: block; }
+.submit-button-container { text-align: center; margin-top: 35px; }
+.btn-create-account { padding: 13px 45px; font-size: 1.15rem; background-color: var(--success-color); color: white; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.2s ease, transform 0.15s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
+.btn-create-account:hover { background-color: #218838; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2);}
+body.minimal-page-bg .card .login-link { margin-top: 25px; font-size: 0.95em; color: #555; } 
+body.minimal-page-bg .card .login-link a { color: var(--success-color); font-weight: 600; text-decoration: none; } 
+body.minimal-page-bg .card .login-link a:hover { text-decoration: underline; color: #1e7e34;}
+
+/* -------------------------------------------------------------------------- */
+/*                            9. نماذج الإدخال (Forms)                         */
+/* -------------------------------------------------------------------------- */
+/* كلاسات عامة لعناصر النماذج */
+.form-group { 
+    margin-bottom: 1.3rem; /* مسافة قياسية بين مجموعات الحقول */
+    text-align: right; /* محاذاة الـ label لليمين */
+}
+.form-group label { 
+    display: block; 
+    margin-bottom: 0.4rem; /* مسافة أقل بين الـ label والحقل */
+    font-weight: 600; 
+    color: #3e4c59; /* لون label أغمق قليلاً */
+    font-size: 0.9em; 
+}
+.form-control { /* كلاس عام لـ input, select, textarea */
+    display: block; width: 100%; 
+    padding: 0.7rem 0.9rem; /* تعديل الحشو ليناسب حجم الخط */
+    font-size: 0.9rem; 
+    font-weight: 400;
+    line-height: 1.6; 
+    color: var(--dark-text-color); 
+    background-color: #fcfdff; /* خلفية فاتحة جدًا للحقل */
+    background-clip: padding-box; 
+    border: 1px solid #bcc3ca; /* حد أغمق قليلاً */
+    appearance: none; /* إزالة المظهر الافتراضي لبعض العناصر مثل select */
+    border-radius: 6px; /* زوايا أكثر تقويسًا قليلاً */
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+.form-control:focus { 
+    border-color: var(--primary-color); 
+    outline: 0; 
+    box-shadow: 0 0 0 .2rem rgba(255,193,7,.25); /* ظل أصفر عند التركيز */
+}
+.form-control::placeholder { color: var(--placeholder-text-color); opacity: 1; }
+
+/* تنسيقات خاصة لنموذج إنشاء الحساب التفصيلي (signup_actual_form.html) */
+/* ولنموذج تسجيل الدخول (login_form.html) */
+body.minimal-page-bg .signup-form-container-actual,
+body.minimal-page-bg .login-form-container-actual { 
+    max-width: 550px !important; /* ليتجاوز max-width العام لـ .card */
+    /* يرث تنسيقات .card العامة، مع هذه التخصيصات */
+}
+.signup-form-container-actual h2, /* عنوان النموذج الرئيسي */
+.login-form-container-actual h2 { 
+    font-size: 1.7rem !important; 
+    margin-bottom: 25px !important;
+    font-weight: 700 !important;
+}
+.form-names-row { display: flex; gap: 15px; margin-bottom: 1.2rem; }
+.form-names-row .form-group { flex: 1; margin-bottom: 0; }
+
+.password-field-container { position: relative; } /* لوضع أيقونة العين */
+.password-toggle-icon { 
+    position: absolute; 
+    top: 50%; 
+    right: 12px;  /* لليمين (لـ RTL) */
+    left: auto;
+    transform: translateY(-50%); 
+    cursor: pointer; 
+    color: #777; /* لون أيقونة العين */
+    padding-top: 8px; /* لضبط المحاذاة مع خط الكتابة داخل الحقل */
+    font-size: 0.9em; /* حجم أيقونة العين */
+}
+/* تعديل حشو حقل كلمة المرور لتوفير مساحة للأيقونة على اليمين (لـ RTL) */
+.signup-form-container-actual .form-control[type="password"],
+.login-form-container-actual .form-control[type="password"] { 
+    padding-right: 40px !important; /* مساحة للأيقونة على اليمين */
+    padding-left: 14px !important;  /* الحشو العادي على اليسار */
+}
+
+/* تنسيق حقل رقم الهاتف (لجعله LTR وإضافة أيقونة على اليمين) */
+.phone-field-container { position: relative; }
+.phone-input-icon {
+    position: absolute; top: 50%; right: 12px; left: auto;
+    transform: translateY(-50%); color: #adb5bd; font-size: 0.9em; 
+    pointer-events: none; padding-top: 8px;
+}
+.form-group input[type="tel"].form-control {
+    direction: ltr; text-align: left; 
+    padding-right: 40px; /* مساحة للأيقونة على اليمين (لـ RTL) */
+    padding-left: 14px;  /* الحشو العادي على اليسار */
+}
+
+.form-check-custom { display: flex; align-items: flex-start; margin-bottom: 18px; font-size: 0.85em; line-height: 1.5;}
+.form-check-custom input[type="checkbox"] { margin-top: 3px; margin-left: 10px; width: 17px; height: 17px; cursor: pointer; accent-color: var(--success-color); }
+.form-check-custom label { margin-bottom: 0; cursor: pointer; color: #4a5568; font-weight: normal;}
+.form-check-custom label a { color: var(--success-color); text-decoration: underline;}
+.form-check-custom label a:hover { color: #218838; }
+.form-group small.form-text { font-size: 0.75em; color: #6c757d; display: block; margin-top: 4px;}
+.btn-create-my-account { background-color: var(--success-color); color: white; padding: 13px 35px; font-size: 1.1rem; font-weight: 600; width: 100%; border-radius: 8px; margin-top: 25px; transition: background-color 0.2s ease, transform 0.2s ease; box-shadow: 0 2px 4px rgba(40,167,69,0.3); }
+.btn-create-my-account:hover { background-color: #218838; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(40,167,69,0.4);}
+.btn-create-my-account:active { transform: translateY(0); }
+/* روابط "لديك حساب بالفعل؟" و "ليس لديك حساب؟" */
+.signup-form-container-actual .login-prompt-actual,
+.login-form-container-actual .signup-prompt-login { text-align: center; margin-top: 25px; font-size: 0.9em; color: #555;}
+.signup-form-container-actual .login-prompt-actual a,
+.login-form-container-actual .signup-prompt-login a { font-weight: 600; text-decoration: none;}
+.signup-form-container-actual .login-prompt-actual a {color: var(--success-color);}
+.login-form-container-actual .signup-prompt-login a {color: var(--success-color);} 
+.signup-form-container-actual .login-prompt-actual a:hover,
+.login-form-container-actual .signup-prompt-login a:hover { text-decoration: underline;}
+.text-danger-asterisk { color: var(--danger-color); margin-right: 2px; font-weight: bold;}
+
+/* زر تسجيل الدخول الرئيسي */
+.btn-login { background-color: var(--primary-color); color: var(--dark-text-color); padding: 12px 30px; font-size: 1.1rem; font-weight: 600; width: 100%; border-radius: 8px; margin-top: 20px; transition: background-color 0.2s ease, transform 0.2s ease; box-shadow: 0 2px 4px rgba(255,193,7,0.3);}
+.btn-login:hover { background-color: #FFCA28; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(255,193,7,0.4);}
+
+/* -------------------------------------------------------------------------- */
+/*                            10. الاستجابة للشاشات (Responsive)                */
+/* -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+    header.main-header { padding: 0.8rem 1rem; flex-direction: column; align-items: center; }
+    header.main-header .logo { margin-bottom: 0.5rem; }
+    header.main-header .main-nav { margin-top: 0.5rem; text-align: center;} /* توسيط روابط الناف بار في الشاشات الصغيرة */
+    header.main-header .main-nav a { margin: 0 10px; display: inline-block; margin-bottom: 5px; /* لتجنب التداخل إذا التفوا */} 
+    /* الهيدر المبسّط */
+    body.minimal-page-bg header.simplified-header-for-auth { padding: 1.2rem 0; margin-bottom: 20px; }
+    body.minimal-page-bg header.simplified-header-for-auth .logo-minimal-auth a { font-size: 1.7rem; }
+
+    .hero-section h1 { font-size: 2.8rem; }
+    .hero-section p.subtitle { font-size: 1.2rem; padding: 0 10px; } 
+    .hero-animation-placeholder { height: 220px; max-width: 90%; }
+    
+    .role-selection-box { max-width: 90%; margin-bottom: 20px; padding: 25px 20px;} 
+    .role-selection-box i { font-size: 2.2rem; margin-bottom: 12px;}
+    .role-selection-box h3 { font-size: 1.2rem; }
+    .role-selection-box p { font-size: 0.85rem; }
+    .role-selection-box-container { flex-direction: column; align-items: center; gap: 20px; margin: 25px 0;}
+
+    .flash-messages-container { top: 10px; /* تقريبها أكثر للأعلى إذا لم يكن الهيدر ثابتًا بنفس الارتفاع */ } 
+    body.minimal-page-bg .flash-messages-container {margin-top: 15px; width: 95%;} /* تعديل عرضها في minimal */
+    .alert { font-size: 0.9rem; padding: 0.75rem 1rem; max-width: 95%; }
+    .close-alert-btn { left: 10px; padding: 0.3rem 0.6rem; font-size: 1rem; }
+    
+    /* البطاقات في الصفحات ذات الخلفية الفاتحة */
+    body.minimal-page-bg .card { 
+        padding: 25px 15px; /* تقليل الحشو الأفقي للبطاقات في الشاشات الصغيرة */
+        margin: 15px auto; 
+        width: calc(100% - 20px); /* توفير هامش بسيط من حواف الشاشة */
+        max-width: calc(100% - 20px); /* لضمان أنها لا تتجاوز عرض الشاشة */
+    } 
+    body.minimal-page-bg .card h2 { font-size: 1.7rem; } 
+    
+    /* تكديس حقلي الاسم الأول والأخير في نموذج التسجيل */
+    .form-names-row { flex-direction: column; gap: 0; margin-bottom: 0;} 
+    .form-names-row .form-group { margin-bottom: 1.2rem; }
+}

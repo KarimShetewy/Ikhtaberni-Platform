@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}عملية الحساب - اختبرني{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <{# <style> block for .minimal-header-container, etc. was here. It is now fully in style.css under 'Header (المبسّط لصفحات المصادقة)' if body has .minimal-page-bg #}
+    {% block head_extra_minimal %}
+    <style>
+        /* These styles are for body.minimal-page-bg and its direct header to override the gradient background */
+        body.minimal-page-bg {
+            background: var(--off-white-bg, #f4f6f9) !important; 
+            color: var(--dark-text-color, #212529) !important;
+            animation: none !important; 
+        }
+        /* Styles for the minimal header when body.minimal-page-bg is active */
+        body.minimal-page-bg header.simplified-header-for-auth { 
+            background-color: var(--minimal-header-bg-color, #ffffff); 
+            border-bottom: 1px solid var(--minimal-header-border-color, #e0e0e0);
+            padding: 1.5rem 0;
+            text-align: center;
+            width: 100%;
+            margin-bottom: 30px; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            position: sticky; 
+            top: 0;
+            z-index: 999; 
+        }
+        body.minimal-page-bg header.simplified-header-for-auth .logo-minimal-auth a {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark-text-color); 
+            text-decoration: none;
+        }
+        body.minimal-page-bg footer.main-footer {
+            display: none !important; 
+        }
+        /* حاوية المحتوى لصفحات المصادقة */
+        .content-wrapper-auth {
+             max-width: 580px; 
+             margin: 0 auto 50px auto; 
+             padding: 0 15px;
+        }
+         /* تعديل لموقع رسائل فلاش في الصفحات المبسّطة */
+        body.minimal-page-bg .flash-messages-container {
+            position: static; /* لجعلها تظهر ضمن تدفق المحتوى */
+            transform: none;
+            left: auto;
+            top: auto;
+            max-width: 100%; /* تأخذ عرض content-wrapper-auth */
+            margin-bottom: 20px;
+        }
+    </style>
+    {% endblock %}
+</head>
+<body class="minimal-page-bg">
+
+    <header class="simplified-header-for-auth"> {# كلاس معرف في style.css (أو في الـ head_extra_minimal أعلاه) #}
+        <div class="logo-minimal-auth">
+            <a href="{{ url_for('home') }}">اختبرني</a>
+        </div>
+    </header>
+
+    <div class="content-wrapper-auth"> 
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-messages-container"> {# لم يعد fixed هنا، يعتمد على position:static #}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category if category else 'info' }}" role="alert">
+                {{ message | safe }}
+                <button type="button" class="close-alert-btn">×</button>
+              </div>
+            {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        {% block content_minimal %}
+            <p style="text-align: center; margin-top: 50px; font-size: 1.2em;">يتم تحميل محتوى صفحة المصادقة...</p>
+        {% endblock %}
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts_extra_minimal %}{% endblock %}
+</body>
+</html>
