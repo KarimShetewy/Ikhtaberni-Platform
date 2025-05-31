@@ -1,35 +1,164 @@
-{% extends "layout.html" %}
+{% extends "layout.html" %} {# يرث من القالب الرئيسي الذي يحتوي على الهيدر والفوتر والمنطق العام #}
 
 {% block title %}
-    اختبرني - منصتك للتقييم الذكي
+    {# يتم التحكم بالنص الفعلي بناءً على اللغة المطبقة بواسطة JavaScript من layout.html #}
+    <span class="lang-en">Ektbariny - Revolutionizing Assessments</span>
+    <span class="lang-ar" style="display:none;">اختبرني - نقلة نوعية في عالم التقييمات</span>
 {% endblock %}
 
 {% block content %}
-<div class="hero-section">
-    <h1>قيم فهمك، عزز معرفتك</h1>
-    <p class="subtitle">
-        أنشئ اختبارات تفاعلية كمعلم، أو تحدَّ نفسك كطالب. اكتشف قوة التقييم المخصص والممتع مع منصة "اختبرني".
-    </p>
-    
-    <div class="hero-animation-placeholder">
-        <i class="fas fa-file-signature fa-5x" style="opacity: 0.5;"></i>
-    </div>
 
-    <a href="{{ url_for('choose_signup_role') }}" class="cta-button" style="margin-top: 30px;">
-        <i class="fas fa-rocket"></i> ابدأ تجربتك الآن!
-    </a>
-</div>
+{# --- HERO SECTION: قسم رئيسي جذاب لجذب الانتباه --- #}
+<section class="hero-section-v2">
+    <div class="container hero-container">
+        <div class="hero-text-content">
+            <h1 class="hero-headline">
+                <span class="lang-en">The Future of Smart Assessments is Here.</span>
+                <span class="lang-ar" style="display:none;">مستقبل التقييمات الذكية يبدأ الآن.</span>
+            </h1>
+            <p class="hero-subheadline">
+                <span class="lang-en">Empowering educators and inspiring students with intuitive and effective learning tools. Discover a new way to evaluate and grow.</span>
+                <span class="lang-ar" style="display:none;">تمكين المعلمين وإلهام الطلاب بأدوات تعلم سهلة وفعالة. اكتشف طريقة جديدة للتقييم والنمو.</span>
+            </p>
+            <div class="hero-cta-buttons">
+                <a href="{{ url_for('choose_signup_role') }}" class="btn btn-primary btn-lg hero-btn-main">
+                    <span class="lang-en">Get Started Free</span>
+                    <span class="lang-ar" style="display:none;">ابدأ مجانًا</span>
+                </a>
+                <a href="#features" class="btn btn-outline-light btn-lg hero-btn-secondary scroll-to"> {# scroll-to class يمكن استخدامه لـ JS للتمرير السلس #}
+                    <span class="lang-en">Learn More</span>
+                    <span class="lang-ar" style="display:none;">اعرف المزيد</span>
+                </a>
+            </div>
+        </div>
+        <div class="hero-image-content">
+            {# مثال لعنصر نائب للصورة - استبدل بمسار صورتك الفعلية #}
+            {# تأكد أن الصورة موجودة في static/images/ أو قم بتحديث المسار #}
+            <img src="{{ url_for('static', filename='images/modern_hero_illustration.svg') }}" 
+                 alt-en="Modern illustration of digital assessment and learning"
+                 alt-ar="رسم توضيحي حديث للتقييم الرقمي والتعلم" 
+                 class="hero-main-img">
+            {# إذا لم تكن الصورة جاهزة، يمكنك استخدام div مؤقت:
+            <div style="width:100%; max-width:450px; height:300px; background-color:#444; display:flex; align-items:center; justify-content:center; border-radius:8px; color:white; font-style:italic;">
+                Hero Illustration Placeholder
+            </div>
+            #}
+        </div>
+    </div>
+</section>
+
+{# --- FEATURES SECTION: قسم الميزات الرئيسية (باستخدام أيقونات ونصوص قصيرة) --- #}
+<section id="features" class="features-section-v2 section-padding"> {# id="features" للرابط #}
+    <div class="container text-center">
+        <h2 class="section-main-title">
+            <span class="lang-en">Why Choose Ektbariny?</span>
+            <span class="lang-ar" style="display:none;">لماذا تختار منصة اختبرني؟</span>
+        </h2>
+        <p class="section-subtitle">
+            <span class="lang-en">We provide innovative tools designed for modern educational needs.</span>
+            <span class="lang-ar" style="display:none;">نقدم أدوات مبتكرة مصممة لتلبية احتياجات التعليم الحديث.</span>
+        </p>
+        <div class="features-grid">
+            <div class="feature-item">
+                <div class="feature-icon"><i class="fas fa-cogs fa-3x"></i></div> {/* أيقونة للتخصيص */}
+                <h3 class="feature-title"><span class="lang-en">Highly Customizable</span><span class="lang-ar" style="display:none;">تخصيص عالي</span></h3>
+                <p class="feature-description"><span class="lang-en">Tailor quizzes to specific needs and learning objectives.</span><span class="lang-ar" style="display:none;">صمم اختبارات تناسب احتياجاتك وأهدافك التعليمية.</span></p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon"><i class="fas fa-chart-line fa-3x"></i></div> {/* أيقونة للتحليلات */}
+                <h3 class="feature-title"><span class="lang-en">Insightful Analytics</span><span class="lang-ar" style="display:none;">تحليلات دقيقة</span></h3>
+                <p class="feature-description"><span class="lang-en">Track progress and gain valuable insights into performance.</span><span class="lang-ar" style="display:none;">تتبع التقدم واحصل على رؤى قيمة حول الأداء.</span></p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon"><i class="fas fa-users fa-3x"></i></div> {/* أيقونة لواجهة المستخدم */}
+                <h3 class="feature-title"><span class="lang-en">User-Friendly Interface</span><span class="lang-ar" style="display:none;">واجهة سهلة الاستخدام</span></h3>
+                <p class="feature-description"><span class="lang-en">Intuitive design for a seamless experience for all users.</span><span class="lang-ar" style="display:none;">تصميم بديهي لتجربة سلسة لجميع المستخدمين.</span></p>
+            </div>
+             <div class="feature-item">
+                <div class="feature-icon"><i class="fas fa-shield-alt fa-3x"></i></div> {/* أيقونة للأمان */}
+                <h3 class="feature-title"><span class="lang-en">Secure & Reliable</span><span class="lang-ar" style="display:none;">آمن وموثوق</span></h3>
+                <p class="feature-description"><span class="lang-en">Your data is protected with robust security measures.</span><span class="lang-ar" style="display:none;">بياناتك محمية بأعلى معايير الأمان.</span></p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# --- ABOUT US / PLATFORM INFO SECTION 1 (نص على اليسار، صورة على اليمين عند عرض LTR) --- #}
+<section class="about-section-v2 section-padding alt-bg"> {# alt-bg لخلفية مميزة قليلاً #}
+    <div class="container">
+        <div class="about-content-grid">
+            <div class="about-text-block">
+                <h2 class="section-main-title">
+                    <span class="lang-en">For Educators: Streamline Your Assessments</span>
+                    <span class="lang-ar" style="display:none;">للمعلمين: اجعل تقييماتك أكثر انسيابية</span>
+                </h2>
+                <p class="section-paragraph">
+                    <span class="lang-en">Ektbariny empowers teachers with tools to create, distribute, and grade assessments effortlessly. Focus more on teaching and less on paperwork. Our platform offers diverse question types, automated grading options, and comprehensive performance reports to help you understand your students' needs better.</span>
+                    <span class="lang-ar" style="display:none;">تمكّن منصة اختبرني المعلمين بأدوات لإنشاء وتوزيع وتقييم الاختبارات بسهولة ويسر. ركز أكثر على التدريس وأقل على الأعمال الورقية. تقدم منصتنا أنواعًا متنوعة من الأسئلة، وخيارات تصحيح آلية، وتقارير أداء شاملة لمساعدتك على فهم احتياجات طلابك بشكل أفضل.</span>
+                </p>
+                 <a href="{{ url_for('choose_signup_role', role='teacher') }}" class="btn btn-secondary learn-more-btn">
+                    <span class="lang-en">Explore Teacher Tools</span>
+                    <span class="lang-ar" style="display:none;">اكتشف أدوات المعلم</span>
+                 </a>
+            </div>
+            <div class="about-image-block">
+                {# استبدل بمسار الصورة المناسب #}
+                <img src="{{ url_for('static', filename='images/modern_educator_illustration.svg') }}" 
+                     alt-en="Illustration of a teacher using a modern assessment platform"
+                     alt-ar="رسم توضيحي لمعلم يستخدم منصة تقييم حديثة">
+            </div>
+        </div>
+    </div>
+</section>
+
+{# --- ABOUT US / PLATFORM INFO SECTION 2 (صورة على اليسار، نص على اليمين عند عرض LTR) --- #}
+<section class="about-section-v2 section-padding">
+    <div class="container">
+        <div class="about-content-grid reverse-grid"> {# reverse-grid لعكس الترتيب #}
+            <div class="about-text-block">
+                <h2 class="section-main-title">
+                    <span class="lang-en">For Students: Engage and Excel</span>
+                    <span class="lang-ar" style="display:none;">للطلاب: تفاعل وتفوق</span>
+                </h2>
+                <p class="section-paragraph">
+                    <span class="lang-en">Take control of your learning journey with Ektbariny. Our interactive quizzes make learning engaging and fun. Get instant feedback, track your progress, and identify areas where you can improve. Prepare for exams with confidence and achieve your academic goals.</span>
+                    <span class="lang-ar" style="display:none;">تحكم في رحلتك التعليمية مع اختبرني. اختباراتنا التفاعلية تجعل التعلم ممتعًا وجذابًا. احصل على ملاحظات فورية، وتتبع تقدمك، وحدد المجالات التي يمكنك تحسينها. استعد لامتحاناتك بثقة وحقق أهدافك الأكاديمية.</span>
+                </p>
+                 <a href="{{ url_for('choose_signup_role', role='student') }}" class="btn btn-secondary learn-more-btn">
+                    <span class="lang-en">Discover Student Features</span>
+                    <span class="lang-ar" style="display:none;">اكتشف ميزات الطالب</span>
+                 </a>
+            </div>
+            <div class="about-image-block">
+                {# استبدل بمسار الصورة المناسب #}
+                <img src="{{ url_for('static', filename='images/modern_student_illustration.svg') }}" 
+                     alt-en="Illustration of students engaging with an online learning platform"
+                     alt-ar="رسم توضيحي لطلاب يتفاعلون مع منصة تعلم عبر الإنترنت">
+            </div>
+        </div>
+    </div>
+</section>
+
+{# --- CALL TO ACTION SECTION (دعوة أخيرة للعمل في نهاية الصفحة) --- #}
+<section class="final-cta-section section-padding text-center alt-bg">
+    <div class="container">
+        <h2 class="section-main-title">
+            <span class="lang-en">Ready to Get Started?</span>
+            <span class="lang-ar" style="display:none;">هل أنت مستعد للبدء؟</span>
+        </h2>
+        <p class="section-subtitle">
+            <span class="lang-en">Join the Ektbariny community today and experience the difference.</span>
+            <span class="lang-ar" style="display:none;">انضم إلى مجتمع اختبرني اليوم واختبر الفرق بنفسك.</span>
+        </p>
+        <a href="{{ url_for('choose_signup_role') }}" class="btn btn-primary btn-xl final-cta-btn">
+            <span class="lang-en">Create Your Free Account</span>
+            <span class="lang-ar" style="display:none;">أنشئ حسابك المجاني</span>
+        </a>
+    </div>
+</section>
+
 {% endblock %}
 
 {% block head_extra %}
-<style>
-    .hero-section .fa-file-signature {
-        animation: pulseAnimation 2s infinite ease-in-out;
-    }
-    @keyframes pulseAnimation {
-        0% { transform: scale(1); opacity: 0.5; }
-        50% { transform: scale(1.1); opacity: 0.7; }
-        100% { transform: scale(1); opacity: 0.5; }
-    }
-</style>
+
 {% endblock %}

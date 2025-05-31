@@ -1,371 +1,237 @@
 {% extends "auth/layout_minimal.html" %} 
 
 {% block title %}
-    إكمال بيانات حساب {% if role == 'student' %}طالب{% elif role == 'teacher' %}معلم{% else %}جديد{% endif %} - اختبرني
+    <span class="lang-en">Complete Account Details 
+        {% if role == 'student' %}as Student{% elif role == 'teacher' %}as Teacher{% else %}for New Account{% endif %} - Ektbariny
+    </span>
+    <span class="lang-ar" style="display:none;">إكمال بيانات حساب 
+        {% if role == 'student' %}طالب{% elif role == 'teacher' %}معلم{% else %}جديد{% endif %} - اختبرني
+    </span>
 {% endblock %}
 
 {% block head_extra_minimal %}
-{# 
 <style>
-    /* يمكنك وضع تنسيقات CSS إضافية خاصة بهذه الصفحة هنا إذا لم تكن عامة */
-    #phone_number { 
-        direction: ltr; 
-        text-align: left;
+    /* أنماط لشريط بحث الدول ومظهر الدمج مع القائمة */
+    .country-select-group {
+        position: relative;
     }
-</style> 
-#}
+    .country-search-input.form-control {
+        margin-bottom: 0; 
+        border-bottom-left-radius: 0; 
+        border-bottom-right-radius: 0;
+        border-bottom: none; 
+        position: relative;
+        z-index: 2; 
+    }
+    .country-select-group #country_signup_select.form-control {
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+        margin-top: -1px; 
+        position: relative;
+        z-index: 1;
+    }
+    #country_signup_select option.hidden-by-search {
+        display: none !important;
+    }
+</style>
 {% endblock %}
 
 
 {% block content_minimal %}
 <div class="card signup-form-container-actual"> 
-    <h2 style="font-weight: 700;">
-        إنشاء حساب 
-        {% if role == 'student' %}
-            <span style="color: var(--primary-color);">كطالب</span>
-        {% elif role == 'teacher' %}
-            <span style="color: var(--success-color);">كمعلم</span>
-        {% else %}
-             جديد
-        {% endif %}
+    <h2 class="card-title">
+        <span class="lang-en">Create Account 
+            {% if role == 'student' %}<span style="color: var(--l-primary-color);">as a Student</span>
+            {% elif role == 'teacher' %}<span style="color: var(--l-success-color);">as a Teacher</span>
+            {% else %}New Account
+            {% endif %}
+        </span>
+        <span class="lang-ar" style="display:none;">إنشاء حساب 
+            {% if role == 'student' %}<span style="color: var(--l-primary-color);">كطالب</span>
+            {% elif role == 'teacher' %}<span style="color: var(--l-success-color);">كمعلم</span>
+            {% else %}جديد
+            {% endif %}
+        </span>
     </h2>
 
-    <form method="POST" action="{{ url_for('signup_actual_form_page') }}">
-        <input type="hidden" name="selected_role" value="{{ role }}">
+    <form method="POST" action="{{ url_for('signup_actual_form_page') }}" novalidate>
 
         <div class="form-names-row">
             <div class="form-group">
-                <label for="first_name">الاسم الأول<span class="text-danger-asterisk">*</span></label>
-                <input type="text" class="form-control" id="first_name" name="first_name" 
+                <label for="first_name_signup">
+                    <span class="lang-en">First Name</span><span class="lang-ar" style="display:none;">الاسم الأول</span>
+                    <span class="text-danger-asterisk">*</span>
+                </label>
+                <input type="text" class="form-control" id="first_name_signup" name="first_name" 
                        value="{{ form_data.get('first_name', '') }}" required autocomplete="given-name"
-                       aria-describedby="firstNameHelp" aria-required="true">
+                       aria-describedby="firstNameHelpSignup" aria-required="true">
             </div>
             <div class="form-group">
-                <label for="last_name">اسم العائلة<span class="text-danger-asterisk">*</span></label>
-                <input type="text" class="form-control" id="last_name" name="last_name" 
+                <label for="last_name_signup">
+                    <span class="lang-en">Last Name</span><span class="lang-ar" style="display:none;">اسم العائلة</span>
+                    <span class="text-danger-asterisk">*</span>
+                </label>
+                <input type="text" class="form-control" id="last_name_signup" name="last_name" 
                        value="{{ form_data.get('last_name', '') }}" required autocomplete="family-name"
-                       aria-describedby="lastNameHelp" aria-required="true">
+                       aria-describedby="lastNameHelpSignup" aria-required="true">
             </div>
         </div>
 
         <div class="form-group">
-            <label for="email">البريد الإلكتروني<span class="text-danger-asterisk">*</span></label>
-            <input type="email" class="form-control" id="email" name="email" 
+            <label for="email_signup">
+                <span class="lang-en">Email Address</span><span class="lang-ar" style="display:none;">البريد الإلكتروني</span>
+                <span class="text-danger-asterisk">*</span>
+            </label>
+            <input type="email" class="form-control" id="email_signup" name="email" 
                    value="{{ form_data.get('email', '') }}" required autocomplete="email"
-                   aria-describedby="emailHelp" aria-required="true">
-            <small id="emailHelp" class="form-text text-muted">لن نشارك بريدك الإلكتروني مع أي طرف آخر.</small>
+                   aria-describedby="emailHelpSignup" aria-required="true"
+                   data-placeholder-en="e.g., user@example.com" data-placeholder-ar="مثال: user@example.com">
+            <small id="emailHelpSignup" class="form-text text-muted">
+                <span class="lang-en">We'll never share your email with anyone else.</span>
+                <span class="lang-ar" style="display:none;">لن نشارك بريدك الإلكتروني مع أي طرف آخر.</span>
+            </small>
         </div>
 
         <div class="form-group phone-field-container"> 
-            <label for="phone_number">رقم الهاتف (اختياري)</label>
-            <input type="tel" class="form-control" id="phone_number" name="phone_number" 
+            <label for="phone_number_signup">
+                <span class="lang-en">Phone Number (Optional)</span><span class="lang-ar" style="display:none;">رقم الهاتف (اختياري)</span>
+            </label>
+            <input type="tel" class="form-control" id="phone_number_signup" name="phone_number" 
                    value="{{ form_data.get('phone_number', '') }}" 
-                   placeholder="مثال: 01012345678 (أرقام إنجليزية)" 
+                   data-placeholder-en="e.g., 01012345678 (English numerals)" 
+                   data-placeholder-ar="مثال: 01012345678 (أرقام إنجليزية)" 
                    autocomplete="tel"
                    pattern="^\+?[0-9\s()-]{7,20}$"> 
              <span class="phone-input-icon"><i class="fas fa-mobile-alt"></i></span>
-            <small class="form-text text-muted">سيتم استخدامه للتواصل إذا لزم الأمر فقط.</small>
+            <small class="form-text text-muted">
+                <span class="lang-en">Will only be used for communication if necessary.</span>
+                <span class="lang-ar" style="display:none;">سيتم استخدامه للتواصل إذا لزم الأمر فقط.</span>
+            </small>
         </div>
 
         <div class="form-group password-field-container">
-            <label for="password">كلمة المرور<span class="text-danger-asterisk">*</span></label>
-            <input type="password" class="form-control" id="password" name="password" 
-                   required minlength="8" autocomplete="new-password" aria-describedby="passwordHelp">
-            <span class="password-toggle-icon" onclick="togglePasswordVisibility('password', this)" 
-                  title="إظهار/إخفاء كلمة المرور" role="button" tabindex="0" 
-                  aria-pressed="false" aria-label="إظهار أو إخفاء كلمة المرور">
+            <label for="password_signup">
+                <span class="lang-en">Password</span><span class="lang-ar" style="display:none;">كلمة المرور</span>
+                <span class="text-danger-asterisk">*</span>
+            </label>
+            <input type="password" class="form-control" id="password_signup" name="password" 
+                   required minlength="8" autocomplete="new-password" aria-describedby="passwordHelpSignup">
+            <span class="password-toggle-icon" onclick="togglePasswordVisibility('password_signup', this)" 
+                  role="button" tabindex="0" aria-pressed="false" 
+                  data-title-en="Show/Hide Password" data-title-ar="إظهار/إخفاء كلمة المرور"
+                  data-aria-label-en="Toggle password visibility" data-aria-label-ar="تبديل رؤية كلمة المرور">
                   <i class="fas fa-eye"></i>
             </span>
-            <small id="passwordHelp" class="form-text text-muted">يجب أن تكون 8 أحرف على الأقل. يُفضل استخدام مزيج من الأحرف الكبيرة والصغيرة والأرقام والرموز.</small>
+            <small id="passwordHelpSignup" class="form-text text-muted">
+                <span class="lang-en">Must be at least 8 characters. A mix of letters, numbers, and symbols is recommended.</span>
+                <span class="lang-ar" style="display:none;">يجب أن تكون 8 أحرف على الأقل. يُفضل استخدام مزيج من الأحرف الكبيرة والصغيرة والأرقام والرموز.</span>
+            </small>
         </div>
         
         <div class="form-group password-field-container">
-            <label for="confirm_password">تأكيد كلمة المرور<span class="text-danger-asterisk">*</span></label>
-            <input type="password" class="form-control" id="confirm_password" name="confirm_password" 
-                   required autocomplete="new-password" aria-describedby="confirmPasswordHelp">
-            <span class="password-toggle-icon" onclick="togglePasswordVisibility('confirm_password', this)"
-                  title="إظهار/إخفاء كلمة المرور" role="button" tabindex="0"
-                  aria-pressed="false" aria-label="إظهار أو إخفاء تأكيد كلمة المرور">
+            <label for="confirm_password_signup">
+                <span class="lang-en">Confirm Password</span><span class="lang-ar" style="display:none;">تأكيد كلمة المرور</span>
+                <span class="text-danger-asterisk">*</span>
+            </label>
+            <input type="password" class="form-control" id="confirm_password_signup" name="confirm_password" 
+                   required autocomplete="new-password" aria-describedby="confirmPasswordHelpSignup">
+            <span class="password-toggle-icon" onclick="togglePasswordVisibility('confirm_password_signup', this)"
+                  role="button" tabindex="0" aria-pressed="false"
+                  data-title-en="Show/Hide Password" data-title-ar="إظهار/إخفاء كلمة المرور"
+                  data-aria-label-en="Toggle confirm password visibility" data-aria-label-ar="تبديل رؤية تأكيد كلمة المرور">
                   <i class="fas fa-eye"></i>
             </span>
-            <small id="confirmPasswordHelp" class="form-text text-muted">يرجى إعادة إدخال كلمة المرور للمطابقة.</small>
+            <small id="confirmPasswordHelpSignup" class="form-text text-muted">
+                <span class="lang-en">Please re-enter your password to match.</span>
+                <span class="lang-ar" style="display:none;">يرجى إعادة إدخال كلمة المرور للمطابقة.</span>
+            </small>
         </div>
         
-        {# ----- قائمة الدول الموسعة جدًا ----- #}
-        <div class="form-group">
-            <label for="country">الدولة (اختياري)</label>
-            <select class="form-control" id="country" name="country" autocomplete="country-name">
-                <option value="">-- اختر دولتك --</option>
-                <option value="AF" {% if form_data.get('country') == 'AF' %}selected{% endif %}>أفغانستان</option>
-                <option value="AX" {% if form_data.get('country') == 'AX' %}selected{% endif %}>جزر آلاند</option>
-                <option value="AL" {% if form_data.get('country') == 'AL' %}selected{% endif %}>ألبانيا</option>
-                <option value="DZ" {% if form_data.get('country') == 'DZ' %}selected{% endif %}>الجزائر</option>
-                <option value="AS" {% if form_data.get('country') == 'AS' %}selected{% endif %}>ساموا الأمريكية</option>
-                <option value="AD" {% if form_data.get('country') == 'AD' %}selected{% endif %}>أندورا</option>
-                <option value="AO" {% if form_data.get('country') == 'AO' %}selected{% endif %}>أنغولا</option>
-                <option value="AI" {% if form_data.get('country') == 'AI' %}selected{% endif %}>أنغيلا</option>
-                <option value="AQ" {% if form_data.get('country') == 'AQ' %}selected{% endif %}>القارة القطبية الجنوبية</option>
-                <option value="AG" {% if form_data.get('country') == 'AG' %}selected{% endif %}>أنتيغوا وبربودا</option>
-                <option value="AR" {% if form_data.get('country') == 'AR' %}selected{% endif %}>الأرجنتين</option>
-                <option value="AM" {% if form_data.get('country') == 'AM' %}selected{% endif %}>أرمينيا</option>
-                <option value="AW" {% if form_data.get('country') == 'AW' %}selected{% endif %}>أروبا</option>
-                <option value="AU" {% if form_data.get('country') == 'AU' %}selected{% endif %}>أستراليا</option>
-                <option value="AT" {% if form_data.get('country') == 'AT' %}selected{% endif %}>النمسا</option>
-                <option value="AZ" {% if form_data.get('country') == 'AZ' %}selected{% endif %}>أذربيجان</option>
-                <option value="BS" {% if form_data.get('country') == 'BS' %}selected{% endif %}>جزر البهاما</option>
-                <option value="BH" {% if form_data.get('country') == 'BH' %}selected{% endif %}>البحرين</option>
-                <option value="BD" {% if form_data.get('country') == 'BD' %}selected{% endif %}>بنغلاديش</option>
-                <option value="BB" {% if form_data.get('country') == 'BB' %}selected{% endif %}>بربادوس</option>
-                <option value="BY" {% if form_data.get('country') == 'BY' %}selected{% endif %}>بيلاروسيا</option>
-                <option value="BE" {% if form_data.get('country') == 'BE' %}selected{% endif %}>بلجيكا</option>
-                <option value="BZ" {% if form_data.get('country') == 'BZ' %}selected{% endif %}>بليز</option>
-                <option value="BJ" {% if form_data.get('country') == 'BJ' %}selected{% endif %}>بنين</option>
-                <option value="BM" {% if form_data.get('country') == 'BM' %}selected{% endif %}>برمودا</option>
-                <option value="BT" {% if form_data.get('country') == 'BT' %}selected{% endif %}>بوتان</option>
-                <option value="BO" {% if form_data.get('country') == 'BO' %}selected{% endif %}>بوليفيا</option>
-                <option value="BQ" {% if form_data.get('country') == 'BQ' %}selected{% endif %}>بونير وسينت أوستاتيوس وسابا</option>
-                <option value="BA" {% if form_data.get('country') == 'BA' %}selected{% endif %}>البوسنة والهرسك</option>
-                <option value="BW" {% if form_data.get('country') == 'BW' %}selected{% endif %}>بوتسوانا</option>
-                <option value="BV" {% if form_data.get('country') == 'BV' %}selected{% endif %}>جزيرة بوفيت</option>
-                <option value="BR" {% if form_data.get('country') == 'BR' %}selected{% endif %}>البرازيل</option>
-                <option value="IO" {% if form_data.get('country') == 'IO' %}selected{% endif %}>إقليم المحيط الهندي البريطاني</option>
-                <option value="BN" {% if form_data.get('country') == 'BN' %}selected{% endif %}>بروناي</option>
-                <option value="BG" {% if form_data.get('country') == 'BG' %}selected{% endif %}>بلغاريا</option>
-                <option value="BF" {% if form_data.get('country') == 'BF' %}selected{% endif %}>بوركينا فاسو</option>
-                <option value="BI" {% if form_data.get('country') == 'BI' %}selected{% endif %}>بوروندي</option>
-                <option value="CV" {% if form_data.get('country') == 'CV' %}selected{% endif %}>الرأس الأخضر</option>
-                <option value="KH" {% if form_data.get('country') == 'KH' %}selected{% endif %}>كمبوديا</option>
-                <option value="CM" {% if form_data.get('country') == 'CM' %}selected{% endif %}>الكاميرون</option>
-                <option value="CA" {% if form_data.get('country') == 'CA' %}selected{% endif %}>كندا</option>
-                <option value="KY" {% if form_data.get('country') == 'KY' %}selected{% endif %}>جزر كايمان</option>
-                <option value="CF" {% if form_data.get('country') == 'CF' %}selected{% endif %}>جمهورية أفريقيا الوسطى</option>
-                <option value="TD" {% if form_data.get('country') == 'TD' %}selected{% endif %}>تشاد</option>
-                <option value="CL" {% if form_data.get('country') == 'CL' %}selected{% endif %}>تشيلي</option>
-                <option value="CN" {% if form_data.get('country') == 'CN' %}selected{% endif %}>الصين</option>
-                <option value="CX" {% if form_data.get('country') == 'CX' %}selected{% endif %}>جزيرة الكريسماس</option>
-                <option value="CC" {% if form_data.get('country') == 'CC' %}selected{% endif %}>جزر كوكوس (كيلينغ)</option>
-                <option value="CO" {% if form_data.get('country') == 'CO' %}selected{% endif %}>كولومبيا</option>
-                <option value="KM" {% if form_data.get('country') == 'KM' %}selected{% endif %}>جزر القمر</option>
-                <option value="CG" {% if form_data.get('country') == 'CG' %}selected{% endif %}>جمهورية الكونغو</option>
-                <option value="CD" {% if form_data.get('country') == 'CD' %}selected{% endif %}>جمهورية الكونغو الديمقراطية</option>
-                <option value="CK" {% if form_data.get('country') == 'CK' %}selected{% endif %}>جزر كوك</option>
-                <option value="CR" {% if form_data.get('country') == 'CR' %}selected{% endif %}>كوستاريكا</option>
-                <option value="CI" {% if form_data.get('country') == 'CI' %}selected{% endif %}>ساحل العاج</option>
-                <option value="HR" {% if form_data.get('country') == 'HR' %}selected{% endif %}>كرواتيا</option>
-                <option value="CU" {% if form_data.get('country') == 'CU' %}selected{% endif %}>كوبا</option>
-                <option value="CW" {% if form_data.get('country') == 'CW' %}selected{% endif %}>كوراساو</option>
-                <option value="CY" {% if form_data.get('country') == 'CY' %}selected{% endif %}>قبرص</option>
-                <option value="CZ" {% if form_data.get('country') == 'CZ' %}selected{% endif %}>جمهورية التشيك</option>
-                <option value="DK" {% if form_data.get('country') == 'DK' %}selected{% endif %}>الدنمارك</option>
-                <option value="DJ" {% if form_data.get('country') == 'DJ' %}selected{% endif %}>جيبوتي</option>
-                <option value="DM" {% if form_data.get('country') == 'DM' %}selected{% endif %}>دومينيكا</option>
-                <option value="DO" {% if form_data.get('country') == 'DO' %}selected{% endif %}>جمهورية الدومينيكان</option>
-                <option value="EC" {% if form_data.get('country') == 'EC' %}selected{% endif %}>الإكوادور</option>
-                <option value="EG" {% if form_data.get('country', 'EG') == 'EG' %}selected{% endif %}>مصر</option> {# جعل مصر افتراضية إذا لم يكن هناك قيمة سابقة #}
-                <option value="SV" {% if form_data.get('country') == 'SV' %}selected{% endif %}>السلفادور</option>
-                <option value="GQ" {% if form_data.get('country') == 'GQ' %}selected{% endif %}>غينيا الاستوائية</option>
-                <option value="ER" {% if form_data.get('country') == 'ER' %}selected{% endif %}>إريتريا</option>
-                <option value="EE" {% if form_data.get('country') == 'EE' %}selected{% endif %}>إستونيا</option>
-                <option value="SZ" {% if form_data.get('country') == 'SZ' %}selected{% endif %}>إسواتيني</option>
-                <option value="ET" {% if form_data.get('country') == 'ET' %}selected{% endif %}>إثيوبيا</option>
-                <option value="FK" {% if form_data.get('country') == 'FK' %}selected{% endif %}>جزر فوكلاند</option>
-                <option value="FO" {% if form_data.get('country') == 'FO' %}selected{% endif %}>جزر فارو</option>
-                <option value="FJ" {% if form_data.get('country') == 'FJ' %}selected{% endif %}>فيجي</option>
-                <option value="FI" {% if form_data.get('country') == 'FI' %}selected{% endif %}>فنلندا</option>
-                <option value="FR" {% if form_data.get('country') == 'FR' %}selected{% endif %}>فرنسا</option>
-                <option value="GF" {% if form_data.get('country') == 'GF' %}selected{% endif %}>غويانا الفرنسية</option>
-                <option value="PF" {% if form_data.get('country') == 'PF' %}selected{% endif %}>بولينيزيا الفرنسية</option>
-                <option value="TF" {% if form_data.get('country') == 'TF' %}selected{% endif %}>الأراضي الفرنسية الجنوبية</option>
-                <option value="GA" {% if form_data.get('country') == 'GA' %}selected{% endif %}>الغابون</option>
-                <option value="GM" {% if form_data.get('country') == 'GM' %}selected{% endif %}>غامبيا</option>
-                <option value="GE" {% if form_data.get('country') == 'GE' %}selected{% endif %}>جورجيا</option>
-                <option value="DE" {% if form_data.get('country') == 'DE' %}selected{% endif %}>ألمانيا</option>
-                <option value="GH" {% if form_data.get('country') == 'GH' %}selected{% endif %}>غانا</option>
-                <option value="GI" {% if form_data.get('country') == 'GI' %}selected{% endif %}>جبل طارق</option>
-                <option value="GR" {% if form_data.get('country') == 'GR' %}selected{% endif %}>اليونان</option>
-                <option value="GL" {% if form_data.get('country') == 'GL' %}selected{% endif %}>جرينلاند</option>
-                <option value="GD" {% if form_data.get('country') == 'GD' %}selected{% endif %}>غرينادا</option>
-                <option value="GP" {% if form_data.get('country') == 'GP' %}selected{% endif %}>غوادلوب</option>
-                <option value="GU" {% if form_data.get('country') == 'GU' %}selected{% endif %}>غوام</option>
-                <option value="GT" {% if form_data.get('country') == 'GT' %}selected{% endif %}>غواتيمالا</option>
-                <option value="GG" {% if form_data.get('country') == 'GG' %}selected{% endif %}>غيرنسي</option>
-                <option value="GN" {% if form_data.get('country') == 'GN' %}selected{% endif %}>غينيا</option>
-                <option value="GW" {% if form_data.get('country') == 'GW' %}selected{% endif %}>غينيا بيساو</option>
-                <option value="GY" {% if form_data.get('country') == 'GY' %}selected{% endif %}>غيانا</option>
-                <option value="HT" {% if form_data.get('country') == 'HT' %}selected{% endif %}>هايتي</option>
-                <option value="HM" {% if form_data.get('country') == 'HM' %}selected{% endif %}>جزيرة هيرد وجزر ماكدونالد</option>
-                <option value="VA" {% if form_data.get('country') == 'VA' %}selected{% endif %}>الفاتيكان</option>
-                <option value="HN" {% if form_data.get('country') == 'HN' %}selected{% endif %}>هندوراس</option>
-                <option value="HK" {% if form_data.get('country') == 'HK' %}selected{% endif %}>هونغ كونغ</option>
-                <option value="HU" {% if form_data.get('country') == 'HU' %}selected{% endif %}>المجر</option>
-                <option value="IS" {% if form_data.get('country') == 'IS' %}selected{% endif %}>آيسلندا</option>
-                <option value="IN" {% if form_data.get('country') == 'IN' %}selected{% endif %}>الهند</option>
-                <option value="ID" {% if form_data.get('country') == 'ID' %}selected{% endif %}>إندونيسيا</option>
-                <option value="IR" {% if form_data.get('country') == 'IR' %}selected{% endif %}>إيران</option>
-                <option value="IQ" {% if form_data.get('country') == 'IQ' %}selected{% endif %}>العراق</option>
-                <option value="IE" {% if form_data.get('country') == 'IE' %}selected{% endif %}>أيرلندا</option>
-                <option value="IM" {% if form_data.get('country') == 'IM' %}selected{% endif %}>جزيرة مان</option>
-                <option value="IL" {% if form_data.get('country') == 'IL' %}selected{% endif %}>فلسطين المحتلة (إسرائيل)</option>
-                <option value="IT" {% if form_data.get('country') == 'IT' %}selected{% endif %}>إيطاليا</option>
-                <option value="JM" {% if form_data.get('country') == 'JM' %}selected{% endif %}>جامايكا</option>
-                <option value="JP" {% if form_data.get('country') == 'JP' %}selected{% endif %}>اليابان</option>
-                <option value="JE" {% if form_data.get('country') == 'JE' %}selected{% endif %}>جيرسي</option>
-                <option value="JO" {% if form_data.get('country') == 'JO' %}selected{% endif %}>الأردن</option>
-                <option value="KZ" {% if form_data.get('country') == 'KZ' %}selected{% endif %}>كازاخستان</option>
-                <option value="KE" {% if form_data.get('country') == 'KE' %}selected{% endif %}>كينيا</option>
-                <option value="KI" {% if form_data.get('country') == 'KI' %}selected{% endif %}>كيريباتي</option>
-                <option value="KP" {% if form_data.get('country') == 'KP' %}selected{% endif %}>كوريا الشمالية</option>
-                <option value="KR" {% if form_data.get('country') == 'KR' %}selected{% endif %}>كوريا الجنوبية</option>
-                <option value="KW" {% if form_data.get('country') == 'KW' %}selected{% endif %}>الكويت</option>
-                <option value="KG" {% if form_data.get('country') == 'KG' %}selected{% endif %}>قيرغيزستان</option>
-                <option value="LA" {% if form_data.get('country') == 'LA' %}selected{% endif %}>لاوس</option>
-                <option value="LV" {% if form_data.get('country') == 'LV' %}selected{% endif %}>لاتفيا</option>
-                <option value="LB" {% if form_data.get('country') == 'LB' %}selected{% endif %}>لبنان</option>
-                <option value="LS" {% if form_data.get('country') == 'LS' %}selected{% endif %}>ليسوتو</option>
-                <option value="LR" {% if form_data.get('country') == 'LR' %}selected{% endif %}>ليبيريا</option>
-                <option value="LY" {% if form_data.get('country') == 'LY' %}selected{% endif %}>ليبيا</option>
-                <option value="LI" {% if form_data.get('country') == 'LI' %}selected{% endif %}>ليختنشتاين</option>
-                <option value="LT" {% if form_data.get('country') == 'LT' %}selected{% endif %}>ليتوانيا</option>
-                <option value="LU" {% if form_data.get('country') == 'LU' %}selected{% endif %}>لوكسمبورغ</option>
-                <option value="MO" {% if form_data.get('country') == 'MO' %}selected{% endif %}>ماكاو</option>
-                <option value="MG" {% if form_data.get('country') == 'MG' %}selected{% endif %}>مدغشقر</option>
-                <option value="MW" {% if form_data.get('country') == 'MW' %}selected{% endif %}>مالاوي</option>
-                <option value="MY" {% if form_data.get('country') == 'MY' %}selected{% endif %}>ماليزيا</option>
-                <option value="MV" {% if form_data.get('country') == 'MV' %}selected{% endif %}>جزر المالديف</option>
-                <option value="ML" {% if form_data.get('country') == 'ML' %}selected{% endif %}>مالي</option>
-                <option value="MT" {% if form_data.get('country') == 'MT' %}selected{% endif %}>مالطا</option>
-                <option value="MH" {% if form_data.get('country') == 'MH' %}selected{% endif %}>جزر مارشال</option>
-                <option value="MQ" {% if form_data.get('country') == 'MQ' %}selected{% endif %}>مارتينيك</option>
-                <option value="MR" {% if form_data.get('country') == 'MR' %}selected{% endif %}>موريتانيا</option>
-                <option value="MU" {% if form_data.get('country') == 'MU' %}selected{% endif %}>موريشيوس</option>
-                <option value="YT" {% if form_data.get('country') == 'YT' %}selected{% endif %}>مايوت</option>
-                <option value="MX" {% if form_data.get('country') == 'MX' %}selected{% endif %}>المكسيك</option>
-                <option value="FM" {% if form_data.get('country') == 'FM' %}selected{% endif %}>ولايات ميكرونيسيا الموحدة</option>
-                <option value="MD" {% if form_data.get('country') == 'MD' %}selected{% endif %}>مولدوفا</option>
-                <option value="MC" {% if form_data.get('country') == 'MC' %}selected{% endif %}>موناكو</option>
-                <option value="MN" {% if form_data.get('country') == 'MN' %}selected{% endif %}>منغوليا</option>
-                <option value="ME" {% if form_data.get('country') == 'ME' %}selected{% endif %}>الجبل الأسود</option>
-                <option value="MS" {% if form_data.get('country') == 'MS' %}selected{% endif %}>مونتسرات</option>
-                <option value="MA" {% if form_data.get('country') == 'MA' %}selected{% endif %}>المغرب</option>
-                <option value="MZ" {% if form_data.get('country') == 'MZ' %}selected{% endif %}>موزمبيق</option>
-                <option value="MM" {% if form_data.get('country') == 'MM' %}selected{% endif %}>ميانمار (بورما)</option>
-                <option value="NA" {% if form_data.get('country') == 'NA' %}selected{% endif %}>ناميبيا</option>
-                <option value="NR" {% if form_data.get('country') == 'NR' %}selected{% endif %}>ناورو</option>
-                <option value="NP" {% if form_data.get('country') == 'NP' %}selected{% endif %}>نيبال</option>
-                <option value="NL" {% if form_data.get('country') == 'NL' %}selected{% endif %}>هولندا</option>
-                <option value="NC" {% if form_data.get('country') == 'NC' %}selected{% endif %}>كاليدونيا الجديدة</option>
-                <option value="NZ" {% if form_data.get('country') == 'NZ' %}selected{% endif %}>نيوزيلندا</option>
-                <option value="NI" {% if form_data.get('country') == 'NI' %}selected{% endif %}>نيكاراغوا</option>
-                <option value="NE" {% if form_data.get('country') == 'NE' %}selected{% endif %}>النيجر</option>
-                <option value="NG" {% if form_data.get('country') == 'NG' %}selected{% endif %}>نيجيريا</option>
-                <option value="NU" {% if form_data.get('country') == 'NU' %}selected{% endif %}>نييوي</option>
-                <option value="NF" {% if form_data.get('country') == 'NF' %}selected{% endif %}>جزيرة نورفولك</option>
-                <option value="MK" {% if form_data.get('country') == 'MK' %}selected{% endif %}>مقدونيا الشمالية</option>
-                <option value="MP" {% if form_data.get('country') == 'MP' %}selected{% endif %}>جزر ماريانا الشمالية</option>
-                <option value="NO" {% if form_data.get('country') == 'NO' %}selected{% endif %}>النرويج</option>
-                <option value="OM" {% if form_data.get('country') == 'OM' %}selected{% endif %}>عمان</option>
-                <option value="PK" {% if form_data.get('country') == 'PK' %}selected{% endif %}>باكستان</option>
-                <option value="PW" {% if form_data.get('country') == 'PW' %}selected{% endif %}>بالاو</option>
-                <option value="PS" {% if form_data.get('country') == 'PS' %}selected{% endif %}>فلسطين</option>
-                <option value="PA" {% if form_data.get('country') == 'PA' %}selected{% endif %}>بنما</option>
-                <option value="PG" {% if form_data.get('country') == 'PG' %}selected{% endif %}>بابوا غينيا الجديدة</option>
-                <option value="PY" {% if form_data.get('country') == 'PY' %}selected{% endif %}>باراغواي</option>
-                <option value="PE" {% if form_data.get('country') == 'PE' %}selected{% endif %}>بيرو</option>
-                <option value="PH" {% if form_data.get('country') == 'PH' %}selected{% endif %}>الفلبين</option>
-                <option value="PN" {% if form_data.get('country') == 'PN' %}selected{% endif %}>جزر بيتكيرن</option>
-                <option value="PL" {% if form_data.get('country') == 'PL' %}selected{% endif %}>بولندا</option>
-                <option value="PT" {% if form_data.get('country') == 'PT' %}selected{% endif %}>البرتغال</option>
-                <option value="PR" {% if form_data.get('country') == 'PR' %}selected{% endif %}>بورتوريكو</option>
-                <option value="QA" {% if form_data.get('country') == 'QA' %}selected{% endif %}>قطر</option>
-                <option value="RE" {% if form_data.get('country') == 'RE' %}selected{% endif %}>ريونيون</option>
-                <option value="RO" {% if form_data.get('country') == 'RO' %}selected{% endif %}>رومانيا</option>
-                <option value="RU" {% if form_data.get('country') == 'RU' %}selected{% endif %}>روسيا</option>
-                <option value="RW" {% if form_data.get('country') == 'RW' %}selected{% endif %}>رواندا</option>
-                <option value="BL" {% if form_data.get('country') == 'BL' %}selected{% endif %}>سان بارتيلمي</option>
-                <option value="SH" {% if form_data.get('country') == 'SH' %}selected{% endif %}>سانت هيلينا وأسينشين وتريستان دا كونا</option>
-                <option value="KN" {% if form_data.get('country') == 'KN' %}selected{% endif %}>سانت كيتس ونيفيس</option>
-                <option value="LC" {% if form_data.get('country') == 'LC' %}selected{% endif %}>سانت لوسيا</option>
-                <option value="MF" {% if form_data.get('country') == 'MF' %}selected{% endif %}>سانت مارتن (الجزء الفرنسي)</option>
-                <option value="PM" {% if form_data.get('country') == 'PM' %}selected{% endif %}>سان بيير وميكلون</option>
-                <option value="VC" {% if form_data.get('country') == 'VC' %}selected{% endif %}>سانت فنسنت والجرينادين</option>
-                <option value="WS" {% if form_data.get('country') == 'WS' %}selected{% endif %}>ساموا</option>
-                <option value="SM" {% if form_data.get('country') == 'SM' %}selected{% endif %}>سان مارينو</option>
-                <option value="ST" {% if form_data.get('country') == 'ST' %}selected{% endif %}>ساو تومي وبرينسيب</option>
-                <option value="SA" {% if form_data.get('country') == 'SA' %}selected{% endif %}>المملكة العربية السعودية</option>
-                <option value="SN" {% if form_data.get('country') == 'SN' %}selected{% endif %}>السنغال</option>
-                <option value="RS" {% if form_data.get('country') == 'RS' %}selected{% endif %}>صربيا</option>
-                <option value="SC" {% if form_data.get('country') == 'SC' %}selected{% endif %}>سيشل</option>
-                <option value="SL" {% if form_data.get('country') == 'SL' %}selected{% endif %}>سيراليون</option>
-                <option value="SG" {% if form_data.get('country') == 'SG' %}selected{% endif %}>سنغافورة</option>
-                <option value="SX" {% if form_data.get('country') == 'SX' %}selected{% endif %}>سينت مارتن (الجزء الهولندي)</option>
-                <option value="SK" {% if form_data.get('country') == 'SK' %}selected{% endif %}>سلوفاكيا</option>
-                <option value="SI" {% if form_data.get('country') == 'SI' %}selected{% endif %}>سلوفينيا</option>
-                <option value="SB" {% if form_data.get('country') == 'SB' %}selected{% endif %}>جزر سليمان</option>
-                <option value="SO" {% if form_data.get('country') == 'SO' %}selected{% endif %}>الصومال</option>
-                <option value="ZA" {% if form_data.get('country') == 'ZA' %}selected{% endif %}>جنوب أفريقيا</option>
-                <option value="GS" {% if form_data.get('country') == 'GS' %}selected{% endif %}>جورجيا الجنوبية وجزر ساندويتش الجنوبية</option>
-                <option value="SS" {% if form_data.get('country') == 'SS' %}selected{% endif %}>جنوب السودان</option>
-                <option value="ES" {% if form_data.get('country') == 'ES' %}selected{% endif %}>إسبانيا</option>
-                <option value="LK" {% if form_data.get('country') == 'LK' %}selected{% endif %}>سريلانكا</option>
-                <option value="SD" {% if form_data.get('country') == 'SD' %}selected{% endif %}>السودان</option>
-                <option value="SR" {% if form_data.get('country') == 'SR' %}selected{% endif %}>سورينام</option>
-                <option value="SJ" {% if form_data.get('country') == 'SJ' %}selected{% endif %}>سفالبارد ويان ماين</option>
-                <option value="SE" {% if form_data.get('country') == 'SE' %}selected{% endif %}>السويد</option>
-                <option value="CH" {% if form_data.get('country') == 'CH' %}selected{% endif %}>سويسرا</option>
-                <option value="SY" {% if form_data.get('country') == 'SY' %}selected{% endif %}>سوريا</option>
-                <option value="TW" {% if form_data.get('country') == 'TW' %}selected{% endif %}>تايوان</option>
-                <option value="TJ" {% if form_data.get('country') == 'TJ' %}selected{% endif %}>طاجيكستان</option>
-                <option value="TZ" {% if form_data.get('country') == 'TZ' %}selected{% endif %}>تنزانيا</option>
-                <option value="TH" {% if form_data.get('country') == 'TH' %}selected{% endif %}>تايلاند</option>
-                <option value="TL" {% if form_data.get('country') == 'TL' %}selected{% endif %}>تيمور الشرقية</option>
-                <option value="TG" {% if form_data.get('country') == 'TG' %}selected{% endif %}>توغو</option>
-                <option value="TK" {% if form_data.get('country') == 'TK' %}selected{% endif %}>توكيلاو</option>
-                <option value="TO" {% if form_data.get('country') == 'TO' %}selected{% endif %}>تونغا</option>
-                <option value="TT" {% if form_data.get('country') == 'TT' %}selected{% endif %}>ترينيداد وتوباغو</option>
-                <option value="TN" {% if form_data.get('country') == 'TN' %}selected{% endif %}>تونس</option>
-                <option value="TR" {% if form_data.get('country') == 'TR' %}selected{% endif %}>تركيا</option>
-                <option value="TM" {% if form_data.get('country') == 'TM' %}selected{% endif %}>تركمانستان</option>
-                <option value="TC" {% if form_data.get('country') == 'TC' %}selected{% endif %}>جزر توركس وكايكوس</option>
-                <option value="TV" {% if form_data.get('country') == 'TV' %}selected{% endif %}>توفالو</option>
-                <option value="UG" {% if form_data.get('country') == 'UG' %}selected{% endif %}>أوغندا</option>
-                <option value="UA" {% if form_data.get('country') == 'UA' %}selected{% endif %}>أوكرانيا</option>
-                <option value="AE" {% if form_data.get('country') == 'AE' %}selected{% endif %}>الإمارات العربية المتحدة</option>
-                <option value="GB" {% if form_data.get('country') == 'GB' %}selected{% endif %}>المملكة المتحدة</option>
-                <option value="US" {% if form_data.get('country') == 'US' %}selected{% endif %}>الولايات المتحدة</option>
-                <option value="UM" {% if form_data.get('country') == 'UM' %}selected{% endif %}>جزر الولايات المتحدة الصغيرة النائية</option>
-                <option value="UY" {% if form_data.get('country') == 'UY' %}selected{% endif %}>أوروغواي</option>
-                <option value="UZ" {% if form_data.get('country') == 'UZ' %}selected{% endif %}>أوزبكستان</option>
-                <option value="VU" {% if form_data.get('country') == 'VU' %}selected{% endif %}>فانواتو</option>
-                <option value="VE" {% if form_data.get('country') == 'VE' %}selected{% endif %}>فنزويلا</option>
-                <option value="VN" {% if form_data.get('country') == 'VN' %}selected{% endif %}>فيتنام</option>
-                <option value="VG" {% if form_data.get('country') == 'VG' %}selected{% endif %}>جزر العذراء البريطانية</option>
-                <option value="VI" {% if form_data.get('country') == 'VI' %}selected{% endif %}>جزر العذراء الأمريكية</option>
-                <option value="WF" {% if form_data.get('country') == 'WF' %}selected{% endif %}>واليس وفوتونا</option>
-                <option value="EH" {% if form_data.get('country') == 'EH' %}selected{% endif %}>الصحراء الغربية</option>
-                <option value="YE" {% if form_data.get('country') == 'YE' %}selected{% endif %}>اليمن</option>
-                <option value="ZM" {% if form_data.get('country') == 'ZM' %}selected{% endif %}>زامبيا</option>
-                <option value="ZW" {% if form_data.get('country') == 'ZW' %}selected{% endif %}>زيمبابوي</option>
-                <option value="other" {% if form_data.get('country') == 'other' %}selected{% endif %}>دولة أخرى (إذا لم تجد دولتك)</option>
+        {# ----- قائمة الدول مع شريط البحث ----- #}
+        <div class="form-group country-select-group">
+            <label for="country_signup_select">
+                <span class="lang-en">Country</span><span class="lang-ar" style="display:none;">الدولة</span>
+                <span class="text-danger-asterisk">*</span> {# الدولة إلزامية #}
+            </label>
+            <input type="text" id="country_signup_search_input" class="country-search-input form-control" 
+                   data-placeholder-en="Search or type country name..." 
+                   data-placeholder-ar="ابحث أو اكتب اسم الدولة..." 
+                   onkeyup="filterCountriesSignup()"
+                   aria-controls="country_signup_select">
+
+            <select class="form-control" id="country_signup_select" name="country" autocomplete="country-name" required>
+                <option value="" data-text-en="-- Select your country --" data-text-ar="-- اختر دولتك --" disabled {% if not form_data.get('country') %}selected{% endif %}>
+                    <span class="lang-en">-- Select your country --</span>
+                    <span class="lang-ar" style="display:none;">-- اختر دولتك --</span>
+                </option>
+                
+                {# مثال لأول بضعة دول مع الترجمة و data attributes للبحث #}
+                <option value="AF" {% if form_data.get('country') == 'AF' %}selected{% endif %} data-text-en="Afghanistan" data-text-ar="أفغانستان"><span class="lang-en">Afghanistan</span><span class="lang-ar" style="display:none;">أفغانستان</span></option>
+                <option value="AX" {% if form_data.get('country') == 'AX' %}selected{% endif %} data-text-en="Åland Islands" data-text-ar="جزر آلاند"><span class="lang-en">Åland Islands</span><span class="lang-ar" style="display:none;">جزر آلاند</span></option>
+                <option value="AL" {% if form_data.get('country') == 'AL' %}selected{% endif %} data-text-en="Albania" data-text-ar="ألبانيا"><span class="lang-en">Albania</span><span class="lang-ar" style="display:none;">ألبانيا</span></option>
+                <option value="DZ" {% if form_data.get('country') == 'DZ' %}selected{% endif %} data-text-en="Algeria" data-text-ar="الجزائر"><span class="lang-en">Algeria</span><span class="lang-ar" style="display:none;">الجزائر</span></option>
+                <option value="AS" {% if form_data.get('country') == 'AS' %}selected{% endif %} data-text-en="American Samoa" data-text-ar="ساموا الأمريكية"><span class="lang-en">American Samoa</span><span class="lang-ar" style="display:none;">ساموا الأمريكية</span></option>
+                <option value="AD" {% if form_data.get('country') == 'AD' %}selected{% endif %} data-text-en="Andorra" data-text-ar="أندورا"><span class="lang-en">Andorra</span><span class="lang-ar" style="display:none;">أندورا</span></option>
+                <option value="AO" {% if form_data.get('country') == 'AO' %}selected{% endif %} data-text-en="Angola" data-text-ar="أنغولا"><span class="lang-en">Angola</span><span class="lang-ar" style="display:none;">أنغولا</span></option>
+                <option value="AI" {% if form_data.get('country') == 'AI' %}selected{% endif %} data-text-en="Anguilla" data-text-ar="أنغيلا"><span class="lang-en">Anguilla</span><span class="lang-ar" style="display:none;">أنغيلا</span></option>
+                <option value="AQ" {% if form_data.get('country') == 'AQ' %}selected{% endif %} data-text-en="Antarctica" data-text-ar="القارة القطبية الجنوبية"><span class="lang-en">Antarctica</span><span class="lang-ar" style="display:none;">القارة القطبية الجنوبية</span></option>
+                <option value="AG" {% if form_data.get('country') == 'AG' %}selected{% endif %} data-text-en="Antigua and Barbuda" data-text-ar="أنتيغوا وبربودا"><span class="lang-en">Antigua and Barbuda</span><span class="lang-ar" style="display:none;">أنتيغوا وبربودا</span></option>
+                <option value="AR" {% if form_data.get('country') == 'AR' %}selected{% endif %} data-text-en="Argentina" data-text-ar="الأرجنتين"><span class="lang-en">Argentina</span><span class="lang-ar" style="display:none;">الأرجنتين</span></option>
+                <option value="AM" {% if form_data.get('country') == 'AM' %}selected{% endif %} data-text-en="Armenia" data-text-ar="أرمينيا"><span class="lang-en">Armenia</span><span class="lang-ar" style="display:none;">أرمينيا</span></option>
+                <option value="AW" {% if form_data.get('country') == 'AW' %}selected{% endif %} data-text-en="Aruba" data-text-ar="أروبا"><span class="lang-en">Aruba</span><span class="lang-ar" style="display:none;">أروبا</span></option>
+                <option value="AU" {% if form_data.get('country') == 'AU' %}selected{% endif %} data-text-en="Australia" data-text-ar="أستراليا"><span class="lang-en">Australia</span><span class="lang-ar" style="display:none;">أستراليا</span></option>
+                <option value="AT" {% if form_data.get('country') == 'AT' %}selected{% endif %} data-text-en="Austria" data-text-ar="النمسا"><span class="lang-en">Austria</span><span class="lang-ar" style="display:none;">النمسا</span></option>
+                <option value="AZ" {% if form_data.get('country') == 'AZ' %}selected{% endif %} data-text-en="Azerbaijan" data-text-ar="أذربيجان"><span class="lang-en">Azerbaijan</span><span class="lang-ar" style="display:none;">أذربيجان</span></option>
+                <option value="BS" {% if form_data.get('country') == 'BS' %}selected{% endif %} data-text-en="Bahamas" data-text-ar="جزر البهاما"><span class="lang-en">Bahamas</span><span class="lang-ar" style="display:none;">جزر البهاما</span></option>
+                <option value="BH" {% if form_data.get('country') == 'BH' %}selected{% endif %} data-text-en="Bahrain" data-text-ar="البحرين"><span class="lang-en">Bahrain</span><span class="lang-ar" style="display:none;">البحرين</span></option>
+                <option value="BD" {% if form_data.get('country') == 'BD' %}selected{% endif %} data-text-en="Bangladesh" data-text-ar="بنغلاديش"><span class="lang-en">Bangladesh</span><span class="lang-ar" style="display:none;">بنغلاديش</span></option>
+                <option value="BB" {% if form_data.get('country') == 'BB' %}selected{% endif %} data-text-en="Barbados" data-text-ar="بربادوس"><span class="lang-en">Barbados</span><span class="lang-ar" style="display:none;">بربادوس</span></option>
+                <option value="BY" {% if form_data.get('country') == 'BY' %}selected{% endif %} data-text-en="Belarus" data-text-ar="بيلاروسيا"><span class="lang-en">Belarus</span><span class="lang-ar" style="display:none;">بيلاروسيا</span></option>
+                <option value="BE" {% if form_data.get('country') == 'BE' %}selected{% endif %} data-text-en="Belgium" data-text-ar="بلجيكا"><span class="lang-en">Belgium</span><span class="lang-ar" style="display:none;">بلجيكا</span></option>
+                <option value="BZ" {% if form_data.get('country') == 'BZ' %}selected{% endif %} data-text-en="Belize" data-text-ar="بليز"><span class="lang-en">Belize</span><span class="lang-ar" style="display:none;">بليز</span></option>
+                <option value="BJ" {% if form_data.get('country') == 'BJ' %}selected{% endif %} data-text-en="Benin" data-text-ar="بنين"><span class="lang-en">Benin</span><span class="lang-ar" style="display:none;">بنين</span></option>
+                <option value="BM" {% if form_data.get('country') == 'BM' %}selected{% endif %} data-text-en="Bermuda" data-text-ar="برمودا"><span class="lang-en">Bermuda</span><span class="lang-ar" style="display:none;">برمودا</span></option>
+                <option value="BT" {% if form_data.get('country') == 'BT' %}selected{% endif %} data-text-en="Bhutan" data-text-ar="بوتان"><span class="lang-en">Bhutan</span><span class="lang-ar" style="display:none;">بوتان</span></option>
+                <option value="BO" {% if form_data.get('country') == 'BO' %}selected{% endif %} data-text-en="Bolivia" data-text-ar="بوليفيا"><span class="lang-en">Bolivia</span><span class="lang-ar" style="display:none;">بوليفيا</span></option>
+                <option value="BA" {% if form_data.get('country') == 'BA' %}selected{% endif %} data-text-en="Bosnia and Herzegovina" data-text-ar="البوسنة والهرسك"><span class="lang-en">Bosnia and Herzegovina</span><span class="lang-ar" style="display:none;">البوسنة والهرسك</span></option>
+                <option value="BW" {% if form_data.get('country') == 'BW' %}selected{% endif %} data-text-en="Botswana" data-text-ar="بوتسوانا"><span class="lang-en">Botswana</span><span class="lang-ar" style="display:none;">بوتسوانا</span></option>
+                <option value="BR" {% if form_data.get('country') == 'BR' %}selected{% endif %} data-text-en="Brazil" data-text-ar="البرازيل"><span class="lang-en">Brazil</span><span class="lang-ar" style="display:none;">البرازيل</span></option>
+                <option value="EG" {% if form_data.get('country') == 'EG' %}selected{% endif %} data-text-en="Egypt" data-text-ar="مصر"><span class="lang-en">Egypt</span><span class="lang-ar" style="display:none;">مصر</span></option>
+                <option value="SA" {% if form_data.get('country') == 'SA' %}selected{% endif %} data-text-en="Saudi Arabia" data-text-ar="المملكة العربية السعودية"><span class="lang-en">Saudi Arabia</span><span class="lang-ar" style="display:none;">المملكة العربية السعودية</span></option>
+                <option value="AE" {% if form_data.get('country') == 'AE' %}selected{% endif %} data-text-en="United Arab Emirates" data-text-ar="الإمارات العربية المتحدة"><span class="lang-en">United Arab Emirates</span><span class="lang-ar" style="display:none;">الإمارات العربية المتحدة</span></option>
+                <option value="US" {% if form_data.get('country') == 'US' %}selected{% endif %} data-text-en="United States" data-text-ar="الولايات المتحدة"><span class="lang-en">United States</span><span class="lang-ar" style="display:none;">الولايات المتحدة</span></option>
+                <option value="GB" {% if form_data.get('country') == 'GB' %}selected{% endif %} data-text-en="United Kingdom" data-text-ar="المملكة المتحدة"><span class="lang-en">United Kingdom</span><span class="lang-ar" style="display:none;">المملكة المتحدة</span></option>
+                
+                {# !!! قم بلصق قائمة الدول الكاملة (أكثر من 200 دولة) هنا، مع التأكد من تطبيق نفس التنسيق أعلاه لكل دولة !!! #}
+                {# كل <option> يجب أن يحتوي على value, data-text-en, data-text-ar, و spans للغتين #}
+
+                <option value="other" {% if form_data.get('country') == 'other' %}selected{% endif %} data-text-en="Other" data-text-ar="أخرى"><span class="lang-en">Other</span><span class="lang-ar" style="display:none;">أخرى</span></option>
             </select>
         </div>
-        {# ------------------------------ #}
-{# ... مربع اختيار الموافقة على الشروط كما هو ... #}
-        <div class="form-check-custom" style="margin-top: 25px;">
-            <input type="checkbox" class="form-check-input" id="agree_terms" name="agree_terms" 
+        
+        <div class="form-check-custom">
+            <input type="checkbox" class="form-check-input" id="agree_terms_signup" name="agree_terms" 
                    {% if form_data.get('agree_terms') == 'on' %}checked{% endif %} required>
-            <label class="form-check-label" for="agree_terms">
-                أقر بأنني قرأت وأوافق على <a href="#" target="_blank">شروط الخدمة</a> و 
-                <a href="#" target="_blank">سياسة الخصوصية</a> لمنصة "اختبرني".<span class="text-danger-asterisk">*</span>
+            <label class="form-check-label" for="agree_terms_signup">
+                <span class="lang-en">I have read and agree to the <a href="#" target="_blank">Terms of Service</a> and <a href="#" target="_blank">Privacy Policy</a> of "Ektbariny".</span>
+                <span class="lang-ar" style="display:none;">أقر بأنني قرأت وأوافق على <a href="#" target="_blank">شروط الخدمة</a> و <a href="#" target="_blank">سياسة الخصوصية</a> لمنصة "اختبرني".</span>
+                <span class="text-danger-asterisk">*</span>
             </label>
         </div>
 
         <button type="submit" class="btn btn-create-my-account">
-            <i class="fas fa-user-plus"></i> إنشاء حسابي الآن
+            <i class="fas fa-user-plus"></i> 
+            <span class="lang-en">Create My Account</span>
+            <span class="lang-ar" style="display:none;">إنشاء حسابي الآن</span>
         </button>
     </form>
 
-    <p class="login-prompt-actual">
-        لديك حساب بالفعل؟ <a href="{{ url_for('login_page') }}">قم بتسجيل الدخول</a>
+    <p class="login-link-prompt">
+        <span class="lang-en">Already have an account?</span><span class="lang-ar" style="display:none;">لديك حساب بالفعل؟</span>
+        <a href="{{ url_for('login_page') }}">
+            <span class="lang-en">Log In</span>
+            <span class="lang-ar" style="display:none;">تسجيل الدخول</span>
+        </a>
     </p>
 </div>
 {% endblock content_minimal %}
@@ -374,25 +240,95 @@
 <script>
     function togglePasswordVisibility(fieldId, iconElement) {
         const passwordField = document.getElementById(fieldId);
-        const icon = iconElement.querySelector('i'); 
-        if (passwordField && icon) { 
+        const icon = iconElement.querySelector('i');
+        const currentLang = document.documentElement.lang || 'en';
+        const titles = { en: { show: 'Show password', hide: 'Hide password' }, ar: { show: 'إظهار كلمة المرور', hide: 'إخفاء كلمة المرور' }};
+        const currentTitles = titles[currentLang] || titles.en;
+
+        if (passwordField && icon) {
             if (passwordField.type === "password") {
                 passwordField.type = "text";
-                icon.classList.remove("fa-eye");
-                icon.classList.add("fa-eye-slash");
+                icon.classList.remove("fa-eye"); icon.classList.add("fa-eye-slash");
                 iconElement.setAttribute('aria-pressed', 'true');
-                iconElement.setAttribute('aria-label', 'إخفاء كلمة المرور'); 
+                iconElement.setAttribute('aria-label', currentTitles.hide);
+                iconElement.setAttribute('title', currentTitles.hide);
             } else {
                 passwordField.type = "password";
-                icon.classList.remove("fa-eye-slash");
-                icon.classList.add("fa-eye");
+                icon.classList.remove("fa-eye-slash"); icon.classList.add("fa-eye");
                 iconElement.setAttribute('aria-pressed', 'false');
-                iconElement.setAttribute('aria-label', 'إظهار كلمة المرور');
+                iconElement.setAttribute('aria-label', currentTitles.show);
+                iconElement.setAttribute('title', currentTitles.show);
             }
-        } else {
-            if (!passwordField) console.error("JS Error: Password field with ID '" + fieldId + "' not found.");
-            if (!icon) console.error("JS Error: Icon element not found for field '" + fieldId + "'.");
         }
     }
+
+    function filterCountriesSignup() {
+        const input = document.getElementById('country_signup_search_input');
+        const filter = input.value.toLowerCase();
+        const select = document.getElementById('country_signup_select');
+        const options = select.options; // أسهل للوصول لـ options
+        const currentLang = document.documentElement.lang || 'en';
+
+        for (let i = 0; i < options.length; i++) {
+            const option = options[i];
+            let textContentToSearch = '';
+            
+            // البحث في data-text-en أو data-text-ar
+            const dataTextKey = currentLang === 'ar' ? 'textAr' : 'textEn';
+            textContentToSearch = (option.dataset[dataTextKey] || '').toLowerCase();
+
+            // إذا لم نجد في data-text، نحاول القراءة من الـ span الداخلي (كاحتياطي)
+            if (!textContentToSearch) {
+                const langSpan = option.querySelector(`.lang-${currentLang}`);
+                if (langSpan) {
+                    textContentToSearch = langSpan.textContent.toLowerCase();
+                } else { // آخر احتياطي هو النص الظاهر مباشرة (إذا لم تكن هناك spans)
+                    textContentToSearch = (option.textContent || option.innerText).toLowerCase();
+                }
+            }
+
+            if (option.value === "") { // الخيار الأول ("-- Select --") يبقى ظاهرًا دائمًا
+                option.style.display = '';
+                continue;
+            }
+            option.style.display = textContentToSearch.includes(filter) ? '' : 'none';
+        }
+    }
+    
+    function updateSignupFormLocalizations(lang) {
+        // تحديث placeholders
+        document.querySelectorAll('#signup_actual_form_page [data-placeholder-en]').forEach(el => {
+            const placeholderKey = `placeholder${lang.charAt(0).toUpperCase() + lang.slice(1)}`;
+            const placeholderText = el.dataset[placeholderKey] || el.dataset.placeholderEn;
+            if (placeholderText !== undefined) el.placeholder = placeholderText;
+        });
+        
+        // تحديث title و aria-label لأزرار تبديل كلمة المرور
+        document.querySelectorAll('#signup_actual_form_page .password-toggle-icon').forEach(iconElement => {
+            const titles = { en: { show: 'Show password', hide: 'Hide password' }, ar: { show: 'إظهار كلمة المرور', hide: 'إخفاء كلمة المرور' }};
+            const currentTitles = titles[lang] || titles.en;
+            const isPasswordVisible = iconElement.getAttribute('aria-pressed') === 'true';
+            
+            iconElement.setAttribute('aria-label', isPasswordVisible ? currentTitles.hide : currentTitles.show);
+            iconElement.setAttribute('title', isPasswordVisible ? currentTitles.hide : currentTitles.show);
+        });
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const currentLang = document.documentElement.lang || 'en';
+        updateSignupFormLocalizations(currentLang); // تحديث عند تحميل الصفحة
+        
+        const searchCountryInput = document.getElementById('country_signup_search_input');
+        if (searchCountryInput) { // تحديث placeholder لحقل بحث الدولة أيضًا
+             updateSignupFormLocalizations(currentLang); // ستعالجها الدالة العامة الآن
+        }
+
+        // استماع لحدث تغيير اللغة العام من main.js (إذا كان main.js يُطلقه)
+        document.addEventListener('languageChanged', function(e) {
+            if (e.detail && e.detail.lang) {
+                updateSignupFormLocalizations(e.detail.lang);
+            }
+        });
+    });
 </script>
 {% endblock scripts_extra_minimal %}

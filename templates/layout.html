@@ -1,27 +1,84 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr"> 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}منصة اختبرني{% endblock %}</title>
+    <title>
+        {% block title %}
+            <span class="lang-en">Ektbariny Platform</span>
+            <span class="lang-ar" style="display:none;">منصة اختبرني</span>
+        {% endblock %}
+    </title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    {% block head_extra %}{% endblock %}
+    
+    {% block head_extra %}
+    {# This block is for page-specific head additions. Keep clean or add valid meta/link tags. #}
+    {% endblock %}
 </head>
-<body>
+<body class="theme-dark" data-current-theme="dark" data-current-lang="en"> 
 
     <header class="main-header">
         <div class="logo">
-            <a href="{{ url_for('home') }}">
-                اختبرني
+            <a href="{{ url_for('home') }}" id="platformLogo">
+                 <span class="lang-en">Ektbariny</span>
+                 <span class="lang-ar" style="display:none;">اختبرني</span>
             </a>
         </div>
+        
         {% if not is_minimal_layout %} 
         <nav class="main-nav">
-            <a href="{{ url_for('login_page') }}">تسجيل الدخول</a> {# <--- تم التعديل هنا #}
-            <a href="{{ url_for('choose_signup_role') }}" class="btn-signup">إنشاء حساب</a>
+            {% if session.get('user_id') %}
+                <a href="{{ url_for('logout') }}">
+                    <span class="lang-en">Logout</span>
+                    <span class="lang-ar" style="display:none;">تسجيل الخروج</span>
+                </a>
+                {% if session.get('role') == 'teacher' %}
+                    <a href="{{ url_for('teacher_dashboard_placeholder') }}">
+                        <span class="lang-en">Teacher Dashboard</span>
+                        <span class="lang-ar" style="display:none;">لوحة تحكم المعلم</span>
+                    </a>
+                {% elif session.get('role') == 'student' %}
+                     <a href="{{ url_for('student_dashboard_placeholder') }}">
+                        <span class="lang-en">Student Dashboard</span>
+                        <span class="lang-ar" style="display:none;">لوحة تحكم الطالب</span>
+                     </a>
+                {% endif %}
+                 <span class="username-display">
+                    <span class="lang-en">Hello, {{ session.get('username', 'User') }}</span>
+                    <span class="lang-ar" style="display:none;">أهلاً، {{ session.get('username', 'مستخدم') }}</span>
+                 </span>
+            {% else %}
+                <a href="{{ url_for('login_page') }}">
+                    <span class="lang-en">Login</span>
+                    <span class="lang-ar" style="display:none;">تسجيل الدخول</span>
+                </a>
+                <a href="{{ url_for('choose_signup_role') }}" class="btn btn-signup">
+                    <span class="lang-en">Sign Up</span>
+                    <span class="lang-ar" style="display:none;">إنشاء حساب</span>
+                </a>
+            {% endif %}
         </nav>
         {% endif %}
+
+        <div class="settings-menu-container">
+            <button id="settingsMenuButton" class="settings-menu-button" aria-label="Settings Menu" aria-expanded="false" 
+                    data-title-en="Settings" data-title-ar="الإعدادات">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div id="settingsDropdown" class="settings-dropdown-menu" style="display: none;">
+                <a href="#" id="languageToggle" class="dropdown-item" data-lang-target="ar">
+                    <i class="fas fa-language"></i> 
+                    <span class="lang-en">Switch to عربي</span> 
+                    <span class="lang-ar" style="display:none;">Switch to English</span>
+                </a>
+                <a href="#" id="themeToggle" class="dropdown-item" data-theme-target="light">
+                    <i class="fas fa-sun"></i>
+                    <span class="lang-en">Day Mode</span> 
+                    <span class="lang-ar" style="display:none;">الوضع النهاري</span>
+                </a>
+            </div>
+        </div>
     </header>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -29,8 +86,10 @@
         <div class="flash-messages-container">
         {% for category, message in messages %}
           <div class="alert alert-{{ category if category else 'info' }}" role="alert">
-            {{ message | safe }}
-            <button type="button" class="close-alert-btn">×</button>
+            {{ message | safe }} 
+            <button type="button" class="close-alert-btn" 
+                    data-aria-label-en="Close alert" 
+                    data-aria-label-ar="إغلاق التنبيه">×</button>
           </div>
         {% endfor %}
         </div>
@@ -39,12 +98,16 @@
         
     {% block content %}
         <div class="container main-page-content">
-            <p style="text-align: center; margin-top: 50px; font-size: 1.2em;">يتم تحميل المحتوى الافتراضي من layout.html الرئيسي...</p>
+            <p class="lang-en" style="text-align: center; margin-top: 50px; font-size: 1.2em;">Default page content is loading...</p>
+            <p class="lang-ar" style="display:none; text-align: center; margin-top: 50px; font-size: 1.2em;">يتم تحميل محتوى الصفحة الافتراضي...</p>
         </div>
     {% endblock %}
 
     <footer class="main-footer">
-        <p>© {{ now.year if now else 2024 }} - منصة اختبرني. جميع الحقوق محفوظة.</p>
+        <p>
+            <span class="lang-en">© {{ now.year if now else "2024" }} - Ektbariny Platform. All rights reserved.</span>
+            <span class="lang-ar" style="display:none;">© {{ now.year if now else "2024" }} - منصة اختبرني. جميع الحقوق محفوظة.</span>
+        </p>
     </footer>
     
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>

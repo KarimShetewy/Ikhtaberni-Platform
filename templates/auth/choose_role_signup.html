@@ -1,83 +1,147 @@
-{% extends "auth/layout_minimal.html" %} 
+{% extends "auth/layout_minimal.html" %} {# يرث من القالب المبسّط للمصادقة #}
 
 {% block title %}
-    إنشاء حساب - اختر دورك
+    {# عنوان الصفحة، سيتم تبديل النصوص بواسطة JavaScript #}
+    <span class="lang-en">Create Account - Choose Your Role</span>
+    <span class="lang-ar" style="display:none;">إنشاء حساب - اختر دورك</span>
 {% endblock %}
 
 {% block content_minimal %}
-<div class="card" style="margin-top: 0; padding: 30px 40px;">
-    <h2 style="font-weight: 600; margin-bottom: 15px; font-size: 1.8rem;">انضم إلى منصة اختبرني</h2>
-    <p style="font-size: 1em; color: #555; margin-bottom: 25px;">
-        مرحباً بك! يرجى تحديد الدور الذي ترغب في التسجيل به للمتابعة.
+<div class="card choose-role-card"> {# كلاس إضافي للتنسيق الخاص #}
+    <h2 class="card-title">
+        <span class="lang-en">Join Ektbariny Platform</span>
+        <span class="lang-ar" style="display:none;">انضم إلى منصة اختبرني</span>
+    </h2>
+    <p class="card-subtitle">
+        <span class="lang-en">Welcome! Please select the role you'd like to sign up with to continue.</span>
+        <span class="lang-ar" style="display:none;">مرحباً بك! يرجى تحديد الدور الذي ترغب في التسجيل به للمتابعة.</span>
     </p>
 
     <form id="roleSelectionForm" method="POST" action="{{ url_for('choose_signup_role') }}">
         <div class="role-selection-box-container">
+            {# صندوق اختيار دور الطالب #}
             <label class="role-selection-box" id="studentRoleBox" for="role_student">
-                <input type="radio" name="role" value="student" id="role_student" class="role-radio" required>
+                <input type="radio" name="role" value="student" id="role_student" class="role-radio" required 
+                       aria-labelledby="studentRoleLabel">
                 <span class="custom-radio-indicator"></span>
                 <i class="fas fa-user-graduate fa-2x"></i>
-                <h3>أنا طالب</h3>
-                <p>أبحث عن اختبارات لتقييم فهمي وتطوير مستواي الدراسي.</p>
+                <h3 id="studentRoleLabel">
+                    <span class="lang-en">I am a Student</span>
+                    <span class="lang-ar" style="display:none;">أنا طالب</span>
+                </h3>
+                <p>
+                    <span class="lang-en">I'm looking for quizzes to assess my understanding and improve my studies.</span>
+                    <span class="lang-ar" style="display:none;">أبحث عن اختبارات لتقييم فهمي وتطوير مستواي الدراسي.</span>
+                </p>
             </label>
 
+            {# صندوق اختيار دور المعلم #}
             <label class="role-selection-box" id="teacherRoleBox" for="role_teacher">
-                <input type="radio" name="role" value="teacher" id="role_teacher" class="role-radio" required>
+                <input type="radio" name="role" value="teacher" id="role_teacher" class="role-radio" required
+                       aria-labelledby="teacherRoleLabel">
                 <span class="custom-radio-indicator"></span>
                 <i class="fas fa-chalkboard-teacher fa-2x"></i>
-                <h3>أنا معلم</h3>
-                <p>أرغب في إنشاء اختبارات تفاعلية وتتبع أداء طلابي بفعالية.</p>
+                <h3 id="teacherRoleLabel">
+                    <span class="lang-en">I am a Teacher</span>
+                    <span class="lang-ar" style="display:none;">أنا معلم</span>
+                </h3>
+                <p>
+                    <span class="lang-en">I want to create interactive quizzes and track my students' performance effectively.</span>
+                    <span class="lang-ar" style="display:none;">أرغب في إنشاء اختبارات تفاعلية وتتبع أداء طلابي بفعالية.</span>
+                </p>
             </label>
         </div>
 
+        {# زر المتابعة #}
         <div class="submit-button-container">
-            <button type="submit" class="btn-create-account">المتابعة كـ<span id="selectedRoleText"></span></button>
+            <button type="submit" class="btn btn-continue-role-selection" aria-live="polite">
+                <span class="lang-en">Continue as<span id="selectedRoleTextEn"></span></span>
+                <span class="lang-ar" style="display:none;">المتابعة كـ<span id="selectedRoleTextAr"></span></span>
+            </button>
         </div>
     </form>
 
-    <p class="login-link" style="margin-top: 25px;">
-        لديك حساب بالفعل؟ <a href="{{ url_for('login_page') }}">تسجيل الدخول</a> {# <--- تم التعديل هنا #}
+    {# رابط لصفحة تسجيل الدخول إذا كان المستخدم لديه حساب بالفعل #}
+    <p class="login-link-prompt">
+        <span class="lang-en">Already have an account?</span><span class="lang-ar" style="display:none;">لديك حساب بالفعل؟</span>
+        <a href="{{ url_for('login_page') }}">
+            <span class="lang-en">Log In</span>
+            <span class="lang-ar" style="display:none;">تسجيل الدخول</span>
+        </a>
     </p>
 </div>
 {% endblock content_minimal %}
 
 {% block scripts_extra_minimal %}
+{# JavaScript خاص بهذه الصفحة لتحديث واجهة المستخدم عند اختيار الدور #}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const studentRoleBox = document.getElementById('studentRoleBox');
         const teacherRoleBox = document.getElementById('teacherRoleBox');
         const studentRadio = document.getElementById('role_student');
         const teacherRadio = document.getElementById('role_teacher');
-        const selectedRoleTextSpan = document.getElementById('selectedRoleText');
+        const selectedRoleTextEnSpan = document.getElementById('selectedRoleTextEn');
+        const selectedRoleTextArSpan = document.getElementById('selectedRoleTextAr');
         const form = document.getElementById('roleSelectionForm');
+        const currentLang = document.documentElement.lang || 'en'; // للرسالة التحذيرية
 
-        function updateSelectedVisuals() {
+        function updateVisualsAndButton() {
+            let roleNameEn = '';
+            let roleNameAr = '';
+            
             if (studentRadio && teacherRadio && studentRoleBox && teacherRoleBox) {
                 studentRoleBox.classList.remove('selected');
                 teacherRoleBox.classList.remove('selected');
-                let roleDisplayName = '';
+                studentRoleBox.setAttribute('aria-checked', 'false');
+                teacherRoleBox.setAttribute('aria-checked', 'false');
+                
                 if (studentRadio.checked) {
                     studentRoleBox.classList.add('selected');
-                    roleDisplayName = 'طالب';
+                    studentRoleBox.setAttribute('aria-checked', 'true');
+                    roleNameEn = ' Student'; // Note the leading space for better text flow
+                    roleNameAr = ' طالب';
                 } else if (teacherRadio.checked) {
                     teacherRoleBox.classList.add('selected');
-                    roleDisplayName = 'معلم';
+                    teacherRoleBox.setAttribute('aria-checked', 'true');
+                    roleNameEn = ' Teacher';
+                    roleNameAr = ' معلم';
                 }
-                if(selectedRoleTextSpan) selectedRoleTextSpan.textContent = roleDisplayName ? ` (${roleDisplayName})` : '';
             }
+            if(selectedRoleTextEnSpan) selectedRoleTextEnSpan.textContent = roleNameEn;
+            if(selectedRoleTextArSpan) selectedRoleTextArSpan.textContent = roleNameAr;
         }
-        if(studentRoleBox) studentRoleBox.addEventListener('click', function () { if(studentRadio) studentRadio.checked = true; updateSelectedVisuals(); });
-        if(teacherRoleBox) teacherRoleBox.addEventListener('click', function () { if(teacherRadio) teacherRadio.checked = true; updateSelectedVisuals(); });
-        if(studentRadio) studentRadio.addEventListener('change', updateSelectedVisuals);
-        if(teacherRadio) teacherRadio.addEventListener('change', updateSelectedVisuals);
-        updateSelectedVisuals(); 
 
+        // Handle clicks on the entire box (label) to check the radio
+        if(studentRoleBox && studentRadio) {
+            studentRoleBox.addEventListener('click', function () { 
+                studentRadio.checked = true; 
+                updateVisualsAndButton(); 
+            });
+        }
+        if(teacherRoleBox && teacherRadio) {
+            teacherRoleBox.addEventListener('click', function () { 
+                teacherRadio.checked = true; 
+                updateVisualsAndButton(); 
+            });
+        }
+        
+        // Handle direct changes to radio buttons (e.g., keyboard navigation)
+        if(studentRadio) studentRadio.addEventListener('change', updateVisualsAndButton);
+        if(teacherRadio) teacherRadio.addEventListener('change', updateVisualsAndButton);
+        
+        // Initial visual update (in case of browser pre-fill, though unlikely for radios)
+        updateVisualsAndButton(); 
+
+        // Form submission validation (client-side)
         if (form) {
             form.addEventListener('submit', function(event) {
-                const selectedRole = document.querySelector('input[name="role"]:checked');
-                if (!selectedRole) {
+                const selectedRoleRadio = document.querySelector('input[name="role"]:checked');
+                if (!selectedRoleRadio) {
                     event.preventDefault(); 
-                    alert('يرجى اختيار دورك (طالب أو معلم) للمتابعة.'); 
+                    const alertMsg = currentLang === 'ar' ? 
+                                     'يرجى اختيار دورك (طالب أو معلم) للمتابعة.' : 
+                                     'Please choose your role (student or teacher) to continue.';
+                    alert(alertMsg); 
                 }
             });
         }

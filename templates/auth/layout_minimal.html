@@ -1,87 +1,83 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+{# يتم التحكم باللغة والاتجاه بواسطة JavaScript الرئيسي (main.js) بناءً على إعدادات المستخدم المحفوظة #}
+{# الافتراضي الأولي عند أول تحميل بدون إعدادات محفوظة هو ما يتم تعيينه هنا أو في <body> #}
+<html lang="en" dir="ltr"> {# يتم تحديث هذه السمات بواسطة JS #}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}عملية الحساب - اختبرني{% endblock %}</title>
+    <title>
+        {% block title %}
+            {# عنوان افتراضي لصفحات المصادقة، سيتم تغييره من الصفحات التي ترث #}
+            {# والنصوص ستُعرض بناءً على اللغة المختارة بواسطة JS #}
+            <span class="lang-en">Account Process - Ektbariny</span>
+            <span class="lang-ar" style="display:none;">عملية الحساب - اختبرني</span>
+        {% endblock %}
+    </title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <{# <style> block for .minimal-header-container, etc. was here. It is now fully in style.css under 'Header (المبسّط لصفحات المصادقة)' if body has .minimal-page-bg #}
+    
     {% block head_extra_minimal %}
+    {#
+        ملاحظة للمطور: هذا البلوك مخصص لأي إضافات ضرورية جدًا لـ <head>
+        في صفحات المصادقة فقط (مثل <meta> tags خاصة أو <link> لملف CSS صغير جدًا خاص).
+        في الوقت الحالي، معظم الأنماط يتم التحكم بها من style.css العام.
+    #}
     <style>
-        /* These styles are for body.minimal-page-bg and its direct header to override the gradient background */
-        body.minimal-page-bg {
-            background: var(--off-white-bg, #f4f6f9) !important; 
-            color: var(--dark-text-color, #212529) !important;
-            animation: none !important; 
-        }
-        /* Styles for the minimal header when body.minimal-page-bg is active */
-        body.minimal-page-bg header.simplified-header-for-auth { 
-            background-color: var(--minimal-header-bg-color, #ffffff); 
-            border-bottom: 1px solid var(--minimal-header-border-color, #e0e0e0);
-            padding: 1.5rem 0;
-            text-align: center;
-            width: 100%;
-            margin-bottom: 30px; 
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            position: sticky; 
-            top: 0;
-            z-index: 999; 
-        }
-        body.minimal-page-bg header.simplified-header-for-auth .logo-minimal-auth a {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--dark-text-color); 
-            text-decoration: none;
-        }
-        body.minimal-page-bg footer.main-footer {
-            display: none !important; 
-        }
-        /* حاوية المحتوى لصفحات المصادقة */
-        .content-wrapper-auth {
-             max-width: 580px; 
-             margin: 0 auto 50px auto; 
-             padding: 0 15px;
-        }
-         /* تعديل لموقع رسائل فلاش في الصفحات المبسّطة */
-        body.minimal-page-bg .flash-messages-container {
-            position: static; /* لجعلها تظهر ضمن تدفق المحتوى */
-            transform: none;
-            left: auto;
-            top: auto;
-            max-width: 100%; /* تأخذ عرض content-wrapper-auth */
-            margin-bottom: 20px;
-        }
+        /* 
+         تم إبقاء هذا الوسم <style> فارغًا عمدًا لتجنب أي أخطاء في بناء الجملة.
+         إذا كنت بحاجة لإضافة أنماط CSS مخصصة جدًا لهذا التخطيط فقط،
+         ضعها هنا وتأكد أنها قواعد CSS صالحة تمامًا.
+         يُفضل دائمًا وضع معظم الأنماط في ملف style.css الرئيسي.
+        */
     </style>
     {% endblock %}
 </head>
-<body class="minimal-page-bg">
+<body class="minimal-page-bg" data-current-theme="light" data-current-lang="en"> 
+    {# 
+      `minimal-page-bg` كلاس يطبق من style.css التصميم الفاتح الثابت لهذه الصفحات.
+      `data-current-theme="light"`: يشير إلى أن هذه الصفحات يجب أن تبقى دائمًا في "الوضع النهاري" الخاص بها.
+      `data-current-lang="en"`: يتم تحديثها بواسطة main.js لتعكس اللغة المختارة.
+    #}
 
-    <header class="simplified-header-for-auth"> {# كلاس معرف في style.css (أو في الـ head_extra_minimal أعلاه) #}
+    <header class="simplified-header-for-auth"> {# هذا الهيدر مُصمم في style.css #}
         <div class="logo-minimal-auth">
-            <a href="{{ url_for('home') }}">اختبرني</a>
+            <a href="{{ url_for('home') }}">
+                 {# النص هنا أيضًا سيعتمد على اللغة المطبقة بواسطة JS #}
+                 <span class="lang-en">Ektbariny</span>
+                 <span class="lang-ar" style="display:none;">اختبرني</span>
+            </a>
         </div>
     </header>
 
-    <div class="content-wrapper-auth"> 
+    <div class="content-wrapper-auth"> {# حاوية لتوسيط المحتوى وتحديد عرضه في صفحات المصادقة #}
+        {# عرض رسائل التنبيه (Flash Messages) #}
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
-            <div class="flash-messages-container"> {# لم يعد fixed هنا، يعتمد على position:static #}
+            <div class="flash-messages-container"> {# يتم تعديل موضع هذا في style.css لـ minimal-page-bg #}
             {% for category, message in messages %}
               <div class="alert alert-{{ category if category else 'info' }}" role="alert">
-                {{ message | safe }}
-                <button type="button" class="close-alert-btn">×</button>
+                {{ message | safe }} {# رسائل الفلاش يجب أن تُترجم من جانب الخادم (Flask) إذا أردت ترجمتها #}
+                <button type="button" class="close-alert-btn" aria-label="Close alert">×</button>
               </div>
             {% endfor %}
             </div>
           {% endif %}
         {% endwith %}
 
+        {# هذا البلوك هو المكان الذي سيتم فيه حقن محتوى نماذج المصادقة الفردية #}
         {% block content_minimal %}
-            <p style="text-align: center; margin-top: 50px; font-size: 1.2em;">يتم تحميل محتوى صفحة المصادقة...</p>
+            <div class="card" style="text-align:center; padding: 40px;"> {# مثال لعنصر نائب #}
+                <p class="lang-en" style="font-size: 1.2em;">Loading specific authentication page content...</p>
+                <p class="lang-ar" style="display:none; font-size: 1.2em;">يتم تحميل محتوى صفحة المصادقة المحددة...</p>
+            </div>
         {% endblock %}
     </div>
     
+    {# 
+      يتم تحميل ملف main.js العام أولاً.
+      scripts_extra_minimal هو مكان لوضع JavaScript خاص جدًا بالصفحة الفرعية
+      (مثل دوال التحقق من صحة النموذج المخصصة أو تبديل رؤية كلمة المرور إذا لم تكن عامة).
+    #}
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     {% block scripts_extra_minimal %}{% endblock %}
 </body>

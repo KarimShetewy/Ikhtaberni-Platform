@@ -1,56 +1,145 @@
-{% extends "auth/layout_minimal.html" %} 
+{% extends "auth/layout_minimal.html" %} {# يرث من القالب المبسّط لصفحات المصادقة #}
 
 {% block title %}
-    تسجيل الدخول - اختبرني
+    {# عنوان الصفحة، النصوص سيتم تبديلها بواسطة JavaScript #}
+    <span class="lang-en">Login - Ektbariny</span>
+    <span class="lang-ar" style="display:none;">تسجيل الدخول - اختبرني</span>
 {% endblock %}
 
 {% block content_minimal %}
-<div class="card login-form-container-actual"> 
-    <h2 style="font-weight: 700;">تسجيل الدخول إلى اختبرني</h2>
+<div class="card login-form-container-actual"> {# كلاس لتحديد عرض البطاقة إذا لزم الأمر #}
+    <h2 class="card-title">
+        <span class="lang-en">Log In to Ektbariny</span>
+        <span class="lang-ar" style="display:none;">تسجيل الدخول إلى اختبرني</span>
+    </h2>
 
-    <form method="POST" action="{{ url_for('login_page') }}">
+    <form method="POST" action="{{ url_for('login_page') }}" novalidate>
         
         <div class="form-group">
-            <label for="email">البريد الإلكتروني<span class="text-danger-asterisk">*</span></label>
-            <input type="email" class="form-control" id="email" name="email" 
-                   value="{{ request.form.email if request.form else '' }}" required autocomplete="email">
+            <label for="email_login">
+                <span class="lang-en">Email Address</span><span class="lang-ar" style="display:none;">البريد الإلكتروني</span>
+                <span class="text-danger-asterisk">*</span>
+            </label>
+            <input type="email" class="form-control" id="email_login" name="email" 
+                   value="{{ form_data.get('email', '') }}" required autocomplete="email"
+                   aria-describedby="emailHelpLogin" aria-required="true"
+                   data-placeholder-en="Enter your email address" 
+                   data-placeholder-ar="أدخل عنوان بريدك الإلكتروني">
         </div>
 
         <div class="form-group password-field-container">
-            <label for="password">كلمة المرور<span class="text-danger-asterisk">*</span></label>
-            <input type="password" class="form-control" id="password" name="password" required autocomplete="current-password">
-            <span class="password-toggle-icon" onclick="togglePasswordVisibilityForLogin('password', this)"><i class="fas fa-eye"></i></span>
+            <label for="password_login">
+                <span class="lang-en">Password</span><span class="lang-ar" style="display:none;">كلمة المرور</span>
+                <span class="text-danger-asterisk">*</span>
+            </label>
+            <input type="password" class="form-control" id="password_login" name="password" 
+                   required autocomplete="current-password" aria-describedby="passwordHelpLogin">
+            <span class="password-toggle-icon" onclick="togglePasswordVisibilityLogin('password_login', this)" 
+                  role="button" tabindex="0" aria-pressed="false" 
+                  data-title-en="Show/Hide Password" data-title-ar="إظهار/إخفاء كلمة المرور"
+                  data-aria-label-en="Toggle password visibility" data-aria-label-ar="تبديل رؤية كلمة المرور">
+                  <i class="fas fa-eye"></i>
+            </span>
         </div>
         
-        <div style="text-align: left; margin-bottom: 15px; font-size: 0.85em;">
-             <a href="#" style="color: var(--dark-text-color); text-decoration:none;">نسيت كلمة المرور؟</a>
+        {# رابط "نسيت كلمة المرور؟" (سيحتاج لتفعيل مساره لاحقًا) #}
+        <div style="text-align: right; margin-bottom: 15px; font-size: 0.85em;"> {# تم تعديل text-align #}
+            <a href="#" style="text-decoration:none;" class="forgot-password-link"> {# مسار وهمي حاليًا #}
+                <span class="lang-en">Forgot password?</span>
+                <span class="lang-ar" style="display:none;">نسيت كلمة المرور؟</span>
+            </a>
         </div>
+         {# محاذاة النص لرابط نسيت كلمة المرور ستتبع اتجاه الصفحة (rtl/ltr) بسبب text-align:inherit على .form-group #}
+         {# إذا أردت دائمًا لليمين أو اليسار، يمكنك تعديل الـ div هنا #}
+         {# مثال لجعله دائمًا على اليسار: style="text-align: left;" #}
+         {# مثال لجعله دائمًا على اليمين: style="text-align: right;" #}
+
 
         <button type="submit" class="btn btn-login">
-            <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+            <i class="fas fa-sign-in-alt"></i> 
+            <span class="lang-en">Log In</span>
+            <span class="lang-ar" style="display:none;">تسجيل الدخول</span>
         </button>
     </form>
 
-    <p class="signup-prompt-login" style="margin-top: 25px;">
-        ليس لديك حساب؟ <a href="{{ url_for('choose_signup_role') }}">أنشئ حسابًا جديدًا</a>
+    <p class="signup-prompt-login">
+        <span class="lang-en">Don't have an account?</span><span class="lang-ar" style="display:none;">ليس لديك حساب؟</span>
+        <a href="{{ url_for('choose_signup_role') }}">
+            <span class="lang-en">Create a new account</span>
+            <span class="lang-ar" style="display:none;">أنشئ حسابًا جديدًا</span>
+        </a>
     </p>
 </div>
 {% endblock content_minimal %}
 
 {% block scripts_extra_minimal %}
+{# JavaScript خاص بهذه الصفحة لتبديل رؤية كلمة المرور #}
 <script>
-    function togglePasswordVisibilityForLogin(fieldId, iconElement) { 
+    function togglePasswordVisibilityLogin(fieldId, iconElement) {
         const passwordField = document.getElementById(fieldId);
         const icon = iconElement.querySelector('i');
-        if (passwordField.type === "password") {
-            passwordField.type = "text";
-            icon.classList.remove("fa-eye");
-            icon.classList.add("fa-eye-slash");
-        } else {
-            passwordField.type = "password";
-            icon.classList.remove("fa-eye-slash");
-            icon.classList.add("fa-eye");
+        const currentLang = document.documentElement.lang || 'en';
+
+        // نصوص مترجمة لـ title و aria-label
+        const titles = {
+            en: { show: 'Show password', hide: 'Hide password' },
+            ar: { show: 'إظهار كلمة المرور', hide: 'إخفاء كلمة المرور' }
+        };
+        const currentTitles = titles[currentLang] || titles.en; // fallback to English
+
+        if (passwordField && icon) { 
+            if (passwordField.type === "password") {
+                passwordField.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+                iconElement.setAttribute('aria-pressed', 'true');
+                iconElement.setAttribute('aria-label', currentTitles.hide);
+                iconElement.setAttribute('title', currentTitles.hide);
+            } else {
+                passwordField.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+                iconElement.setAttribute('aria-pressed', 'false');
+                iconElement.setAttribute('aria-label', currentTitles.show);
+                iconElement.setAttribute('title', currentTitles.show);
+            }
         }
     }
+
+    // دالة لتحديث النصوص المعتمدة على سمات البيانات عند تغيير اللغة
+    function updateLoginFormLocalizations(lang) {
+        // تحديث placeholders
+        document.querySelectorAll('#login_form_page input[data-placeholder-en]').forEach(el => { // افترض أن للـ form id أو class
+            const placeholderKey = `placeholder${lang.charAt(0).toUpperCase() + lang.slice(1)}`;
+            const placeholderText = el.dataset[placeholderKey] || el.dataset.placeholderEn;
+            if (placeholderText !== undefined) el.placeholder = placeholderText;
+        });
+        
+        // تحديث title و aria-label لأزرار تبديل كلمة المرور
+        document.querySelectorAll('#login_form_page .password-toggle-icon').forEach(iconElement => {
+            const titles = { en: { show: 'Show password', hide: 'Hide password' }, ar: { show: 'إظهار كلمة المرور', hide: 'إخفاء كلمة المرور' }};
+            const currentTitles = titles[lang] || titles.en;
+            const isPasswordVisible = iconElement.getAttribute('aria-pressed') === 'true';
+            
+            iconElement.setAttribute('aria-label', isPasswordVisible ? currentTitles.hide : currentTitles.show);
+            iconElement.setAttribute('title', isPasswordVisible ? currentTitles.hide : currentTitles.show);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // نفترض أن لنموذج تسجيل الدخول حاوية رئيسية لها ID
+        const loginFormContainer = document.querySelector('.login-form-container-actual');
+        if (loginFormContainer) loginFormContainer.id = 'login_form_page'; // إضافة ID مؤقت إذا لم يكن موجودًا للـ JS
+
+        const currentLang = document.documentElement.lang || 'en';
+        updateLoginFormLocalizations(currentLang); // تحديث عند تحميل الصفحة
+
+        // استماع لحدث تغيير اللغة العام من main.js
+        document.addEventListener('languageChanged', function(e) {
+            if (e.detail && e.detail.lang) {
+                updateLoginFormLocalizations(e.detail.lang);
+            }
+        });
+    });
 </script>
 {% endblock scripts_extra_minimal %}
