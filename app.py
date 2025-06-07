@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import re
 import logging
 from logging.handlers import RotatingFileHandler
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from functools import wraps
@@ -180,7 +180,7 @@ def create_tables():
       `payment_for_type` ENUM('extra_videos_package', 'extra_quizzes_package', 'featured_listing', 'other') NULL,
       `description` VARCHAR(255) NULL, `amount` DECIMAL(10,2) NOT NULL, `currency_code` VARCHAR(3) DEFAULT 'USD',
       `payment_date` TIMESTAMP DEFAULT CURRENT_TIMESTAMP, `transaction_id` VARCHAR(255) NOT NULL UNIQUE,
-      `payment_gateway` VARCHAR(50) NULL, `status` ENUM('pending', 'completed', 'failed', 'refunded') DEFAULT 'pending',
+      `payment_gateway` VARCHAR(50) NULL, `status` ENUM('pending', 'processing', 'completed', 'failed', 'refunded') DEFAULT 'pending',
       CONSTRAINT `fk_platformpayment_teacher` FOREIGN KEY (`teacher_id`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
       INDEX `idx_platformpayment_teacher` (`teacher_id` ASC)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -510,7 +510,7 @@ def explore_teachers_page():
         if db_conn is None:
             app.logger.error("EXPLORE_TEACHERS_DB_ERROR: Failed to connect to database.")
             flash("Database connection error. Please try again later.", "danger")
-            return render_template('public/explore_teachers.html', teachers=[], search_query=search_query) # cite: 1
+            return render_template('public/explore_teachers.html', teachers=[], search_query=search_query)
 
         db_cursor = db_conn.cursor(dictionary=True)
 
@@ -551,7 +551,7 @@ def explore_teachers_page():
     return render_template('public/explore_teachers.html', 
                            teachers=teachers_list, 
                            search_query=search_query,
-                           current_lang=session.get('current_lang', 'en')) # cite: 1
+                           current_lang=session.get('current_lang', 'en'))
 
 
 # --- 9. Teacher Video Management Routes ---
@@ -659,7 +659,7 @@ def upload_video_page():
             return redirect(url_for('teacher_videos_list_page'))
 
         except Exception as e_video_upload_process: # Catch generic Python errors and DB errors
-            if db_conn_upload: db_conn_upload.rollback() # Rollback DB changes if any part failed
+            if db_conn_upload: db_conn_upload.rollback()
             
             # If file was saved but DB operation failed, attempt to delete the orphaned file
             if video_successfully_saved_to_disk and os.path.exists(video_save_path_on_server_disk):
@@ -677,7 +677,7 @@ def upload_video_page():
             flash(f"An error occurred during video upload: {str(e_video_upload_process)[:150]}. Please try again.", "danger")
         finally:
             if db_cursor_upload: db_cursor_upload.close()
-            if db_conn_upload and db_conn_upload.is_connected(): db_conn_upload.close()
+            if db_conn_upload and db_conn_upload.is_connected(): conn_upload.close()
         
         # If reached here, POST failed, re-render form
         return render_template('teacher/upload_video.html', 
@@ -1402,8 +1402,397 @@ def edit_teacher_profile():
 @app.route('/student/dashboard')
 @student_required
 def student_dashboard_placeholder():
+    student_id = session['user_id']
     username = session.get('username', 'Student User')
-    return render_template('student/dashboard.html', username=username, is_minimal_layout=False)
+    videos = []
+    quizzes = []
+
+    conn = None
+    cursor = None
+    try:
+        conn = get_db_connection()
+        if conn is None:
+            raise Error("Database connection failed for student dashboard.")
+        cursor = conn.cursor(dictionary=True)
+
+        # Fetch videos relevant to the student (e.g., free videos or from subscribed teachers)
+        # For simplicity, let's fetch all "published" and "is_viewable_free_for_student" videos first
+        # In a real app, you'd add complex logic for subscriptions.
+        cursor.execute("""
+            SELECT v.id, v.title, v.description, v.video_path_or_url, v.thumbnail_path_or_url,
+                   u.first_name as teacher_first_name, u.last_name as teacher_last_name,
+                   q.id as quiz_id, q.title as quiz_title,
+                   CASE WHEN swv.video_id IS NOT NULL THEN TRUE ELSE FALSE END as is_watched
+            FROM videos v
+            JOIN users u ON v.teacher_id = u.id
+            LEFT JOIN quizzes q ON v.id = q.video_id AND q.is_active = TRUE
+            LEFT JOIN student_watched_videos swv ON v.id = swv.video_id AND swv.student_id = %s
+            WHERE v.status = 'published' AND v.is_viewable_free_for_student = TRUE
+            ORDER BY v.upload_timestamp DESC
+        """, (student_id,))
+        videos = cursor.fetchall()
+
+        # Fetch quizzes relevant to the student (e.g., active quizzes)
+        # Again, this simplified query can be expanded later for subscriptions
+        cursor.execute("""
+            SELECT q.id, q.title, q.description, q.time_limit_minutes, q.passing_score_percentage,
+                   u.first_name as teacher_first_name, u.last_name as teacher_last_name,
+                   qa.is_completed, qa.score, qa.passed
+            FROM quizzes q
+            JOIN users u ON q.teacher_id = u.id
+            LEFT JOIN quiz_attempts qa ON q.id = qa.quiz_id AND qa.student_id = %s
+            WHERE q.is_active = TRUE AND EXISTS (SELECT 1 FROM questions WHERE quiz_id = q.id)
+            ORDER BY q.created_at DESC
+        """, (student_id,))
+        quizzes = cursor.fetchall()
+
+    except Error as e:
+        app.logger.error(f"STUDENT_DASHBOARD_DB_ERROR for student {student_id}: {e.msg}", exc_info=False)
+        flash("Failed to load dashboard content. Please try again later.", "danger")
+    finally:
+        if cursor: cursor.close()
+        if conn and conn.is_connected(): conn.close()
+
+    return render_template('student/dashboard.html', username=username, videos=videos, quizzes=quizzes, is_minimal_layout=False)
+
+@app.route('/student/videos/<int:video_id>')
+@student_required
+def student_view_video_page(video_id):
+    student_id = session['user_id']
+    video_data = None
+    quizzes_for_video = []
+    
+    conn = None; cursor = None
+    try:
+        conn = get_db_connection()
+        if not conn: raise Error("DB connection error viewing video.")
+        cursor = conn.cursor(dictionary=True)
+
+        # Fetch video details and check if it's free or if student is subscribed to the teacher
+        # For now, let's allow all published free videos OR if teacher is current user's teacher (for testing)
+        # In a real app, you'd check student_subscriptions table.
+        cursor.execute("""
+            SELECT v.id, v.title, v.description, v.video_path_or_url, v.thumbnail_path_or_url,
+                   v.teacher_id, u.username as teacher_username, u.first_name as teacher_first_name, u.last_name as teacher_last_name
+            FROM videos v
+            JOIN users u ON v.teacher_id = u.id
+            WHERE v.id = %s AND v.status = 'published'
+            AND (v.is_viewable_free_for_student = TRUE OR v.teacher_id IN (SELECT teacher_id FROM student_subscriptions WHERE student_id = %s AND status = 'active'))
+            # Add OR condition for paid access here
+        """, (video_id, student_id))
+        video_data = cursor.fetchone()
+
+        if not video_data:
+            flash("Video not found, or you don't have access to view it. Please check your subscriptions.", "warning")
+            return redirect(url_for('student_dashboard_placeholder'))
+        
+        # Fetch quizzes associated with this video
+        cursor.execute("""
+            SELECT id, title FROM quizzes
+            WHERE video_id = %s AND is_active = TRUE
+            ORDER BY created_at ASC
+        """, (video_id,))
+        quizzes_for_video = cursor.fetchall()
+
+        # Mark video as watched by the student
+        cursor.execute("""
+            INSERT IGNORE INTO student_watched_videos (student_id, video_id, teacher_id)
+            VALUES (%s, %s, %s)
+        """, (student_id, video_id, video_data['teacher_id']))
+        conn.commit() # Commit the watch record
+
+    except Error as e:
+        if conn: conn.rollback()
+        app.logger.error(f"STUDENT_VIEW_VIDEO_DB_ERROR for video {video_id}, student {student_id}: {e.msg}", exc_info=False)
+        flash("An error occurred while loading the video. Please try again.", "danger")
+        return redirect(url_for('student_dashboard_placeholder'))
+    finally:
+        if cursor: cursor.close()
+        if conn and conn.is_connected(): conn.close()
+
+    return render_template('student/student_view_video.html', video=video_data, quizzes=quizzes_for_video)
+
+@app.route('/student/quizzes/<int:quiz_id>/take', methods=['GET', 'POST'])
+@student_required
+def student_take_quiz_page(quiz_id):
+    student_id = session['user_id']
+    quiz_info = None
+    questions_with_choices = []
+    
+    conn = None; cursor = None
+    try:
+        conn = get_db_connection()
+        if not conn: raise Error("DB connection error for taking quiz.")
+        cursor = conn.cursor(dictionary=True)
+
+        # Get quiz info and check if student has access
+        # For now, allow if active and has questions
+        # In a real app, check subscriptions (if quiz.video_id is null, it's standalone)
+        cursor.execute("""
+            SELECT q.id, q.title, q.description, q.time_limit_minutes, q.passing_score_percentage, q.allow_answer_review, q.teacher_id,
+                   v.title as video_title, v.video_path_or_url as video_link
+            FROM quizzes q
+            LEFT JOIN videos v ON q.video_id = v.id
+            WHERE q.id = %s AND q.is_active = TRUE AND EXISTS (SELECT 1 FROM questions WHERE quiz_id = q.id)
+            # Add subscription check logic here for v.id or q.teacher_id
+        """, (quiz_id,))
+        quiz_info = cursor.fetchone()
+
+        if not quiz_info:
+            flash("Quiz not found, is inactive, has no questions, or you don't have access. Contact the teacher.", "warning")
+            return redirect(url_for('student_dashboard_placeholder'))
+
+        # Check for existing incomplete attempt (if any)
+        cursor.execute("""
+            SELECT id, start_time, time_taken_seconds, score, max_possible_score, is_completed
+            FROM quiz_attempts
+            WHERE student_id = %s AND quiz_id = %s AND is_completed = FALSE
+            ORDER BY start_time DESC LIMIT 1
+        """, (student_id, quiz_id))
+        active_attempt = cursor.fetchone()
+
+        if request.method == 'GET':
+            if active_attempt:
+                flash(f"You have an ongoing attempt for this quiz. Resuming attempt from {active_attempt['start_time']}.", "info")
+            else:
+                # Start a new attempt
+                cursor.execute("""
+                    INSERT INTO quiz_attempts (student_id, quiz_id, start_time, is_completed)
+                    VALUES (%s, %s, %s, FALSE)
+                """, (student_id, quiz_id, datetime.utcnow()))
+                conn.commit()
+                active_attempt = {
+                    'id': cursor.lastrowid,
+                    'start_time': datetime.utcnow(),
+                    'time_taken_seconds': 0, # Initial time is 0
+                    'score': 0,
+                    'max_possible_score': 0,
+                    'is_completed': False
+                }
+                app.logger.info(f"QUIZ_ATTEMPT_START: Student {student_id} started quiz {quiz_id}. Attempt ID: {active_attempt['id']}")
+            
+            # Fetch questions and their choices
+            cursor.execute("""
+                SELECT q.id as question_id, q.question_text, q.question_type, q.points,
+                       GROUP_CONCAT(c.id, '||', c.choice_text ORDER BY c.id ASC SEPARATOR '&&') as choices_data
+                FROM questions q
+                LEFT JOIN choices c ON q.id = c.question_id
+                WHERE q.quiz_id = %s
+                GROUP BY q.id
+                ORDER BY q.display_order ASC, q.id ASC
+            """, (quiz_id,))
+            questions_raw = cursor.fetchall()
+            
+            # Parse choices_data string into list of dicts
+            for q_row in questions_raw:
+                q_row['choices'] = []
+                if q_row['choices_data']:
+                    for choice_str in q_row['choices_data'].split('&&'):
+                        choice_id, choice_text = choice_str.split('||', 1)
+                        q_row['choices'].append({'id': int(choice_id), 'choice_text': choice_text})
+                questions_with_choices.append(q_row)
+
+            # Store attempt_id in session to link answers to it
+            session['current_quiz_attempt_id'] = active_attempt['id']
+            session['current_quiz_id'] = quiz_id # Store quiz_id as well for security/double-check
+
+            # Calculate max possible score
+            max_score = sum(q['points'] for q in questions_with_choices)
+            if max_score != active_attempt['max_possible_score']: # Update if initial attempt started with 0
+                 cursor.execute("UPDATE quiz_attempts SET max_possible_score = %s WHERE id = %s", (max_score, active_attempt['id']))
+                 conn.commit()
+                 active_attempt['max_possible_score'] = max_score
+
+
+        elif request.method == 'POST':
+            if 'current_quiz_attempt_id' not in session or session['current_quiz_id'] != quiz_id:
+                flash("Error: Your quiz attempt session is invalid or expired. Please restart the quiz.", "danger")
+                return redirect(url_for('student_dashboard_placeholder'))
+            
+            attempt_id = session['current_quiz_attempt_id']
+
+            # Check if quiz was already completed
+            cursor.execute("SELECT is_completed FROM quiz_attempts WHERE id = %s AND student_id = %s", (attempt_id, student_id))
+            attempt_status = cursor.fetchone()
+            if attempt_status and attempt_status['is_completed']:
+                flash("This quiz attempt has already been submitted.", "info")
+                return redirect(url_for('student_quiz_result_page', attempt_id=attempt_id)) # Redirect to result page if already completed
+
+            student_answers = {}
+            for key, value in request.form.items():
+                if key.startswith('question_'):
+                    question_id_str = key.replace('question_', '')
+                    try:
+                        question_id_int = int(question_id_str)
+                        selected_choice_id_int = int(value)
+                        student_answers[question_id_int] = selected_choice_id_int
+                    except ValueError:
+                        app.logger.warning(f"Invalid question_id or choice_id received in quiz submission for student {student_id}: {key}={value}")
+                        continue
+            
+            total_score = 0
+            questions_data_for_scoring = {} # To hold question details and correct answers
+            
+            # Fetch all questions and their correct choices for this quiz
+            cursor.execute("""
+                SELECT q.id as question_id, q.points, c.id as choice_id, c.is_correct
+                FROM questions q
+                JOIN choices c ON q.id = c.question_id
+                WHERE q.quiz_id = %s
+            """, (quiz_id,))
+            all_quiz_questions_and_choices = cursor.fetchall()
+
+            max_possible_score_calc = 0
+            for row in all_quiz_questions_and_choices:
+                q_id = row['question_id']
+                if q_id not in questions_data_for_scoring:
+                    questions_data_for_scoring[q_id] = {
+                        'points': row['points'],
+                        'correct_choice_id': None # Only for MC, essay needs manual grading
+                    }
+                    max_possible_score_calc += row['points']
+
+                if row['is_correct']:
+                    questions_data_for_scoring[q_id]['correct_choice_id'] = row['choice_id']
+
+            # Process student answers and calculate score
+            sql_insert_student_answer = """
+                INSERT INTO student_answers (attempt_id, question_id, selected_choice_id, is_mc_correct, points_awarded)
+                VALUES (%s, %s, %s, %s, %s)
+                ON DUPLICATE KEY UPDATE selected_choice_id = VALUES(selected_choice_id), is_mc_correct = VALUES(is_mc_correct), points_awarded = VALUES(points_awarded)
+            """ # Use ON DUPLICATE KEY UPDATE for resuming attempts and saving partial answers
+
+            for q_id, selected_c_id in student_answers.items():
+                q_data = questions_data_for_scoring.get(q_id)
+                if q_data:
+                    is_correct_answer = (selected_c_id == q_data['correct_choice_id'])
+                    points_awarded = q_data['points'] if is_correct_answer else 0
+                    total_score += points_awarded
+                    cursor.execute(sql_insert_student_answer, (attempt_id, q_id, selected_c_id, is_correct_answer, points_awarded))
+                else:
+                    app.logger.warning(f"Question ID {q_id} not found in quiz {quiz_id} for scoring student {student_id}'s attempt {attempt_id}.")
+                    # Still record answer even if question data is missing for some reason
+                    cursor.execute(sql_insert_student_answer, (attempt_id, q_id, selected_c_id, False, 0))
+            
+            # Update quiz attempt status
+            is_passed = (total_score >= (max_possible_score_calc * (quiz_info['passing_score_percentage'] / 100.0)))
+            end_time = datetime.utcnow()
+            time_taken_seconds = (end_time - active_attempt['start_time']).total_seconds() if active_attempt else None # If attempt started in this session
+
+            cursor.execute("""
+                UPDATE quiz_attempts
+                SET end_time = %s, score = %s, max_possible_score = %s, time_taken_seconds = %s, submitted_at = %s, is_completed = TRUE, passed = %s
+                WHERE id = %s AND student_id = %s
+            """, (end_time, total_score, max_possible_score_calc, time_taken_seconds, end_time, is_passed, attempt_id, student_id))
+            
+            conn.commit()
+            
+            session.pop('current_quiz_attempt_id', None) # Clear attempt from session
+            session.pop('current_quiz_id', None)
+
+            flash("Quiz submitted successfully!", "success")
+            return redirect(url_for('student_quiz_result_page', attempt_id=attempt_id))
+
+    except Error as e:
+        if conn: conn.rollback()
+        app.logger.error(f"STUDENT_TAKE_QUIZ_DB_ERROR for quiz {quiz_id}, student {student_id}: {e.msg}", exc_info=False)
+        flash("An error occurred during the quiz process. Please try again.", "danger")
+        return redirect(url_for('student_dashboard_placeholder'))
+    except Exception as e_general:
+        if conn: conn.rollback()
+        app.logger.critical(f"STUDENT_TAKE_QUIZ_GENERAL_ERROR for quiz {quiz_id}, student {student_id}: {e_general}", exc_info=True)
+        flash("An unexpected error occurred. Please try again.", "danger")
+        return redirect(url_for('student_dashboard_placeholder'))
+    finally:
+        if cursor: cursor.close()
+        if conn and conn.is_connected(): conn.close()
+
+    # If GET request, render the quiz page
+    return render_template('student/student_take_quiz.html', 
+                           quiz=quiz_info, 
+                           questions=questions_with_choices, 
+                           attempt=active_attempt)
+
+
+@app.route('/student/quizzes/results/<int:attempt_id>')
+@student_required
+def student_quiz_result_page(attempt_id):
+    student_id = session['user_id']
+    attempt_details = None
+    answers_with_questions = []
+
+    conn = None
+    cursor = None
+    try:
+        conn = get_db_connection()
+        if not conn:
+            raise Error("DB connection error for quiz results.")
+        cursor = conn.cursor(dictionary=True)
+
+        # Get attempt details and verify ownership
+        cursor.execute("""
+            SELECT qa.id, qa.quiz_id, qa.score, qa.max_possible_score, qa.time_taken_seconds, qa.submitted_at, qa.passed,
+                   q.title as quiz_title, q.description as quiz_description, q.time_limit_minutes, q.passing_score_percentage, q.allow_answer_review,
+                   v.title as video_title
+            FROM quiz_attempts qa
+            JOIN quizzes q ON qa.quiz_id = q.id
+            LEFT JOIN videos v ON q.video_id = v.id
+            WHERE qa.id = %s AND qa.student_id = %s AND qa.is_completed = TRUE
+        """, (attempt_id, student_id))
+        attempt_details = cursor.fetchone()
+
+        if not attempt_details:
+            flash("Quiz result not found or you are not authorized to view it.", "warning")
+            return redirect(url_for('student_dashboard_placeholder'))
+
+        # Fetch questions, student's answers, and correct choices (if allowed to review)
+        if attempt_details['allow_answer_review']:
+            cursor.execute("""
+                SELECT sa.question_id, sa.selected_choice_id, sa.is_mc_correct, sa.points_awarded,
+                       q.question_text, q.points as question_max_points,
+                       GROUP_CONCAT(c.id, '||', c.choice_text, '||', c.is_correct ORDER BY c.id ASC SEPARATOR '&&') as all_choices_data
+                FROM student_answers sa
+                JOIN questions q ON sa.question_id = q.id
+                LEFT JOIN choices c ON q.id = c.question_id
+                WHERE sa.attempt_id = %s
+                GROUP BY sa.question_id
+                ORDER BY q.display_order ASC, q.id ASC
+            """, (attempt_id,))
+            questions_raw = cursor.fetchall()
+
+            for q_row in questions_raw:
+                q_row['choices'] = []
+                q_row['correct_choice_text'] = None
+                q_row['student_choice_text'] = None
+
+                if q_row['all_choices_data']:
+                    for choice_str in q_row['all_choices_data'].split('&&'):
+                        parts = choice_str.split('||', 2) # Split by ||, limit to 2 parts (id, text, is_correct)
+                        if len(parts) == 3:
+                            choice_id = int(parts[0])
+                            choice_text = parts[1]
+                            is_correct_choice_db = (parts[2].lower() == '1' or parts[2].lower() == 'true') # Handle boolean from DB
+
+                            q_row['choices'].append({'id': choice_id, 'choice_text': choice_text, 'is_correct': is_correct_choice_db})
+                            
+                            if is_correct_choice_db:
+                                q_row['correct_choice_text'] = choice_text
+                            if choice_id == q_row['selected_choice_id']:
+                                q_row['student_choice_text'] = choice_text
+                answers_with_questions.append(q_row)
+
+    except Error as e:
+        app.logger.error(f"QUIZ_RESULT_DB_ERROR for attempt {attempt_id}, student {student_id}: {e.msg}", exc_info=False)
+        flash("An error occurred while loading quiz results. Please try again.", "danger")
+        return redirect(url_for('student_dashboard_placeholder'))
+    finally:
+        if cursor: cursor.close()
+        if conn and conn.is_connected(): conn.close()
+
+    return render_template('student/student_quiz_result.html', 
+                           attempt=attempt_details, 
+                           answers_data=answers_with_questions)
+
 
 @app.route('/teacher/dashboard')
 @teacher_required
