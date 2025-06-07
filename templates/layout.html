@@ -56,10 +56,14 @@
                         <span class="lang-en">My Videos</span>
                         <span class="lang-ar" style="display:none;">فيديوهاتي</span>
                     </a>
-                    {# <<<<<<< الرابط الجديد المضاف >>>>>>> #}
                     <a href="{{ url_for('teacher_quizzes_list_page') }}" style="margin-left: 10px; margin-right: 10px;">
                         <span class="lang-en">My Quizzes</span>
                         <span class="lang-ar" style="display:none;">اختباراتي</span>
+                    </a>
+                    {# الرابط الجديد المضاف لصفحة استكشاف المعلمين (للمعلم) #}
+                    <a href="{{ url_for('explore_teachers_page') }}" style="margin-left: 10px; margin-right: 10px;">
+                        <span class="lang-en">Explore Teachers</span>
+                        <span class="lang-ar" style="display:none;">استكشف المعلمين</span>
                     </a>
                     {# يمكنك إعادة رابط Teacher Dashboard Placeholder إذا أردت لوحة تحكم عامة منفصلة لاحقًا #}
                     {# <a href="{{ url_for('teacher_dashboard_placeholder') }}">
@@ -72,8 +76,12 @@
                         <span class="lang-en">Student Dashboard</span>
                         <span class="lang-ar" style="display:none;">لوحة تحكم الطالب</span>
                      </a>
+                    {# الرابط الجديد المضاف لصفحة استكشاف المعلمين (للطالب) #}
+                    <a href="{{ url_for('explore_teachers_page') }}" style="margin-left: 10px; margin-right: 10px;">
+                        <span class="lang-en">Explore Teachers</span>
+                        <span class="lang-ar" style="display:none;">استكشف المعلمين</span>
+                    </a>
                 {% endif %}
-                 {# عرض اسم المستخدم المسجل #}
                  <span class="username-display" style="padding: 0 12px; opacity: 0.8;"> {# إضافة تنسيق بسيط هنا #}
                     <span class="lang-en">Hello, {{ session.get('username', 'User') }}</span>
                     <span class="lang-ar" style="display:none;">أهلاً، {{ session.get('username', 'مستخدم') }}</span>
@@ -88,18 +96,87 @@
                     <span class="lang-en">Sign Up</span>
                     <span class="lang-ar" style="display:none;">إنشاء حساب</span>
                 </a>
+                {# الرابط الجديد المضاف لصفحة استكشاف المعلمين (للزوار) #}
+                <a href="{{ url_for('explore_teachers_page') }}" style="margin-left: 10px; margin-right: 10px;">
+                    <span class="lang-en">Explore Teachers</span>
+                    <span class="lang-ar" style="display:none;">استكشف المعلمين</span>
+                </a>
             {% endif %}
         </nav>
         {% endif %} {# نهاية التحقق من is_minimal_layout #}
 
         {# حاوية قائمة الإعدادات (تبديل اللغة والثيم) #}
+        {# تم تحويلها لـ Hamburger Menu على الشاشات الصغيرة #}
         <div class="settings-menu-container">
             <button id="settingsMenuButton" class="settings-menu-button" 
                     aria-label="Settings Menu" aria-expanded="false" 
                     data-title-en="Settings" data-title-ar="الإعدادات">
-                <i class="fas fa-bars"></i> {# أيقونة القائمة #}
+                <i class="fas fa-bars"></i> {# أيقونة القائمة (Hamburger) #}
             </button>
-            <div id="settingsDropdown" class="settings-dropdown-menu" style="display: none;"> {# يتم إظهارها/إخفائها بـ JS #}
+            <div id="settingsDropdown" class="settings-dropdown-menu"> {# تم إزالة style="display: none;" ليتم التحكم به بالـ CSS/JS #}
+                <button class="close-menu-button" id="closeMenuButton" aria-label="Close menu">
+                    <i class="fas fa-times"></i> {# أيقونة X للإغلاق #}
+                </button>
+                
+                {# الروابط اللي كانت في main-nav، هنقلها هنا عشان تظهر في قائمة الهامبرجر #}
+                {% if session.get('user_id') %}
+                    <div class="dropdown-item username-display-mobile"> {# عرض اسم المستخدم في القائمة #}
+                        <i class="fas fa-user-circle"></i>
+                        <span class="lang-en">Hello, {{ session.get('username', 'User') }}</span>
+                        <span class="lang-ar" style="display:none;">أهلاً، {{ session.get('username', 'مستخدم') }}</span>
+                    </div>
+                    <a href="{{ url_for('teacher_dashboard_placeholder') if session.get('role') == 'teacher' else url_for('student_dashboard_placeholder') }}" class="dropdown-item">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span class="lang-en">Dashboard</span>
+                        <span class="lang-ar" style="display:none;">لوحة التحكم</span>
+                    </a>
+                    {% if session.get('role') == 'teacher' %}
+                        <a href="{{ url_for('teacher_videos_list_page') }}" class="dropdown-item">
+                            <i class="fas fa-video"></i>
+                            <span class="lang-en">My Videos</span>
+                            <span class="lang-ar" style="display:none;">فيديوهاتي</span>
+                        </a>
+                        <a href="{{ url_for('teacher_quizzes_list_page') }}" class="dropdown-item">
+                            <i class="fas fa-question-circle"></i>
+                            <span class="lang-en">My Quizzes</span>
+                            <span class="lang-ar" style="display:none;">اختباراتي</span>
+                        </a>
+                        <a href="{{ url_for('edit_teacher_profile') }}" class="dropdown-item">
+                            <i class="fas fa-user-edit"></i>
+                            <span class="lang-en">Edit Profile</span>
+                            <span class="lang-ar" style="display:none;">تعديل ملفي الشخصي</span>
+                        </a>
+                    {% endif %}
+                    <a href="{{ url_for('explore_teachers_page') }}" class="dropdown-item">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                        <span class="lang-en">Explore Teachers</span>
+                        <span class="lang-ar" style="display:none;">استكشف المعلمين</span>
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="dropdown-item">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span class="lang-en">Logout</span>
+                        <span class="lang-ar" style="display:none;">تسجيل الخروج</span>
+                    </a>
+                {% else %} {# للزوار غير المسجلين #}
+                    <a href="{{ url_for('login_page') }}" class="dropdown-item">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span class="lang-en">Login</span>
+                        <span class="lang-ar" style="display:none;">تسجيل الدخول</span>
+                    </a>
+                    <a href="{{ url_for('choose_signup_role') }}" class="dropdown-item">
+                        <i class="fas fa-user-plus"></i>
+                        <span class="lang-en">Sign Up</span>
+                        <span class="lang-ar" style="display:none;">إنشاء حساب</span>
+                    </a>
+                    <a href="{{ url_for('explore_teachers_page') }}" class="dropdown-item">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                        <span class="lang-en">Explore Teachers</span>
+                        <span class="lang-ar" style="display:none;">استكشف المعلمين</span>
+                    </a>
+                {% endif %}
+
+                <hr style="border-color: rgba(255,255,255,0.1); margin: 8px 0;"> {# فاصل بين الروابط واعدادات اللغة/الثيم #}
+
                 {# زر تبديل اللغة #}
                 <a href="#" id="languageToggle" class="dropdown-item" data-lang-target="ar">
                     <i class="fas fa-language"></i> 

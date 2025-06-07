@@ -33,15 +33,15 @@
                 <tbody>
                     {% for video in videos %}
                     <tr>
-                        <td>{{ video.title }}</td>
-                        <td>
+                        <td data-label="{% if current_lang == 'ar' %}العنوان{% else %}Title{% endif %}">{{ video.title }}</td>
+                        <td data-label="{% if current_lang == 'ar' %}الحالة{% else %}Status{% endif %}">
                             <span class="badge 
                                 {% if video.status == 'published' %}bg-success{% elif video.status == 'processing' %}bg-warning text-dark{% elif video.status == 'unpublished' %}bg-secondary{% else %}bg-danger{% endif %}">
                                 {{ video.status.capitalize() }}
                             </span>
                         </td>
-                        <td>{{ video.upload_timestamp.strftime('%Y-%m-%d %H:%M') if video.upload_timestamp else 'N/A' }}</td>
-                        <td>
+                        <td data-label="{% if current_lang == 'ar' %}تاريخ الرفع{% else %}Upload Date{% endif %}">{{ video.upload_timestamp.strftime('%Y-%m-%d %H:%M') if video.upload_timestamp else 'N/A' }}</td>
+                        <td data-label="{% if current_lang == 'ar' %}إجراءات{% else %}Actions{% endif %}">
                             {# روابط وهمية حاليًا #}
                             <a href="#" class="btn btn-sm btn-info">
                                 <i class="fas fa-eye"></i> 

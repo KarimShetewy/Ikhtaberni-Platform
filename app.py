@@ -495,6 +495,65 @@ def logout():
     flash(f"You have been successfully logged out, {user_name_at_logout}. We hope to see you again soon!", "info")
     return redirect(url_for('home'))
 
+@app.route('/explore/teachers')
+def explore_teachers_page():
+    """
+    Renders the page for exploring teachers, with search functionality.
+    Fetches teachers based on a search query if provided.
+    """
+    search_query = request.args.get('search_query', '').strip()
+    teachers_list = []
+    db_conn = None
+    db_cursor = None
+    try:
+        db_conn = get_db_connection()
+        if db_conn is None:
+            app.logger.error("EXPLORE_TEACHERS_DB_ERROR: Failed to connect to database.")
+            flash("Database connection error. Please try again later.", "danger")
+            return render_template('public/explore_teachers.html', teachers=[], search_query=search_query) # cite: 1
+
+        db_cursor = db_conn.cursor(dictionary=True)
+
+        sql_query = """
+            SELECT id, first_name, last_name, username, profile_picture_url, bio
+            FROM users
+            WHERE role = 'teacher' AND is_active = TRUE
+        """
+        query_params = []
+
+        if search_query:
+            # Add conditions for searching across multiple fields
+            sql_query += """
+                AND (first_name LIKE %s OR last_name LIKE %s OR username LIKE %s OR bio LIKE %s)
+            """
+            # Add '%' for LIKE queries to match partial strings
+            search_pattern = f"%{search_query}%"
+            query_params.extend([search_pattern, search_pattern, search_pattern, search_pattern])
+        
+        sql_query += " ORDER BY first_name ASC, last_name ASC"
+
+        db_cursor.execute(sql_query, tuple(query_params))
+        teachers_list = db_cursor.fetchall()
+        
+    except Error as e_db:
+        app.logger.error(f"EXPLORE_TEACHERS_DB_ERROR: {e_db.msg}", exc_info=False)
+        flash("An error occurred while fetching teachers. Please try again.", "danger")
+    except Exception as e_general:
+        app.logger.critical(f"EXPLORE_TEACHERS_GENERAL_ERROR: {e_general}", exc_info=True)
+        flash("An unexpected error occurred. Please try again.", "danger")
+    finally:
+        if db_cursor:
+            db_cursor.close()
+        if db_conn and db_conn.is_connected():
+            db_conn.close()
+
+    # Pass current_lang from session to the template for initial rendering of placeholders/buttons
+    return render_template('public/explore_teachers.html', 
+                           teachers=teachers_list, 
+                           search_query=search_query,
+                           current_lang=session.get('current_lang', 'en')) # cite: 1
+
+
 # --- 9. Teacher Video Management Routes ---
 @app.route('/teacher/videos/upload', methods=['GET', 'POST'])
 @teacher_required

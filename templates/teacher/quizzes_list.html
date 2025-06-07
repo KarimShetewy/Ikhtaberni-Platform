@@ -47,7 +47,7 @@
                 <tbody>
                     {% for quiz_item in quizzes %} {# تغيير اسم المتغير لتجنب أي تعارض محتمل #}
                     <tr>
-                        <td>
+                        <td data-label="{% if current_lang == 'ar' %}عنوان الاختبار{% else %}Quiz Title{% endif %}">
                             <a href="{{ url_for('add_question_to_quiz_page', quiz_id=quiz_item.id) }}" 
                                data-bs-toggle="tooltip" data-bs-placement="top"
                                title-en="Click to manage questions for '{{ quiz_item.title }}'" 
@@ -55,21 +55,21 @@
                                 {{ quiz_item.title }}
                             </a>
                         </td>
-                        <td>
+                        <td data-label="{% if current_lang == 'ar' %}الفيديو المرتبط{% else %}Linked Video{% endif %}">
                             {% if quiz_item.video_title %}
                                 {{ quiz_item.video_title }}
                             {% else %}
                                 <span class="text-muted fst-italic"><span class="lang-en">Not linked to a video</span><span class="lang-ar" style="display:none;">غير مرتبط بفيديو</span></span>
                             {% endif %}
                         </td>
-                        <td>
+                        <td data-label="{% if current_lang == 'ar' %}الحالة{% else %}Status{% endif %}">
                             <span class="badge {% if quiz_item.is_active %}bg-success-subtle text-success-emphasis border border-success-subtle{% else %}bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle{% endif %} p-2">
                                 {% if quiz_item.is_active %}<i class="fas fa-check-circle me-1"></i><span class="lang-en">Active</span><span class="lang-ar" style="display:none;">نشط</span>
                                 {% else %}<i class="fas fa-times-circle me-1"></i><span class="lang-en">Inactive</span><span class="lang-ar" style="display:none;">غير نشط</span>{% endif %}
                             </span>
                         </td>
-                        <td>{{ quiz_item.created_at.strftime('%Y-%m-%d') if quiz_item.created_at else 'N/A' }}</td>
-                        <td>
+                        <td data-label="{% if current_lang == 'ar' %}تاريخ الإنشاء{% else %}Date Created{% endif %}">{{ quiz_item.created_at.strftime('%Y-%m-%d') if quiz_item.created_at else 'N/A' }}</td>
+                        <td data-label="{% if current_lang == 'ar' %}الإجراءات{% else %}Actions{% endif %}">
                             <div class="btn-group" role="group" aria-label="Quiz actions">
                                 {# زر إدارة الأسئلة #}
                                 <a href="{{ url_for('add_question_to_quiz_page', quiz_id=quiz_item.id) }}" class="btn btn-sm btn-warning text-dark" 

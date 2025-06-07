@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const themeToggle = document.getElementById('themeToggle');
     const htmlElement = document.documentElement;
     const bodyElement = document.body;
+    const closeMenuButton = document.getElementById('closeMenuButton'); // جديد: زر الإغلاق
 
     // --- 1. UTILITY: Update Texts Based on Data Attributes ---
     function updateAttributeBasedTexts(lang) {
@@ -111,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const icon = themeToggle.querySelector('i');
             const enTextSpan = themeToggle.querySelector('.lang-en');
             const arTextSpan = themeToggle.querySelector('.lang-ar');
-            const nextThemeTarget = (theme === 'dark' ? 'light' : 'dark');
+            const nextThemeTarget = (theme === 'light') ? 'dark' : 'light'; // تصحيح: لو الثيم الحالي Light، الزرار يوديك لـ Dark
 
             if (icon) {
                 icon.className = (theme === 'light') ? 'fas fa-moon' : 'fas fa-sun'; // Moon icon for Light theme (to switch to Dark)
@@ -128,24 +129,44 @@ document.addEventListener('DOMContentLoaded', function() {
         // console.log(`UI Theme has been set to: ${theme}`);
     }
 
-    // --- 4. SETTINGS DROPDOWN MENU CONTROL ---
+    // --- 4. SETTINGS DROPDOWN MENU CONTROL (تم تعديله للـ Hamburger Menu) ---
     if (settingsMenuButton && settingsDropdown) {
         settingsMenuButton.addEventListener('click', function(event) {
             event.stopPropagation(); // Prevent the click from immediately closing the dropdown via the document listener
             const isExpanded = settingsMenuButton.getAttribute('aria-expanded') === 'true';
-            settingsDropdown.style.display = isExpanded ? 'none' : 'block';
+            
+            // بدال ما نغير الـ display: none/block، هنستخدم كلاس 'show' عشان الـ CSS animations
+            if (isExpanded) {
+                settingsDropdown.classList.remove('show');
+                settingsDropdown.setAttribute('aria-hidden', 'true');
+            } else {
+                settingsDropdown.classList.add('show');
+                settingsDropdown.setAttribute('aria-hidden', 'false');
+            }
             settingsMenuButton.setAttribute('aria-expanded', String(!isExpanded));
+        });
+    }
+
+    // جديد: إضافة event listener لزرار الإغلاق
+    if (closeMenuButton && settingsDropdown && settingsMenuButton) {
+        closeMenuButton.addEventListener('click', function(event) {
+            event.stopPropagation();
+            settingsDropdown.classList.remove('show');
+            settingsDropdown.setAttribute('aria-hidden', 'true');
+            settingsMenuButton.setAttribute('aria-expanded', 'false');
         });
     }
 
     // Close dropdown if clicked outside
     document.addEventListener('click', function(event) {
-        if (settingsDropdown && settingsDropdown.style.display === 'block' &&
+        // نتحقق إذا كانت القائمة مفتوحة، وإذا كان الكليك مش على زرار الفتح ولا جوه القائمة نفسها
+        if (settingsDropdown && settingsDropdown.classList.contains('show') &&
             settingsMenuButton && 
             !settingsMenuButton.contains(event.target) &&
             !settingsDropdown.contains(event.target)) {
             
-            settingsDropdown.style.display = 'none';
+            settingsDropdown.classList.remove('show');
+            settingsDropdown.setAttribute('aria-hidden', 'true');
             settingsMenuButton.setAttribute('aria-expanded', 'false');
         }
     });
@@ -160,8 +181,11 @@ document.addEventListener('DOMContentLoaded', function() {
             setLanguage(targetLang);
             
             // Close dropdown after selection
-            if (settingsDropdown) settingsDropdown.style.display = 'none';
-            if (settingsMenuButton) settingsMenuButton.setAttribute('aria-expanded', 'false');
+            if (settingsDropdown) { 
+                settingsDropdown.classList.remove('show');
+                settingsDropdown.setAttribute('aria-hidden', 'true');
+            }
+            if (settingsMenuButton) settingsMenuButton.setAttribute('aria-expanded', 'false'); 
         });
     }
 
@@ -173,8 +197,11 @@ document.addEventListener('DOMContentLoaded', function() {
             setTheme(targetTheme);
 
             // Close dropdown after selection
-            if (settingsDropdown) settingsDropdown.style.display = 'none';
-            if (settingsMenuButton) settingsMenuButton.setAttribute('aria-expanded', 'false');
+            if (settingsDropdown) { 
+                settingsDropdown.classList.remove('show');
+                settingsDropdown.setAttribute('aria-hidden', 'true');
+            }
+            if (settingsMenuButton) settingsMenuButton.setAttribute('aria-expanded', 'false'); 
         });
     }
 
