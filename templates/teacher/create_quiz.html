@@ -1,0 +1,105 @@
+{% extends "layout.html" %} {# أو قالب لوحة تحكم المعلم المستقبلي #}
+
+{% block title %}
+    <span class="lang-en">Create New Quiz - Ektbariny</span>
+    <span class="lang-ar" style="display:none;">إنشاء اختبار جديد - اختبرني</span>
+{% endblock %}
+
+{% block content %}
+<div class="container main-page-content" style="margin-top: 30px; margin-bottom: 30px;">
+    <h2 class="section-main-title">
+        <span class="lang-en">Create a New Quiz</span>
+        <span class="lang-ar" style="display:none;">إنشاء اختبار جديد</span>
+    </h2>
+
+    {% if not can_create_quiz %}
+    <div class="alert alert-warning">
+        <span class="lang-en">You have used all your free quiz creations ({{ free_quizzes_left }} left). Please upgrade your account to create more quizzes.</span>
+        <span class="lang-ar" style="display:none;">لقد استنفدت رصيدك من الاختبارات المجانية (متبقي {{ free_quizzes_left }}). يرجى ترقية حسابك لإنشاء المزيد.</span>
+    </div>
+    {% else %}
+    <p>
+        <span class="lang-en">You have <strong>{{ free_quizzes_left }}</strong> free quiz creations remaining.</span>
+        <span class="lang-ar" style="display:none;">لديك <strong>{{ free_quizzes_left }}</strong> محاولات مجانية متبقية لإنشاء الاختبارات.</span>
+    </p>
+    {% endif %}
+
+    <div class="card" style="max-width: 750px; margin: 20px auto; padding: 30px;">
+        <form method="POST" action="{{ url_for('create_quiz_page', video_id=video_id_preselected if video_id_preselected else None) }}">
+            <div class="form-group">
+                <label for="quiz_title_create">
+                    <span class="lang-en">Quiz Title</span><span class="lang-ar" style="display:none;">عنوان الاختبار</span>
+                    <span class="text-danger-asterisk">*</span>
+                </label>
+                <input type="text" class="form-control" id="quiz_title_create" name="quiz_title" 
+                       value="{{ quiz_title or '' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="quiz_description_create">
+                    <span class="lang-en">Description (Optional)</span><span class="lang-ar" style="display:none;">الوصف (اختياري)</span>
+                </label>
+                <textarea class="form-control" id="quiz_description_create" name="quiz_description" rows="3">{{ quiz_description or '' }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="linked_video_id_create">
+                    <span class="lang-en">Link to Video (Optional)</span><span class="lang-ar" style="display:none;">ربط بفيديو (اختياري)</span>
+                </label>
+                <select class="form-control" id="linked_video_id_create" name="linked_video_id">
+                    <option value=""><span class="lang-en">-- No Video (Standalone Quiz) --</span><span class="lang-ar" style="display:none;">-- بدون فيديو (اختبار مستقل) --</span></option>
+                    {% for video in teacher_videos %}
+                    <option value="{{ video.id }}" 
+                            {% if (video_id_preselected and video.id == video_id_preselected) or (linked_video_id_selected and video.id == linked_video_id_selected) %}selected{% endif %}>
+                        {{ video.title }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <small class="form-text text-muted">
+                    <span class="lang-en">If this quiz is specifically for a video, select it here.</span>
+                    <span class="lang-ar" style="display:none;">إذا كان هذا الاختبار مخصصًا لفيديو معين، قم باختياره هنا.</span>
+                </small>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="time_limit_minutes_create">
+                            <span class="lang-en">Time Limit (minutes)</span><span class="lang-ar" style="display:none;">الوقت المحدد (دقائق)</span>
+                        </label>
+                        <input type="number" class="form-control" id="time_limit_minutes_create" name="time_limit_minutes" 
+                               value="{{ time_limit_minutes if time_limit_minutes is defined else 60 }}" min="0">
+                        <small class="form-text text-muted">
+                            <span class="lang-en">Set to 0 for no time limit.</span><span class="lang-ar" style="display:none;">ضع 0 لعدم تحديد وقت.</span>
+                        </small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="passing_score_percentage_create">
+                            <span class="lang-en">Passing Score (%)</span><span class="lang-ar" style="display:none;">درجة النجاح (%)</span>
+                        </label>
+                        <input type="number" class="form-control" id="passing_score_percentage_create" name="passing_score_percentage" 
+                               value="{{ passing_score_percentage if passing_score_percentage is defined else 70 }}" min="0" max="100">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-check-custom" style="margin-bottom: 25px; margin-top: 10px;">
+                <input type="checkbox" class="form-check-input" id="allow_answer_review_create" name="allow_answer_review"
+                       {% if allow_answer_review %}checked{% endif %}>
+                <label class="form-check-label" for="allow_answer_review_create">
+                    <span class="lang-en">Allow students to review correct answers after completing the quiz.</span>
+                    <span class="lang-ar" style="display:none;">السماح للطلاب بمراجعة الإجابات الصحيحة بعد إكمال الاختبار.</span>
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;" {% if not can_create_quiz %}disabled{% endif %}>
+                <i class="fas fa-plus-circle"></i> 
+                <span class="lang-en">Create Quiz and Add Questions</span>
+                <span class="lang-ar" style="display:none;">إنشاء الاختبار وإضافة الأسئلة</span>
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

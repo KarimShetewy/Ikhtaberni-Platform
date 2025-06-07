@@ -1,0 +1,160 @@
+{% extends "layout.html" %} {# أو قالب لوحة تحكم المعلم إذا كان متاحًا #}
+
+{% block title %}
+    {# تم تبسيط هذا الجزء قليلًا، يمكنك إعادته كما كان إذا أردت استخدام lang-en/ar منفصلين #}
+    <span class="lang-en">Manage Questions: {{ quiz.title if quiz else 'Quiz' }}</span>
+    <span class="lang-ar" style="display:none;">إدارة أسئلة: {{ quiz.title if quiz else 'الاختبار' }}</span>
+{% endblock %}
+
+{% block content %}
+<div class="container main-page-content" style="margin-top: 30px; margin-bottom: 30px;">
+    
+    {% if quiz %} {# تأكد من أن متغير quiz مُمرر بشكل صحيح من app.py #}
+    <div style="margin-bottom: 25px;">
+        <a href="{{ url_for('teacher_quizzes_list_page') }}" class="btn btn-outline-secondary btn-sm mb-2">
+            <i class="fas fa-arrow-left"></i> 
+            <span class="lang-en">Back to My Quizzes</span>
+            <span class="lang-ar" style="display:none;">العودة إلى اختباراتي</span>
+        </a>
+        <h2 class="section-main-title">
+            <span class="lang-en">Manage Questions for Quiz: <em>{{ quiz.title }}</em></span>
+            <span class="lang-ar" style="display:none;">إدارة أسئلة الاختبار: <em>{{ quiz.title }}</em></span>
+        </h2>
+        {# يمكنك إضافة تفاصيل أخرى عن الاختبار هنا إذا أردت، مثل الوصف أو الفيديو المرتبط #}
+    </div>
+
+    <div class="row">
+        {# --- عمود لإضافة سؤال جديد --- #}
+        <div class="col-lg-5 mb-4 mb-lg-0">
+            <div class="card p-4 shadow-sm"> {# إضافة ظل خفيف للبطاقة #}
+                <h4 class="mb-3 card-title" style="font-size: 1.5rem;">
+                    <span class="lang-en">Add New Question (MCQ)</span>
+                    <span class="lang-ar" style="display:none;">إضافة سؤال جديد (اختيار من متعدد)</span>
+                </h4>
+                {# يتم تمرير quiz.id من app.py إلى هذا المسار #}
+                <form method="POST" action="{{ url_for('add_question_to_quiz_page', quiz_id=quiz.id) }}" novalidate>
+                    <div class="form-group">
+                        <label for="question_text_add" class="form-label">
+                            <span class="lang-en">Question Text</span><span class="lang-ar" style="display:none;">نص السؤال</span>
+                            <span class="text-danger-asterisk">*</span>
+                        </label>
+                        {# استخدام request.form للاحتفاظ بالقيمة عند حدوث خطأ، وإلا استخدم المتغير الممرر (إذا وجد) #}
+                        <textarea class="form-control" id="question_text_add" name="question_text" rows="3" required>{{ request.form.question_text or question_text or '' }}</textarea>
+                    </div>
+
+                    <hr class="my-3">
+                    <p style="font-weight: 500; margin-bottom: 0.75rem;">
+                        <span class="lang-en">Choices (Provide at least two. Mark the correct one):</span>
+                        <span class="lang-ar" style="display:none;">الخيارات (قدم خيارين على الأقل. حدد الإجابة الصحيحة):</span>
+                    </p>
+
+                    {% set num_choices_to_render = 4 %} {# لتسهيل التغيير إذا أردت عددًا مختلفًا من الخيارات لاحقًا #}
+                    {% for i in range(num_choices_to_render) %}
+                    <div class="form-group mb-2">
+                        <label for="choice_{{ i+1 }}_text_add" class="sr-only"><span class="lang-en">Choice {{ i+1 }}</span><span class="lang-ar" style="display:none;">الخيار {{ i+1 }}</span></label>
+                        <div class="input-group">
+                            <div class="input-group-text" style="min-width: 40px; justify-content: center; border-top-right-radius: 0; border-bottom-right-radius: 0;">
+                                {# التحقق من correct_choice_index_submitted (من POST عند الخطأ) أو (إذا كان method GET وليس POST) التحقق من request.form عند أول تحميل لنموذج فارغ #}
+                                <input type="radio" name="correct_choice_index" value="{{ i }}" id="correct_choice_{{ i+1 }}"
+                                       {% if request.form.correct_choice_index == i|string or (correct_choice_index_submitted is defined and correct_choice_index_submitted == i) %}checked{% endif %}
+                                       aria-label="Mark choice {{ i+1 }} as correct" required>
+                            </div>
+                            <input type="text" class="form-control" id="choice_{{ i+1 }}_text_add" name="choice_{{ i+1 }}_text" 
+                                   value="{{ request.form['choice_'~(i+1)~'_text'] or (choices_text[i] if choices_text and choices_text[i] is defined else '') }}" 
+                                   placeholder="{{ 'Choice '~(i+1)~' Text' if session.get('current_lang', 'en') == 'en' else 'نص الخيار '~(i+1) }}"
+                                   style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                        </div>
+                        {% if loop.index == 1 %} {# عرض الملاحظة مرة واحدة فقط #}
+                            <small class="form-text text-muted mt-1 d-block">
+                                <span class="lang-en">Select the radio button next to the correct answer.</span>
+                                <span class="lang-ar" style="display:none;">اختر زر الراديو بجانب الإجابة الصحيحة.</span>
+                            </small>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    
+                    <div class="form-group mt-3">
+                        <label for="points_add" class="form-label">
+                            <span class="lang-en">Points for this question</span><span class="lang-ar" style="display:none;">درجة هذا السؤال</span>
+                        </label>
+                        <input type="number" class="form-control" id="points_add" name="points" 
+                               value="{{ request.form.points or points or 1 }}" min="1" style="width: 120px;">
+                    </div>
+
+                    <button type="submit" class="btn btn-success mt-4 w-100 py-2">
+                        <i class="fas fa-plus-circle me-2"></i> 
+                        <span class="lang-en">Add This Question</span>
+                        <span class="lang-ar" style="display:none;">إضافة هذا السؤال</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        {# --- عمود لعرض الأسئلة الموجودة --- #}
+        <div class="col-lg-7">
+            <div class="card p-4 shadow-sm">
+                <h4 class="mb-3 card-title" style="font-size: 1.5rem;">
+                    <span class="lang-en">Existing Questions in "{{ quiz.title }}"</span>
+                    <span class="lang-ar" style="display:none;">الأسئلة الموجودة في اختبار "{{ quiz.title }}"</span>
+                </h4>
+                {% if existing_questions %}
+                    <div class="list-group"> {# استخدام list-group-flush لإزالة الحدود الجانبية إذا كانت البطاقة لها padding #}
+                        {% for question_item in existing_questions %} {# تغيير اسم المتغير لتجنب التعارض مع question المحتمل في السياق العام #}
+                        <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 px-3">
+                            <div style="flex-grow: 1; margin-right: 10px; word-break: break-word;">
+                                <strong>{{ loop.index }}. </strong>{{ question_item.question_text | truncate(90, True) }} {# قص النص الطويل #}
+                            </div>
+                            <div class="d-flex align-items-center flex-shrink-0">
+                                <span class="badge bg-secondary me-3">
+                                    <span class="lang-en">Pts:</span><span class="lang-ar" style="display:none;">نقطة:</span> 
+                                    {{ question_item.points }}
+                                </span>
+                                {# <<<<<<< زر التعديل المحدث >>>>>>> #}
+                                <a href="{{ url_for('edit_question_page', quiz_id=quiz.id, question_id=question_item.id) }}" 
+                                   class="btn btn-sm btn-outline-primary me-2" 
+                                   data-title-en="Edit this question" data-title-ar="تعديل هذا السؤال">
+                                    <i class="fas fa-edit"></i>
+                                    {# <span class="lang-en d-none d-md-inline ms-1">Edit</span> <!-- نص يظهر في الشاشات الأكبر --> #}
+                                    {# <span class="lang-ar d-none d-md-inline ms-1" style="display:none;">تعديل</span> #}
+                                </a>
+                                {# زر الحذف (سيتم إضافة وظيفته لاحقًا) #}
+                                <form method="POST" action="#" {#="{{ url_for('delete_question_page', quiz_id=quiz.id, question_id=question_item.id) }}"#} 
+                                      style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this question?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger disabled" {# اجعل disabled حاليًا #}
+                                            data-title-en="Delete this question (Coming Soon)" 
+                                            data-title-ar="حذف هذا السؤال (قريباً)" style="pointer-events: none;">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-light text-center border mt-2"> {# إضافة حدود لجعلها أوضح #}
+                        <i class="fas fa-info-circle fa-2x mb-2 text-info"></i>
+                        <p class="mb-0"><span class="lang-en">No questions have been added to this quiz yet. Use the form on the left to add your first question.</span><span class="lang-ar" style="display:none;">لم تتم إضافة أي أسئلة لهذا الاختبار بعد. استخدم النموذج على اليسار لإضافة أول سؤال لك.</span></p>
+                    </div>
+                {% endif %}
+                 <hr class="my-4">
+                 <a href="{{ url_for('teacher_quizzes_list_page') }}" class="btn btn-primary w-100 py-2">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span class="lang-en">Done & Back to Quizzes List</span>
+                    <span class="lang-ar" style="display:none;">تم (العودة لقائمة الاختبارات)</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% else %} {# إذا كان متغير quiz غير موجود أو فارغ #}
+    <div class="alert alert-danger text-center">
+        <h4 class="alert-heading"><span class="lang-en">Error!</span><span class="lang-ar" style="display:none;">خطأ!</span></h4>
+        <p><span class="lang-en">Quiz information could not be loaded or is invalid.</span><span class="lang-ar" style="display:none;">لم يتم تحميل معلومات الاختبار أو أنها غير صالحة.</span></p>
+        <a href="{{ url_for('teacher_quizzes_list_page') }}" class="btn btn-primary">
+            <span class="lang-en">Go Back to My Quizzes</span>
+            <span class="lang-ar" style="display:none;">العودة إلى قائمة اختباراتي</span>
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

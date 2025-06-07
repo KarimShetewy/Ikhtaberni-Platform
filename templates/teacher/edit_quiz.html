@@ -1,0 +1,122 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    <span class="lang-en">Edit Quiz: {{ quiz.title }} - Ektbariny</span>
+    <span class="lang-ar" style="display:none;">تعديل اختبار: {{ quiz.title }} - اختبرني</span>
+{% endblock %}
+
+{% block content %}
+<div class="container main-page-content" style="margin-top: 30px; margin-bottom: 30px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h2 class="section-main-title" style="margin-bottom: 0;">
+            <span class="lang-en">Edit Quiz Details</span>
+            <span class="lang-ar" style="display:none;">تعديل بيانات الاختبار</span>
+        </h2>
+        <a href="{{ url_for('teacher_quizzes_list_page') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i>
+            <span class="lang-en">Back to Quizzes List</span>
+            <span class="lang-ar" style="display:none;">العودة لقائمة الاختبارات</span>
+        </a>
+    </div>
+     <p class="text-muted">
+        <span class="lang-en">You are editing: <strong>{{ quiz.title }}</strong></span>
+        <span class="lang-ar" style="display:none;">أنت تقوم بتعديل: <strong>{{ quiz.title }}</strong></span>
+    </p>
+
+
+    <div class="card" style="max-width: 750px; margin: 20px auto; padding: 30px;">
+        <form method="POST" action="{{ url_for('edit_quiz_page', quiz_id=quiz.id) }}">
+            <div class="form-group">
+                <label for="quiz_title_edit">
+                    <span class="lang-en">Quiz Title</span><span class="lang-ar" style="display:none;">عنوان الاختبار</span>
+                    <span class="text-danger-asterisk">*</span>
+                </label>
+                <input type="text" class="form-control" id="quiz_title_edit" name="quiz_title" 
+                       value="{{ submitted_data.quiz_title if submitted_data else quiz.title }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="quiz_description_edit">
+                    <span class="lang-en">Description (Optional)</span><span class="lang-ar" style="display:none;">الوصف (اختياري)</span>
+                </label>
+                <textarea class="form-control" id="quiz_description_edit" name="quiz_description" rows="3">{{ submitted_data.quiz_description if submitted_data else (quiz.description or '') }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="linked_video_id_edit">
+                    <span class="lang-en">Link to Video (Optional)</span><span class="lang-ar" style="display:none;">ربط بفيديو (اختياري)</span>
+                </label>
+                <select class="form-control" id="linked_video_id_edit" name="linked_video_id">
+                    <option value=""><span class="lang-en">-- No Video (Standalone Quiz) --</span><span class="lang-ar" style="display:none;">-- بدون فيديو (اختبار مستقل) --</span></option>
+                    {% for video in teacher_videos %}
+                    <option value="{{ video.id }}" 
+                            {% if submitted_data and submitted_data.linked_video_id|int == video.id %}selected
+                            {% elif not submitted_data and quiz.video_id == video.id %}selected
+                            {% endif %}>
+                        {{ video.title }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <small class="form-text text-muted">
+                    <span class="lang-en">If this quiz is specifically for a video, select it here.</span>
+                    <span class="lang-ar" style="display:none;">إذا كان هذا الاختبار مخصصًا لفيديو معين، قم باختياره هنا.</span>
+                </small>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="time_limit_minutes_edit">
+                            <span class="lang-en">Time Limit (minutes)</span><span class="lang-ar" style="display:none;">الوقت المحدد (دقائق)</span>
+                        </label>
+                        <input type="number" class="form-control" id="time_limit_minutes_edit" name="time_limit_minutes" 
+                               value="{{ submitted_data.time_limit_minutes if submitted_data is defined and submitted_data.time_limit_minutes is not none else (quiz.time_limit_minutes if quiz.time_limit_minutes is not none else 60) }}" min="0">
+                        <small class="form-text text-muted">
+                            <span class="lang-en">Set to 0 for no time limit.</span><span class="lang-ar" style="display:none;">ضع 0 لعدم تحديد وقت.</span>
+                        </small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="passing_score_percentage_edit">
+                            <span class="lang-en">Passing Score (%)</span><span class="lang-ar" style="display:none;">درجة النجاح (%)</span>
+                        </label>
+                        <input type="number" class="form-control" id="passing_score_percentage_edit" name="passing_score_percentage" 
+                               value="{{ submitted_data.passing_score_percentage if submitted_data is defined and submitted_data.passing_score_percentage is not none else (quiz.passing_score_percentage if quiz.passing_score_percentage is not none else 70) }}" min="0" max="100">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-check-custom" style="margin-bottom: 25px; margin-top: 10px;">
+                {# Note: if 'submitted_data' exists, it means there was a POST attempt.
+                   If 'allow_answer_review' is not in submitted_data, it means it was unchecked.
+                   If 'submitted_data' does not exist (GET request), use quiz.allow_answer_review.
+                #}
+                <input type="checkbox" class="form-check-input" id="allow_answer_review_edit" name="allow_answer_review" value="on"
+                       {% if submitted_data is defined %}
+                           {% if submitted_data.allow_answer_review == 'on' %}checked{% endif %}
+                       {% elif quiz.allow_answer_review %}
+                           checked
+                       {% endif %}>
+                <label class="form-check-label" for="allow_answer_review_edit">
+                    <span class="lang-en">Allow students to review correct answers after completing the quiz.</span>
+                    <span class="lang-ar" style="display:none;">السماح للطلاب بمراجعة الإجابات الصحيحة بعد إكمال الاختبار.</span>
+                </label>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('teacher_quizzes_list_page') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-1"></i>
+                    <span class="lang-en">Cancel</span>
+                    <span class="lang-ar" style="display:none;">إلغاء</span>
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i> 
+                    <span class="lang-en">Save Changes</span>
+                    <span class="lang-ar" style="display:none;">حفظ التعديلات</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

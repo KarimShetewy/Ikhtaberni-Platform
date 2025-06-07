@@ -1,0 +1,42 @@
+{% extends "layout.html" %} {# أو أي قالب أساسي تستخدمه لصفحات المعلم #}
+
+{% block title %}
+    <span class="lang-en">Teacher Dashboard</span>
+    <span class="lang-ar" style="display:none;">لوحة تحكم المعلم</span>
+{% endblock %}
+
+{% block content %}
+<div class="container main-page-content" style="margin-top: 30px;">
+    <h2 class="section-main-title">
+        <span class="lang-en">Welcome to Your Dashboard, {{ username }}!</span>
+        <span class="lang-ar" style="display:none;">أهلاً بك في لوحة التحكم الخاصة بك، {{ username }}!</span>
+    </h2>
+    <p>
+        <span class="lang-en">This is your teacher dashboard. Content will be added here soon.</span>
+        <span class="lang-ar" style="display:none;">هذه هي لوحة تحكم المعلم الخاصة بك. سيتم إضافة المحتوى هنا قريبًا.</span>
+    </p>
+    
+    {# يمكنك إضافة روابط سريعة هنا لاحقًا #}
+    {# 
+    <div class="row mt-4">
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title"><span class="lang-en">My Videos</span><span class="lang-ar" style="display:none;">فيديوهاتي</span></h5>
+                    <a href="{{ url_for('teacher_videos_list_page') }}" class="btn btn-primary"><span class="lang-en">View Videos</span><span class="lang-ar" style="display:none;">عرض الفيديوهات</span></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title"><span class="lang-en">My Quizzes</span><span class="lang-ar" style="display:none;">اختباراتي</span></h5>
+                    <a href="{{ url_for('teacher_quizzes_list_page') }}" class="btn btn-primary"><span class="lang-en">View Quizzes</span><span class="lang-ar" style="display:none;">عرض الاختبارات</span></a>
+                </div>
+            </div>
+        </div>
+        <!-- Add more quick links or stats -->
+    </div>
+    #}
+</div>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "layout.html" %} {# أو قالب لوحة تحكم المعلم إذا أنشأناه لاحقًا #}
+
+{% block title %}
+    <span class="lang-en">Upload New Video - Ektbariny</span>
+    <span class="lang-ar" style="display:none;">رفع فيديو جديد - اختبرني</span>
+{% endblock %}
+
+{% block content %}
+<div class="container main-page-content" style="margin-top: 30px; margin-bottom: 30px;">
+    <h2 class="section-main-title">
+        <span class="lang-en">Upload a New Video</span>
+        <span class="lang-ar" style="display:none;">رفع فيديو تعليمي جديد</span>
+    </h2>
+    
+    {# يمكن إضافة معلومات هنا عن عدد الفيديوهات المجانية المتبقية #}
+
+    <div class="card" style="max-width: 700px; margin: 20px auto; padding: 30px;">
+        <form method="POST" action="{{ url_for('upload_video_page') }}" enctype="multipart/form-data">
+            {# enctype="multipart/form-data" ضروري لرفع الملفات #}
+
+            <div class="form-group">
+                <label for="video_title_upload">
+                    <span class="lang-en">Video Title</span><span class="lang-ar" style="display:none;">عنوان الفيديو</span>
+                    <span class="text-danger-asterisk">*</span>
+                </label>
+                <input type="text" class="form-control" id="video_title_upload" name="title" 
+                       value="{{ request.form.title }}" required 
+                       data-placeholder-en="e.g., Introduction to Algebra Part 1" 
+                       data-placeholder-ar="مثال: مقدمة في الجبر - الجزء الأول">
+            </div>
+
+            <div class="form-group">
+                <label for="video_description_upload">
+                    <span class="lang-en">Description</span><span class="lang-ar" style="display:none;">وصف الفيديو</span>
+                </label>
+                <textarea class="form-control" id="video_description_upload" name="description" rows="4"
+                          data-placeholder-en="Briefly describe what this video is about..."
+                          data-placeholder-ar="صف بإيجاز محتوى هذا الفيديو...">{{ request.form.description }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="video_file_upload">
+                    <span class="lang-en">Video File</span><span class="lang-ar" style="display:none;">ملف الفيديو</span>
+                    <span class="text-danger-asterisk">*</span>
+                </label>
+                <input type="file" class="form-control" id="video_file_upload" name="video_file" 
+                       accept=".mp4,.mov,.avi,.mkv,.webm" required> {# تحديد أنواع الملفات المسموح بها #}
+                <small class="form-text text-muted">
+                    <span class="lang-en">Allowed formats: MP4, MOV, AVI, MKV, WebM. Max size: (Set in config)</span>
+                    <span class="lang-ar" style="display:none;">الصيغ المسموح بها: MP4, MOV, AVI, MKV, WebM. الحجم الأقصى: (يُضبط في الإعدادات)</span>
+                </small>
+            </div>
+            
+            {# يمكن إضافة حقل لرفع صورة مصغرة هنا لاحقًا #}
+
+            <div class="form-check-custom" style="margin-bottom: 20px;">
+                <input type="checkbox" class="form-check-input" id="is_viewable_free_upload" name="is_viewable_free" value="true"
+                       {% if request.form.is_viewable_free %}checked{% endif %}>
+                <label class="form-check-label" for="is_viewable_free_upload">
+                    <span class="lang-en">Make this video viewable for free by students (counts towards student's free samples if this is one of your first 3 public videos).</span>
+                    <span class="lang-ar" style="display:none;">اجعل هذا الفيديو متاحًا مجانًا للطلاب (يُحتسب ضمن العينات المجانية للطالب إذا كان هذا الفيديو من ضمن أول 3 فيديوهات عامة لك).</span>
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+                <i class="fas fa-upload"></i> 
+                <span class="lang-en">Upload Video</span>
+                <span class="lang-ar" style="display:none;">رفع الفيديو</span>
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

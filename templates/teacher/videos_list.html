@@ -1,0 +1,74 @@
+{% extends "layout.html" %} {# أو قالب لوحة تحكم المعلم #}
+
+{% block title %}
+    <span class="lang-en">My Videos - Ektbariny</span>
+    <span class="lang-ar" style="display:none;">فيديوهاتي - اختبرني</span>
+{% endblock %}
+
+{% block content %}
+<div class="container main-page-content" style="margin-top: 30px; margin-bottom: 30px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+        <h2 class="section-main-title" style="margin-bottom: 0;">
+            <span class="lang-en">My Uploaded Videos</span>
+            <span class="lang-ar" style="display:none;">الفيديوهات التي قمت برفعها</span>
+        </h2>
+        <a href="{{ url_for('upload_video_page') }}" class="btn btn-success">
+            <i class="fas fa-plus-circle"></i> 
+            <span class="lang-en">Upload New Video</span>
+            <span class="lang-ar" style="display:none;">رفع فيديو جديد</span>
+        </a>
+    </div>
+
+    {% if videos %}
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col"><span class="lang-en">Title</span><span class="lang-ar" style="display:none;">العنوان</span></th>
+                        <th scope="col"><span class="lang-en">Status</span><span class="lang-ar" style="display:none;">الحالة</span></th>
+                        <th scope="col"><span class="lang-en">Upload Date</span><span class="lang-ar" style="display:none;">تاريخ الرفع</span></th>
+                        <th scope="col"><span class="lang-en">Actions</span><span class="lang-ar" style="display:none;">إجراءات</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for video in videos %}
+                    <tr>
+                        <td>{{ video.title }}</td>
+                        <td>
+                            <span class="badge 
+                                {% if video.status == 'published' %}bg-success{% elif video.status == 'processing' %}bg-warning text-dark{% elif video.status == 'unpublished' %}bg-secondary{% else %}bg-danger{% endif %}">
+                                {{ video.status.capitalize() }}
+                            </span>
+                        </td>
+                        <td>{{ video.upload_timestamp.strftime('%Y-%m-%d %H:%M') if video.upload_timestamp else 'N/A' }}</td>
+                        <td>
+                            {# روابط وهمية حاليًا #}
+                            <a href="#" class="btn btn-sm btn-info">
+                                <i class="fas fa-eye"></i> 
+                                <span class="lang-en">View</span><span class="lang-ar" style="display:none;">عرض</span>
+                            </a>
+                            <a href="#" class="btn btn-sm btn-primary">
+                                <i class="fas fa-edit"></i> 
+                                <span class="lang-en">Edit</span><span class="lang-ar" style="display:none;">تعديل</span>
+                            </a>
+                            <a href="#" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i> 
+                                <span class="lang-en">Delete</span><span class="lang-ar" style="display:none;">حذف</span>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center">
+            <p><span class="lang-en">You haven't uploaded any videos yet.</span><span class="lang-ar" style="display:none;">لم تقم برفع أي فيديوهات بعد.</span></p>
+            <a href="{{ url_for('upload_video_page') }}" class="btn btn-primary">
+                <span class="lang-en">Upload Your First Video</span>
+                <span class="lang-ar" style="display:none;">ارفع أول فيديو لك</span>
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

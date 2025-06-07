@@ -1,0 +1,29 @@
+{% extends "layout.html" %} {# أو أي قالب أساسي تستخدمه لصفحات الطلاب #}
+
+{% block title %}
+    <span class="lang-en">My Dashboard - Ektbariny</span>
+    <span class="lang-ar" style="display:none;">لوحة التحكم الخاصة بي - اختبرني</span>
+{% endblock %}
+
+{% block content %}
+<div class="container main-page-content" style="margin-top: 30px;">
+    <h2 class="section-main-title">
+        <span class="lang-en">Welcome to Your Student Dashboard, {{ username }}!</span>
+        <span class="lang-ar" style="display:none;">أهلاً بك في لوحة تحكم الطالب، {{ username }}!</span>
+    </h2>
+    <p>
+        <span class="lang-en">This is where you will find your courses, progress, and other student-specific information. Content will be added here soon.</span>
+        <span class="lang-ar" style="display:none;">هنا ستجد كورساتك، تقدمك، ومعلومات أخرى خاصة بك كطالب. سيتم إضافة المحتوى هنا قريبًا.</span>
+    </p>
+    
+    {# يمكنك إضافة روابط أو محتوى للطالب هنا لاحقًا #}
+    {# مثال:
+    <div class="mt-4">
+        <a href="#" class="btn btn-primary">
+            <span class="lang-en">Browse Available Courses</span>
+            <span class="lang-ar" style="display:none;">تصفح الكورسات المتاحة</span>
+        </a>
+    </div>
+    #}
+</div>
+{% endblock %}

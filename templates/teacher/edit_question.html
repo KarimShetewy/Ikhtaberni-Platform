@@ -1,0 +1,115 @@
+{% extends "layout.html" %} {# أو قالب لوحة تحكم المعلم #}
+
+{% block title %}
+    <span class="lang-en">Edit Question for: {{ quiz.title if quiz else 'Quiz' }} - Ektbariny</span>
+    <span class="lang-ar" style="display:none;">تعديل سؤال لاختبار: {{ quiz.title if quiz else 'الاختبار' }} - اختبرني</span>
+{% endblock %}
+
+{% block content %}
+<div class="container main-page-content" style="margin-top: 30px; margin-bottom: 30px;">
+    
+    {% if quiz and question %}
+    <div style="margin-bottom: 25px;">
+        {# رابط العودة إلى صفحة إدارة أسئلة هذا الاختبار #}
+        <a href="{{ url_for('add_question_to_quiz_page', quiz_id=quiz.id) }}" class="btn btn-outline-secondary btn-sm mb-2">
+            <i class="fas fa-arrow-left"></i> 
+            <span class="lang-en">Back to Questions for "{{ quiz.title }}"</span>
+            <span class="lang-ar" style="display:none;">العودة إلى أسئلة اختبار "{{ quiz.title }}"</span>
+        </a>
+        <h2 class="section-main-title">
+            <span class="lang-en">Edit Question in Quiz: <em>{{ quiz.title }}</em></span>
+            <span class="lang-ar" style="display:none;">تعديل سؤال في اختبار: <em>{{ quiz.title }}</em></span>
+        </h2>
+    </div>
+
+    <div class="card p-4" style="max-width: 700px; margin: 0 auto;">
+        <form method="POST" action="{{ url_for('edit_question_page', quiz_id=quiz.id, question_id=question.id) }}">
+            <div class="form-group">
+                <label for="question_text_edit">
+                    <span class="lang-en">Question Text</span><span class="lang-ar" style="display:none;">نص السؤال</span>
+                    <span class="text-danger-asterisk">*</span>
+                </label>
+                {# استخدام submitted_question_text إذا كان موجودًا (في حالة خطأ التحقق)، وإلا استخدم question.question_text #}
+                <textarea class="form-control" id="question_text_edit" name="question_text" rows="3" required>{{ submitted_question_text if submitted_question_text is defined else (question.question_text or '') }}</textarea>
+            </div>
+
+            <hr class="my-3">
+            <p style="font-weight: 500;">
+                <span class="lang-en">Choices (Provide at least two. Mark the correct one):</span>
+                <span class="lang-ar" style="display:none;">الخيارات (قدم خيارين على الأقل. حدد الإجابة الصحيحة):</span>
+            </p>
+
+            {# عرض الخيارات الموجودة (أو حقول فارغة إذا كان أقل من 4) #}
+            {% set current_choices = choices if choices else [] %}
+            {% for i in range(4) %} {# دائماً عرض 4 حقول #}
+                {% set choice_item = current_choices[i] if i < current_choices|length else {'id': None, 'choice_text': '', 'is_correct': False} %}
+                {#  إذا كان submitted_choices موجودًا بسبب خطأ، استخدمه، وإلا استخدم choice_item  #}
+                {#  لاحظ: معالجة submitted_choices هنا قد تكون معقدة إذا أردنا الحفاظ على IDs الخيارات #}
+                {#  للتبسيط الآن، سنعتمد على أن `choices` التي تمرر من GET صحيحة #}
+                {#  وإذا كان هناك خطأ POST، فالقيم المعادة في form ستستخدم لإعادة الملء #}
+            <div class="form-group mb-2">
+                <label for="choice_{{ i+1 }}_text_edit" class="sr-only"><span class="lang-en">Choice {{ i+1 }}</span><span class="lang-ar" style="display:none;">الخيار {{ i+1 }}</span></label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text" style="min-width: 40px; justify-content: center;">
+                            <input type="radio" name="correct_choice_index" value="{{ i }}" id="correct_choice_edit_{{ i+1 }}"
+                                   {% if request.form.correct_choice_index == i|string %}
+                                       checked
+                                   {% elif request.method != 'POST' and choice_item.is_correct %} 
+                                       checked 
+                                   {% endif %}
+                                   aria-label="Mark choice {{ i+1 }} as correct" required>
+                        </div>
+                    </div>
+                    {#  نستخدم request.form للاحتفاظ بالقيم عند حدوث خطأ، وإلا نستخدم بيانات الخيار من قاعدة البيانات #}
+                    <input type="text" class="form-control" id="choice_{{ i+1 }}_text_edit" name="choice_{{ i+1 }}_text" 
+                           value="{{ request.form['choice_'~(i+1)~'_text'] if request.form['choice_'~(i+1)~'_text'] is defined else choice_item.choice_text }}"
+                           placeholder="{{ 'Choice '~(i+1)~' Text' if lang_code == 'en' else 'نص الخيار '~(i+1) }}">
+                    {#  يمكن إضافة حقل مخفي لـ choice_id إذا أردت تحديث الخيارات بدلاً من حذفها وإعادة إنشائها #}
+                    {# <input type="hidden" name="choice_{{ i+1 }}_id" value="{{ choice_item.id if choice_item.id else '' }}"> #}
+                </div>
+                {% if loop.index == 1 %}
+                    <small class="form-text text-muted">
+                        <span class="lang-en">Select the radio button next to the correct answer.</span>
+                        <span class="lang-ar" style="display:none;">اختر زر الراديو بجانب الإجابة الصحيحة.</span>
+                    </small>
+                {% endif %}
+            </div>
+            {% endfor %}
+            
+            <div class="form-group mt-3">
+                <label for="points_edit">
+                    <span class="lang-en">Points for this question</span><span class="lang-ar" style="display:none;">درجة هذا السؤال</span>
+                </label>
+                {# استخدام submitted_points إذا كان موجودًا (في حالة خطأ التحقق)، وإلا استخدم question.points #}
+                <input type="number" class="form-control" id="points_edit" name="points" 
+                       value="{{ submitted_points if submitted_points is defined else (question.points or 1) }}" 
+                       min="1" style="width: 100px;">
+            </div>
+
+            <div class="mt-4 d-flex justify-content-between">
+                <a href="{{ url_for('add_question_to_quiz_page', quiz_id=quiz.id) }}" class="btn btn-outline-secondary">
+                    <span class="lang-en">Cancel</span>
+                    <span class="lang-ar" style="display:none;">إلغاء</span>
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> 
+                    <span class="lang-en">Save Changes</span>
+                    <span class="lang-ar" style="display:none;">حفظ التعديلات</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    {% else %}
+    <div class="alert alert-danger text-center">
+        <h4 class="alert-heading"><span class="lang-en">Error!</span><span class="lang-ar" style="display:none;">خطأ!</span></h4>
+        <p><span class="lang-en">Question or Quiz information could not be loaded.</span><span class="lang-ar" style="display:none;">لم يتم تحميل معلومات السؤال أو الاختبار.</span></p>
+        <a href="{{ url_for('teacher_quizzes_list_page') }}" class="btn btn-primary">
+            <span class="lang-en">Go Back to My Quizzes</span>
+            <span class="lang-ar" style="display:none;">العودة إلى قائمة اختباراتي</span>
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

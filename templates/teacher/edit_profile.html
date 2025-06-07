@@ -1,0 +1,147 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    <span class="lang-en">Edit My Profile - Ektbariny</span>
+    <span class="lang-ar" style="display:none;">تعديل ملفي الشخصي - اختبرني</span>
+{% endblock %}
+
+{% block content %}
+<div class="container main-page-content" style="margin-top: 30px; margin-bottom: 30px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h2 class="section-main-title" style="margin-bottom: 0;">
+            <span class="lang-en">Edit Your Profile</span>
+            <span class="lang-ar" style="display:none;">تعديل ملفك الشخصي</span>
+        </h2>
+        {# ربما رابط للعودة إلى صفحة عرض الملف الشخصي لاحقًا #}
+        <a href="{{ url_for('teacher_dashboard_placeholder') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i>
+            <span class="lang-en">Back to Dashboard</span>
+            <span class="lang-ar" style="display:none;">العودة للوحة التحكم</span>
+        </a>
+    </div>
+
+    <div class="card" style="max-width: 750px; margin: 20px auto; padding: 30px;">
+        {# enctype ضروري لرفع الملفات #}
+        <form method="POST" action="{{ url_for('edit_teacher_profile') }}" enctype="multipart/form-data">
+            
+            {# عرض الصورة الشخصية الحالية #}
+            {% if current_profile_pic_url %}
+            <div class="mb-3 text-center">
+                <img src="{{ url_for('static', filename=current_profile_pic_url) }}" alt-en="Current Profile Picture" alt-ar="الصورة الشخصية الحالية" 
+                     class="img-thumbnail rounded-circle" style="width: 150px; height: 150px; object-fit: cover; margin-bottom: 10px;">
+                <p><small class="text-muted"><span class="lang-en">Current Picture</span><span class="lang-ar">الصورة الحالية</span></small></p>
+            </div>
+            {% elif form_data.profile_picture_url %} {# احتياطي إذا مررنا المسار القديم عبر form_data عند خطأ ولم يكن current_profile_pic_url محدثًا #}
+             <div class="mb-3 text-center">
+                <img src="{{ url_for('static', filename=form_data.profile_picture_url) }}" alt-en="Current Profile Picture" alt-ar="الصورة الشخصية الحالية" 
+                     class="img-thumbnail rounded-circle" style="width: 150px; height: 150px; object-fit: cover; margin-bottom: 10px;">
+            </div>
+            {% else %}
+            <div class="mb-3 text-center">
+                 <div class="img-thumbnail rounded-circle d-flex justify-content-center align-items-center" 
+                      style="width: 150px; height: 150px; background-color: #e9ecef; color: #6c757d; margin-bottom:10px; margin-left:auto; margin-right:auto;">
+                    <i class="fas fa-user fa-3x"></i>
+                </div>
+                 <p><small class="text-muted"><span class="lang-en">No profile picture uploaded</span><span class="lang-ar">لم يتم رفع صورة شخصية</span></small></p>
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="profile_picture_upload">
+                    <span class="lang-en">Change Profile Picture (Optional)</span>
+                    <span class="lang-ar" style="display:none;">تغيير الصورة الشخصية (اختياري)</span>
+                </label>
+                <input type="file" class="form-control" id="profile_picture_upload" name="profile_picture" accept="image/png, image/jpeg, image/gif, image/webp">
+                <small class="form-text text-muted">
+                    <span class="lang-en">Allowed formats: PNG, JPG, GIF, WEBP. Max 2MB.</span>
+                    <span class="lang-ar" style="display:none;">الصيغ المسموحة: PNG, JPG, GIF, WEBP. الحجم الأقصى 2 ميجا.</span>
+                </small>
+            </div>
+            <hr class="my-3">
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="first_name_edit">
+                            <span class="lang-en">First Name</span><span class="lang-ar" style="display:none;">الاسم الأول</span>
+                            <span class="text-danger-asterisk">*</span>
+                        </label>
+                        <input type="text" class="form-control" id="first_name_edit" name="first_name" 
+                               value="{{ form_data.first_name or '' }}" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="last_name_edit">
+                            <span class="lang-en">Last Name</span><span class="lang-ar" style="display:none;">الاسم الأخير</span>
+                            <span class="text-danger-asterisk">*</span>
+                        </label>
+                        <input type="text" class="form-control" id="last_name_edit" name="last_name" 
+                               value="{{ form_data.last_name or '' }}" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email_edit_display">
+                    <span class="lang-en">Email (Cannot be changed here)</span>
+                    <span class="lang-ar" style="display:none;">البريد الإلكتروني (لا يمكن تغييره هنا)</span>
+                </label>
+                <input type="email" class="form-control" id="email_edit_display" name="email_display" 
+                       value="{{ form_data.email or '' }}" readonly disabled 
+                       style="background-color: #e9ecef; opacity: 0.8;">
+                 <small class="form-text text-muted">
+                    <span class="lang-en">To change your email, please contact support.</span>
+                    <span class="lang-ar" style="display:none;">لتغيير بريدك الإلكتروني، يرجى التواصل مع الدعم الفني.</span>
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label for="phone_number_edit">
+                    <span class="lang-en">Phone Number (Optional)</span>
+                    <span class="lang-ar" style="display:none;">رقم الهاتف (اختياري)</span>
+                </label>
+                <input type="tel" class="form-control" id="phone_number_edit" name="phone_number" 
+                       value="{{ form_data.phone_number or '' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="country_edit">
+                    <span class="lang-en">Country (Optional)</span>
+                    <span class="lang-ar" style="display:none;">الدولة (اختياري)</span>
+                </label>
+                {# يمكنك تحويل هذا إلى قائمة منسدلة إذا أردت لاحقًا #}
+                <input type="text" class="form-control" id="country_edit" name="country" 
+                       value="{{ form_data.country or '' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="bio_edit">
+                    <span class="lang-en">Bio / About Me (Optional)</span>
+                    <span class="lang-ar" style="display:none;">نبذة تعريفية (اختياري)</span>
+                </label>
+                <textarea class="form-control" id="bio_edit" name="bio" rows="4" maxlength="1000" 
+                          placeholder-en="Tell us a little about yourself, your expertise, or teaching style..."
+                          placeholder-ar="أخبرنا قليلاً عن نفسك، خبراتك، أو أسلوبك في التدريس...">{{ form_data.bio or '' }}</textarea>
+                <small class="form-text text-muted">
+                    <span class="lang-en">Max 1000 characters.</span>
+                    <span class="lang-ar" style="display:none;">1000 حرف كحد أقصى.</span>
+                </small>
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{{ url_for('teacher_dashboard_placeholder') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-1"></i>
+                    <span class="lang-en">Cancel</span>
+                    <span class="lang-ar" style="display:none;">إلغاء</span>
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i> 
+                    <span class="lang-en">Save Changes</span>
+                    <span class="lang-ar" style="display:none;">حفظ التغييرات</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
