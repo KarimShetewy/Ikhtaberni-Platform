@@ -553,6 +553,91 @@ def explore_teachers_page():
                            search_query=search_query,
                            current_lang=session.get('current_lang', 'en'))
 
+# Start of new public teacher profile route
+@app.route('/teachers/<int:teacher_id>')
+def public_teacher_profile_page(teacher_id):
+    teacher_profile = None
+    teacher_videos = []
+    teacher_quizzes = []
+    
+    current_user_id = session.get('user_id') # Get student ID if logged in
+    
+    conn = None
+    cursor = None
+    try:
+        conn = get_db_connection()
+        if not conn:
+            flash("Database connection error. Please try again later.", "danger")
+            return redirect(url_for('home'))
+
+        cursor = conn.cursor(dictionary=True)
+
+        # Fetch teacher profile
+        cursor.execute("""
+            SELECT id, first_name, last_name, username, profile_picture_url, bio, country
+            FROM users
+            WHERE id = %s AND role = 'teacher' AND is_active = TRUE
+        """, (teacher_id,))
+        teacher_profile = cursor.fetchone()
+
+        if not teacher_profile:
+            flash("Teacher not found or profile is not active.", "warning")
+            return redirect(url_for('explore_teachers_page'))
+
+        # Check if current logged-in user (student) is subscribed to this teacher
+        is_subscribed = False
+        if current_user_id and session.get('role') == 'student': # Only students can subscribe
+            cursor.execute("""
+                SELECT COUNT(*) FROM student_subscriptions
+                WHERE student_id = %s AND teacher_id = %s AND status = 'active'
+            """, (current_user_id, teacher_id))
+            if cursor.fetchone()['COUNT(*)'] > 0:
+                is_subscribed = True
+
+        # Fetch videos for this teacher
+        cursor.execute("""
+            SELECT v.id, v.title, v.description, v.thumbnail_path_or_url, v.is_viewable_free_for_student,
+                   CASE WHEN v.is_viewable_free_for_student = TRUE THEN TRUE
+                        WHEN %s IS NOT NULL AND %s = TRUE THEN TRUE -- If current_user_id is logged in AND subscribed
+                        ELSE FALSE
+                   END as has_access
+            FROM videos v
+            WHERE v.teacher_id = %s AND v.status = 'published'
+            ORDER BY v.upload_timestamp DESC
+        """, (current_user_id, is_subscribed, teacher_id)) # Pass current_user_id and is_subscribed for conditional access
+        teacher_videos = cursor.fetchall()
+
+        # Fetch quizzes for this teacher
+        cursor.execute("""
+            SELECT q.id, q.title, q.description, q.time_limit_minutes, q.passing_score_percentage,
+                   (SELECT COUNT(DISTINCT qst.id) FROM questions qst WHERE qst.quiz_id = q.id) AS question_count,
+                   q.video_id, v.is_viewable_free_for_student as video_is_free, -- Added q.video_id and v.is_viewable_free_for_student for access control logic
+                   CASE WHEN v.is_viewable_free_for_student = TRUE THEN TRUE -- Linked to free video
+                        WHEN %s IS NOT NULL AND %s = TRUE THEN TRUE -- User is subscribed to this teacher (covers standalone and premium linked videos)
+                        ELSE FALSE
+                   END as has_access
+            FROM quizzes q
+            LEFT JOIN videos v ON q.video_id = v.id -- Use LEFT JOIN for video details
+            WHERE q.teacher_id = %s AND q.is_active = TRUE AND EXISTS (SELECT 1 FROM questions WHERE quiz_id = q.id)
+            ORDER BY q.created_at DESC
+        """, (current_user_id, is_subscribed, teacher_id)) # Pass current_user_id and is_subscribed for conditional access
+        teacher_quizzes = cursor.fetchall()
+
+    except Error as e:
+        app.logger.error(f"PUBLIC_TEACHER_PROFILE_DB_ERROR for teacher {teacher_id}: {e.msg}", exc_info=False)
+        flash("An error occurred while loading the teacher's profile. Please try again.", "danger")
+        return redirect(url_for('explore_teachers_page'))
+    finally:
+        if cursor: cursor.close()
+        if conn and conn.is_connected(): conn.close()
+    
+    # Render the public teacher profile page with data
+    return render_template('public/teacher_profile.html', 
+                           teacher_profile=teacher_profile,
+                           teacher_videos=teacher_videos,
+                           teacher_quizzes=teacher_quizzes,
+                           is_subscribed=is_subscribed, # Pass subscription status
+                           current_user_id=current_user_id) # Pass current user ID to check if logged in
 
 # --- 9. Teacher Video Management Routes ---
 @app.route('/teacher/videos/upload', methods=['GET', 'POST'])
@@ -654,7 +739,7 @@ def upload_video_page():
                     WHERE id = %s AND free_video_uploads_remaining > 0
                 """, (teacher_id,))
             
-            db_conn_upload.commit()
+            conn.commit()
             flash(f"Video '{video_title_input}' has been successfully uploaded and published!", "success")
             return redirect(url_for('teacher_videos_list_page'))
 
@@ -677,7 +762,7 @@ def upload_video_page():
             flash(f"An error occurred during video upload: {str(e_video_upload_process)[:150]}. Please try again.", "danger")
         finally:
             if db_cursor_upload: db_cursor_upload.close()
-            if db_conn_upload and db_conn_upload.is_connected(): conn_upload.close()
+            if db_conn_upload and db_conn_upload.is_connected(): db_conn_upload.close()
         
         # If reached here, POST failed, re-render form
         return render_template('teacher/upload_video.html', 
@@ -698,20 +783,20 @@ def teacher_videos_list_page():
     """Displays a list of videos uploaded by the current teacher."""
     teacher_id = session['user_id']
     videos_list_from_db = []
-    db_conn_list_videos = None; db_cursor_list_videos = None
+    conn = None; cursor = None
     try:
-        db_conn_list_videos = get_db_connection()
-        if db_conn_list_videos is None:
+        conn = get_db_connection()
+        if conn is None:
             raise Error("Database connection failed while trying to list videos.")
         
-        db_cursor_list_videos = db_conn_list_videos.cursor(dictionary=True)
-        db_cursor_list_videos.execute("""
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
             SELECT id, title, status, upload_timestamp, is_viewable_free_for_student 
             FROM videos 
             WHERE teacher_id = %s 
             ORDER BY upload_timestamp DESC
         """, (teacher_id,))
-        videos_list_from_db = db_cursor_list_videos.fetchall()
+        videos_list_from_db = cursor.fetchall()
     except Error as e_list_videos_db:
         app.logger.error(f"LIST_VIDEOS_DB_ERROR for teacher {teacher_id}: {e_list_videos_db.msg}", exc_info=False)
         flash("A database error occurred while retrieving your videos. Please try again later.", "danger")
@@ -719,8 +804,8 @@ def teacher_videos_list_page():
         app.logger.error(f"LIST_VIDEOS_GENERAL_ERROR for teacher {teacher_id}: {e_list_videos_general}", exc_info=True)
         flash("An unexpected error occurred while retrieving your videos.", "warning")
     finally:
-        if db_cursor_list_videos: db_cursor_list_videos.close()
-        if db_conn_list_videos and db_conn_list_videos.is_connected(): db_conn_list_videos.close()
+        if cursor: cursor.close()
+        if conn and conn.is_connected(): conn.close()
     
     return render_template('teacher/videos_list.html', videos=videos_list_from_db)
 
@@ -773,8 +858,9 @@ def create_quiz_page(video_id=None):
         if not conn_q_quota: raise Error("DB error fetching quiz quota.")
         cursor_q_quota = conn_q_quota.cursor(dictionary=True)
         cursor_q_quota.execute("SELECT free_quiz_creations_remaining FROM users WHERE id = %s", (teacher_id,))
-        user_meta_q = cursor_q_quota.fetchone()
-        if user_meta_q: free_quizzes_left = user_meta_q.get('free_quiz_creations_remaining', 0)
+        user_quota_data = cursor_q_quota.fetchone()
+        if user_quota_data:
+            free_quizzes_left = user_quota_data.get('free_quiz_creations_remaining', 0)
         if free_quizzes_left <= 0: can_create_quiz = False
     except Error as e_q_quota:
         app.logger.error(f"Err fetching quiz quota (TID:{teacher_id}): {e_q_quota.msg}", exc_info=False)
@@ -1000,12 +1086,16 @@ def delete_quiz_page(quiz_id):
 def add_question_to_quiz_page(quiz_id):
     teacher_id = session['user_id']
     quiz_info_data = None; existing_quiz_questions = []
-    # For repopulating form on validation error
-    form_data_repopulate_q = request.form.to_dict() if request.method == 'POST' else {}
-    # Specific handling for choices array and correct index repopulation
-    choices_text_for_repop = [form_data_repopulate_q.get(f'choice_{i+1}_text', '') for i in range(4)] if request.method == 'POST' else ['','','','']
-    correct_choice_idx_for_repop = int(form_data_repopulate_q.get('correct_choice_index', -1)) if request.method == 'POST' else -1
-    points_for_repop = form_data_repopulate_q.get('points', '1') if request.method == 'POST' else '1'
+    # Initialize variables for GET request or POST errors
+    choices_text_for_repop = ['','','','']
+    correct_choice_idx_for_repop = -1
+    points_for_repop = 1
+
+    if request.method == 'POST':
+        form_data_repopulate_q = request.form.to_dict()
+        choices_text_for_repop = [form_data_repopulate_q.get(f'choice_{i+1}_text', '') for i in range(4)]
+        correct_choice_idx_for_repop = int(form_data_repopulate_q.get('correct_choice_index', -1))
+        points_for_repop = int(form_data_repopulate_q.get('points', '1'))
 
 
     conn_fetch_q_page = None; cursor_fetch_q_page = None
@@ -1031,7 +1121,6 @@ def add_question_to_quiz_page(quiz_id):
 
     if request.method == 'POST':
         question_text_input = request.form.get('question_text', '').strip()
-        # choices_text_repopulate and correct_choice_idx_repopulate already set from form_data
         points_input_str = request.form.get('points', '1').strip()
         
         validation_errors = []
@@ -1095,8 +1184,9 @@ def add_question_to_quiz_page(quiz_id):
     # For GET request:
     return render_template('teacher/add_question_to_quiz.html', 
                            quiz=quiz_info_data, existing_questions=existing_quiz_questions,
-                           question_text='', choices_text=['','','',''], # Empty for new question
-                           correct_choice_index_submitted=-1, points=1) # Defaults for new question
+                           question_text='', choices_text=choices_text_for_repop, # Use initialized empty list
+                           correct_choice_index_submitted=correct_choice_idx_for_repop, # Use initialized -1
+                           points=points_for_repop) # Use initialized 1
 
 @app.route('/teacher/quizzes/<int:quiz_id>/questions/<int:question_id>/edit', methods=['GET', 'POST'])
 @teacher_required
@@ -1104,8 +1194,8 @@ def edit_question_page(quiz_id, question_id):
     teacher_id = session['user_id']
     quiz_info_for_edit_q = None; question_to_edit_data = None; choices_for_edit_q_padded = []
     # For repopulating form on error (POST)
-    submitted_question_text_val = request.form.get('question_text') if request.method == 'POST' else None
-    submitted_points_val = request.form.get('points') if request.method == 'POST' else None
+    submitted_question_text_val = None
+    submitted_points_val = None
 
 
     conn_fetch_edit_q_data = None; cursor_fetch_edit_q_data = None
@@ -1208,7 +1298,7 @@ def edit_question_page(quiz_id, question_id):
             for idx, choice_text_val in enumerate(updated_choices_texts_from_form):
                 if choice_text_val: # Only insert choices that have text
                     is_this_choice_correct_updated = (idx == updated_correct_choice_idx)
-                    cursor_update_edited_q.execute(sql_insert_updated_choice, (question_id, choice_text_val, is_this_choice_correct_updated))
+                    cursor_insert_new_q.execute(sql_insert_updated_choice, (question_id, choice_text_val, is_this_choice_correct_updated))
             
             conn_update_edited_q.commit()
             flash(f"Question in quiz '{quiz_info_for_edit_q['title']}' has been updated successfully!", "success")
@@ -1404,8 +1494,17 @@ def edit_teacher_profile():
 def student_dashboard_placeholder():
     student_id = session['user_id']
     username = session.get('username', 'Student User')
-    videos = []
-    quizzes = []
+    
+    # هذه القوائم ستعرض المحتوى المتاح للطالب فقط (سواء مجاني أو باشتراك)
+    accessible_videos = []
+    accessible_quizzes = []
+
+    # هذه القوائم ستعرض المحتوى الذي يتطلب اشتراكًا
+    premium_videos_preview = []
+    premium_quizzes_preview = []
+
+    latest_quiz_attempts = []
+    recently_watched_videos = []
 
     conn = None
     cursor = None
@@ -1415,36 +1514,115 @@ def student_dashboard_placeholder():
             raise Error("Database connection failed for student dashboard.")
         cursor = conn.cursor(dictionary=True)
 
-        # Fetch videos relevant to the student (e.g., free videos or from subscribed teachers)
-        # For simplicity, let's fetch all "published" and "is_viewable_free_for_student" videos first
-        # In a real app, you'd add complex logic for subscriptions.
+        # 1. Fetch all published videos, and determine access
         cursor.execute("""
             SELECT v.id, v.title, v.description, v.video_path_or_url, v.thumbnail_path_or_url,
-                   u.first_name as teacher_first_name, u.last_name as teacher_last_name,
-                   q.id as quiz_id, q.title as quiz_title,
-                   CASE WHEN swv.video_id IS NOT NULL THEN TRUE ELSE FALSE END as is_watched
+                   v.teacher_id, u.first_name as teacher_first_name, u.last_name as teacher_last_name, u.profile_picture_url as teacher_profile_pic,
+                   v.is_viewable_free_for_student, -- Get this directly for access logic
+                   CASE WHEN swv.video_id IS NOT NULL THEN TRUE ELSE FALSE END as is_watched -- Check if watched
             FROM videos v
             JOIN users u ON v.teacher_id = u.id
-            LEFT JOIN quizzes q ON v.id = q.video_id AND q.is_active = TRUE
             LEFT JOIN student_watched_videos swv ON v.id = swv.video_id AND swv.student_id = %s
-            WHERE v.status = 'published' AND v.is_viewable_free_for_student = TRUE
+            WHERE v.status = 'published'
             ORDER BY v.upload_timestamp DESC
-        """, (student_id,))
-        videos = cursor.fetchall()
+            LIMIT 20 -- Limit to recent videos
+        """, (student_id,)) # student_id only needed for swv join
+        all_videos_raw = cursor.fetchall()
 
-        # Fetch quizzes relevant to the student (e.g., active quizzes)
-        # Again, this simplified query can be expanded later for subscriptions
+        for video in all_videos_raw:
+            # Determine access after fetching all needed video data
+            video_has_access = False
+            if video['is_viewable_free_for_student']:
+                video_has_access = True
+            else:
+                cursor.execute("""
+                    SELECT COUNT(*) FROM student_subscriptions
+                    WHERE student_id = %s AND teacher_id = %s AND status = 'active'
+                """, (student_id, video['teacher_id']))
+                if cursor.fetchone()['COUNT(*)'] > 0:
+                    video_has_access = True
+            
+            video['has_access'] = video_has_access # Add has_access flag to the dictionary
+            if video_has_access:
+                accessible_videos.append(video)
+            else:
+                premium_videos_preview.append(video) # يمكن استخدامها لعرض معاينات أو دعوات للاشتراك
+
+        # 2. Fetch all active quizzes with questions, and determine access
         cursor.execute("""
-            SELECT q.id, q.title, q.description, q.time_limit_minutes, q.passing_score_percentage,
+            SELECT q.id, q.title, q.description, q.time_limit_minutes, q.passing_score_percentage, q.allow_answer_review, q.teacher_id,
                    u.first_name as teacher_first_name, u.last_name as teacher_last_name,
-                   qa.is_completed, qa.score, qa.passed
+                   q.video_id, COALESCE(v.is_viewable_free_for_student, FALSE) as video_is_free, -- Use COALESCE for safety when video_id is NULL
+                   (SELECT COUNT(DISTINCT qst.id) FROM questions qst WHERE qst.quiz_id = q.id) AS question_count,
+                   (SELECT qa.score FROM quiz_attempts qa WHERE qa.quiz_id = q.id AND qa.student_id = %s ORDER BY qa.submitted_at DESC LIMIT 1) AS last_attempt_score,
+                   (SELECT qa.max_possible_score FROM quiz_attempts qa WHERE qa.quiz_id = q.id AND qa.student_id = %s ORDER BY qa.submitted_at DESC LIMIT 1) AS last_attempt_max_score,
+                   (SELECT qa.passed FROM quiz_attempts qa WHERE qa.quiz_id = q.id AND qa.student_id = %s ORDER BY qa.submitted_at DESC LIMIT 1) AS last_attempt_passed,
+                   (SELECT qa.submitted_at FROM quiz_attempts qa WHERE qa.quiz_id = q.id AND qa.student_id = %s ORDER BY qa.submitted_at DESC LIMIT 1) AS last_attempt_date,
+                   (SELECT qa.id FROM quiz_attempts qa WHERE qa.quiz_id = q.id AND qa.student_id = %s ORDER BY qa.submitted_at DESC LIMIT 1) AS last_attempt_id
             FROM quizzes q
             JOIN users u ON q.teacher_id = u.id
-            LEFT JOIN quiz_attempts qa ON q.id = qa.quiz_id AND qa.student_id = %s
+            LEFT JOIN videos v ON q.video_id = v.id -- LEFT JOIN is crucial to get v.is_viewable_free_for_student even if q.video_id is NULL
             WHERE q.is_active = TRUE AND EXISTS (SELECT 1 FROM questions WHERE quiz_id = q.id)
             ORDER BY q.created_at DESC
+            LIMIT 20 -- Limit to recent quizzes
+        """, (student_id, student_id, student_id, student_id, student_id))
+        all_quizzes_raw = cursor.fetchall()
+
+        for quiz in all_quizzes_raw:
+            quiz_has_access = False
+            # Check if quiz is linked to a video, and if that video is free
+            if quiz['video_id'] is not None and quiz['video_is_free']: # This check now safely uses video_is_free
+                quiz_has_access = True
+            # If standalone quiz OR quiz linked to a premium video, check teacher subscription
+            elif quiz['video_id'] is None or (quiz['video_id'] is not None and not quiz['video_is_free']):
+                cursor.execute("""
+                    SELECT COUNT(*) FROM student_subscriptions
+                    WHERE student_id = %s AND teacher_id = %s AND status = 'active'
+                """, (student_id, quiz['teacher_id']))
+                if cursor.fetchone()['COUNT(*)'] > 0:
+                    quiz_has_access = True
+            
+            quiz['has_access'] = quiz_has_access # Add has_access flag to the dictionary
+
+            if quiz['has_access']:
+                accessible_quizzes.append(quiz)
+            else:
+                premium_quizzes_preview.append(quiz) # يمكن استخدامها لعرض معاينات أو دعوات للاشتراك
+
+
+        # 3. Fetch latest quiz attempts (for progress/results summary) - This section remains unchanged as it fetches completed attempts
+        cursor.execute("""
+            SELECT qa.id, qa.quiz_id, qa.score, qa.max_possible_score, qa.submitted_at, qa.passed,
+                   q.title as quiz_title, q.passing_score_percentage
+            FROM quiz_attempts qa
+            JOIN quizzes q ON qa.quiz_id = q.id
+            WHERE qa.student_id = %s AND qa.is_completed = TRUE
+            ORDER BY qa.submitted_at DESC
+            LIMIT 5
         """, (student_id,))
-        quizzes = cursor.fetchall()
+        latest_quiz_attempts = cursor.fetchall()
+
+        # 4. Fetch recently watched videos (for progress/activity summary)
+        #    Only show videos they have access to watch.
+        cursor.execute("""
+            SELECT swv.video_id, swv.watched_at,
+                   v.title as video_title, v.thumbnail_path_or_url,
+                   u.first_name as teacher_first_name, u.last_name as teacher_last_name
+            FROM student_watched_videos swv
+            JOIN videos v ON swv.video_id = v.id
+            JOIN users u ON v.teacher_id = u.id
+            WHERE swv.student_id = %s
+            AND (
+                v.is_viewable_free_for_student = TRUE
+                OR EXISTS (
+                    SELECT 1 FROM student_subscriptions ss 
+                    WHERE ss.student_id = %s AND ss.teacher_id = v.teacher_id AND ss.status = 'active'
+                )
+            )
+            ORDER BY swv.watched_at DESC
+            LIMIT 5
+        """, (student_id, student_id))
+        recently_watched_videos = cursor.fetchall()
 
     except Error as e:
         app.logger.error(f"STUDENT_DASHBOARD_DB_ERROR for student {student_id}: {e.msg}", exc_info=False)
@@ -1453,7 +1631,15 @@ def student_dashboard_placeholder():
         if cursor: cursor.close()
         if conn and conn.is_connected(): conn.close()
 
-    return render_template('student/dashboard.html', username=username, videos=videos, quizzes=quizzes, is_minimal_layout=False)
+    return render_template('student/dashboard.html', 
+                           username=username, 
+                           accessible_videos=accessible_videos, 
+                           accessible_quizzes=accessible_quizzes,
+                           premium_videos_preview=premium_videos_preview,
+                           premium_quizzes_preview=premium_quizzes_preview,
+                           latest_quiz_attempts=latest_quiz_attempts,
+                           recently_watched_videos=recently_watched_videos,
+                           is_minimal_layout=False)
 
 @app.route('/student/videos/<int:video_id>')
 @student_required
@@ -1468,23 +1654,38 @@ def student_view_video_page(video_id):
         if not conn: raise Error("DB connection error viewing video.")
         cursor = conn.cursor(dictionary=True)
 
-        # Fetch video details and check if it's free or if student is subscribed to the teacher
-        # For now, let's allow all published free videos OR if teacher is current user's teacher (for testing)
-        # In a real app, you'd check student_subscriptions table.
+        # Fetch video details
         cursor.execute("""
             SELECT v.id, v.title, v.description, v.video_path_or_url, v.thumbnail_path_or_url,
-                   v.teacher_id, u.username as teacher_username, u.first_name as teacher_first_name, u.last_name as teacher_last_name
+                   v.teacher_id, u.username as teacher_username, u.first_name as teacher_first_name, u.last_name as teacher_last_name,
+                   v.is_viewable_free_for_student
             FROM videos v
             JOIN users u ON v.teacher_id = u.id
             WHERE v.id = %s AND v.status = 'published'
-            AND (v.is_viewable_free_for_student = TRUE OR v.teacher_id IN (SELECT teacher_id FROM student_subscriptions WHERE student_id = %s AND status = 'active'))
-            # Add OR condition for paid access here
-        """, (video_id, student_id))
+        """, (video_id,))
         video_data = cursor.fetchone()
 
         if not video_data:
-            flash("Video not found, or you don't have access to view it. Please check your subscriptions.", "warning")
+            flash("Video not found or is not currently published.", "warning")
             return redirect(url_for('student_dashboard_placeholder'))
+
+        # --- Access Control Logic for Video ---
+        has_access = False
+        if video_data['is_viewable_free_for_student']:
+            has_access = True
+        else:
+            # Check if student is subscribed to this video's teacher
+            cursor.execute("""
+                SELECT COUNT(*) FROM student_subscriptions
+                WHERE student_id = %s AND teacher_id = %s AND status = 'active'
+            """, (student_id, video_data['teacher_id']))
+            if cursor.fetchone()['COUNT(*)'] > 0:
+                has_access = True
+
+        if not has_access:
+            flash("This video requires a subscription to the teacher. Please subscribe to view the full content.", "warning")
+            return redirect(url_for('public_teacher_profile_page', teacher_id=video_data['teacher_id']))
+        # --- End Access Control Logic ---
         
         # Fetch quizzes associated with this video
         cursor.execute("""
@@ -1494,7 +1695,7 @@ def student_view_video_page(video_id):
         """, (video_id,))
         quizzes_for_video = cursor.fetchall()
 
-        # Mark video as watched by the student
+        # Mark video as watched by the student (only if they have access)
         cursor.execute("""
             INSERT IGNORE INTO student_watched_videos (student_id, video_id, teacher_id)
             VALUES (%s, %s, %s)
@@ -1525,22 +1726,45 @@ def student_take_quiz_page(quiz_id):
         if not conn: raise Error("DB connection error for taking quiz.")
         cursor = conn.cursor(dictionary=True)
 
-        # Get quiz info and check if student has access
-        # For now, allow if active and has questions
-        # In a real app, check subscriptions (if quiz.video_id is null, it's standalone)
+        # Get quiz info
         cursor.execute("""
-            SELECT q.id, q.title, q.description, q.time_limit_minutes, q.passing_score_percentage, q.allow_answer_review, q.teacher_id,
-                   v.title as video_title, v.video_path_or_url as video_link
+            SELECT q.id, q.title, q.description, q.time_limit_minutes, q.passing_score_percentage, q.allow_answer_review, q.teacher_id, q.video_id,
+                   COALESCE(v.is_viewable_free_for_student, FALSE) as video_is_free -- Use COALESCE for safety
             FROM quizzes q
             LEFT JOIN videos v ON q.video_id = v.id
             WHERE q.id = %s AND q.is_active = TRUE AND EXISTS (SELECT 1 FROM questions WHERE quiz_id = q.id)
-            # Add subscription check logic here for v.id or q.teacher_id
         """, (quiz_id,))
         quiz_info = cursor.fetchone()
 
         if not quiz_info:
-            flash("Quiz not found, is inactive, has no questions, or you don't have access. Contact the teacher.", "warning")
+            flash("Quiz not found, is inactive, or has no questions.", "warning")
             return redirect(url_for('student_dashboard_placeholder'))
+
+        # --- Access Control Logic for Quiz ---
+        has_access = False
+        if quiz_info['video_id'] is not None and quiz_info['video_is_free']: # Quiz linked to a free video
+            has_access = True
+        elif quiz_info['video_id'] is None: # Standalone quiz
+             # Check if student is subscribed to this standalone quiz's teacher
+            cursor.execute("""
+                SELECT COUNT(*) FROM student_subscriptions
+                WHERE student_id = %s AND teacher_id = %s AND status = 'active'
+            """, (student_id, quiz_info['teacher_id']))
+            if cursor.fetchone()['COUNT(*)'] > 0:
+                has_access = True
+        elif quiz_info['video_id'] is not None and not quiz_info['video_is_free']: # Linked to a premium video
+            # Check if student is subscribed to this teacher (covers premium linked videos)
+            cursor.execute("""
+                SELECT COUNT(*) FROM student_subscriptions
+                WHERE student_id = %s AND teacher_id = %s AND status = 'active'
+            """, (student_id, quiz_info['teacher_id']))
+            if cursor.fetchone()['COUNT(*)'] > 0:
+                has_access = True
+
+        if not has_access:
+            flash("This quiz requires a subscription to the teacher or access to the linked video. Please subscribe to gain access.", "warning")
+            return redirect(url_for('public_teacher_profile_page', teacher_id=quiz_info['teacher_id']))
+        # --- End Access Control Logic ---
 
         # Check for existing incomplete attempt (if any)
         cursor.execute("""

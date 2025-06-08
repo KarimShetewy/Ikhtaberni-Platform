@@ -1,0 +1,130 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    {% if current_lang == 'ar' %}حل الاختبار: {{ quiz.title }} - اختبرني{% else %}Take Quiz: {{ quiz.title }} - Ektbariny{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container main-page-content" style="margin-top: 30px; margin-bottom: 30px;">
+    {% if quiz and questions %}
+    <div class="row">
+        <div class="col-lg-10 offset-lg-1">
+            <h2 class="section-main-title text-center mb-4">
+                {% if current_lang == 'ar' %}ابدأ اختبار: <em>{{ quiz.title }}</em>{% else %}Take Quiz: <em>{{ quiz.title }}</em>{% endif %}
+            </h2>
+            <p class="text-muted text-center mb-4">
+                {% if quiz.description %}
+                    {{ quiz.description }}
+                {% else %}
+                    {% if current_lang == 'ar' %}لا يوجد وصف لهذا الاختبار.{% else %}No description available for this quiz.{% endif %}
+                {% endif %}
+            </p>
+
+            {% if quiz.time_limit_minutes %}
+            <div class="alert alert-warning text-center" id="quizTimer"
+                 data-time-limit-minutes="{{ quiz.time_limit_minutes }}"
+                 data-attempt-start-time="{{ (attempt.start_time.isoformat() if attempt and attempt.start_time) or '' }}"
+                 data-time-taken-seconds="{{ (attempt.time_taken_seconds if attempt and attempt.time_taken_seconds is not none) or 0 }}">
+                {% if current_lang == 'ar' %}الوقت المتبقي: <span id="timerDisplay"></span>{% else %}Time Remaining: <span id="timerDisplay"></span>{% endif %}
+            </div>
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('student_take_quiz_page', quiz_id=quiz.id) }}" id="quizForm">
+                {% for question in questions %}
+                <div class="card p-4 mb-4 shadow-sm question-card">
+                    <div class="card-header bg-light">
+                        <h4 class="card-title mb-0">
+                            {% if current_lang == 'ar' %}سؤال {{ loop.index }}: {% else %}Question {{ loop.index }}: {% endif %}
+                            {{ question.question_text }}
+                        </h4>
+                        <p class="text-muted small mb-0 mt-2">
+                            {% if current_lang == 'ar' %}الدرجة: {{ question.points }}{% else %}Points: {{ question.points }}{% endif %}
+                        </p>
+                    </div>
+                    <div class="card-body">
+                        {% if question.question_type == 'mc' %}
+                            {% for choice in question.choices %}
+                            <div class="form-check my-3">
+                                <input class="form-check-input" type="radio" name="question_{{ question.question_id }}" id="question_{{ question.question_id }}_choice_{{ choice.id }}" value="{{ choice.id }}" required>
+                                <label class="form-check-label" for="question_{{ question.question_id }}_choice_{{ choice.id }}">
+                                    {{ choice.choice_text }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            {# لو فيه أنواع أسئلة تانية زي المقالية، ممكن نضيفها هنا #}
+                            <textarea class="form-control" name="question_{{ question.question_id }}" rows="4" placeholder="{% if current_lang == 'ar' %}اكتب إجابتك هنا...{% else %}Write your answer here...{% endif %}" disabled>{% if current_lang == 'ar' %}(هذا النوع من الأسئلة غير مدعوم حاليا){% else %}(This question type is not currently supported){% endif %}</textarea>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+
+                <div class="text-center mt-5">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-check-circle me-2"></i>
+                        {% if current_lang == 'ar' %}تسليم الاختبار{% else %}Submit Quiz{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-danger text-center">
+        <h4 class="alert-heading">{% if current_lang == 'ar' %}خطأ!{% else %}Error!{% endif %}</h4>
+        <p>{% if current_lang == 'ar' %}معلومات الاختبار أو الأسئلة لا يمكن تحميلها أو أنها غير صالحة.{% else %}Quiz or question information could not be loaded or is invalid.{% endif %}</p>
+        <a href="{{ url_for('student_dashboard_placeholder') }}" class="btn btn-primary">
+            {% if current_lang == 'ar' %}العودة إلى لوحة التحكم{% else %}Go Back to Dashboard{% endif %}
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+{% if quiz.time_limit_minutes %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const timerDisplay = document.getElementById('timerDisplay');
+        const quizForm = document.getElementById('quizForm');
+        const quizTimerDiv = document.getElementById('quizTimer'); // Get the timer div
+
+        // Read values from data attributes
+        const timeLimitMinutes = parseInt(quizTimerDiv.dataset.timeLimitMinutes);
+        const attemptStartTimeStr = quizTimerDiv.dataset.attemptStartTime;
+        const timeTakenSecondsFromDB = parseInt(quizTimerDiv.dataset.timeTakenSeconds);
+
+        let startTime;
+        if (attemptStartTimeStr) {
+            startTime = new Date(attemptStartTimeStr);
+        } else {
+            startTime = new Date(); // Current time if no start time is recorded or attempt is new
+        }
+        
+        let timeElapsedSeconds = isNaN(timeTakenSecondsFromDB) ? 0 : timeTakenSecondsFromDB;
+
+        let totalTimeSeconds = timeLimitMinutes * 60;
+        let remainingTimeSeconds = totalTimeSeconds - timeElapsedSeconds;
+
+        function updateTimer() {
+            if (remainingTimeSeconds <= 0) {
+                timerDisplay.textContent = "{% if current_lang == 'ar' %}انتهى الوقت!{% else %}Time's up!{% endif %}";
+                clearInterval(timerInterval);
+                // Prevent multiple submissions if already submitted or network issue
+                if (!quizForm.dataset.submitted) {
+                    quizForm.dataset.submitted = 'true'; // Mark form as submitted
+                    alert("{% if current_lang == 'ar' %}انتهى وقت الاختبار. سيتم تسليم إجاباتك تلقائياً.{% else %}Quiz time has ended. Your answers will be submitted automatically.{% endif %}");
+                    quizForm.submit(); // Submit the form automatically
+                }
+            } else {
+                const minutes = Math.floor(remainingTimeSeconds / 60);
+                const seconds = remainingTimeSeconds % 60;
+                timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                remainingTimeSeconds--;
+            }
+        }
+
+        // Run the timer every second
+        const timerInterval = setInterval(updateTimer, 1000);
+        updateTimer(); // Call immediately to show time without delay
+    });
+</script>
+{% endif %}
+{% endblock %}

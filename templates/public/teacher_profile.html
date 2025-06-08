@@ -1,0 +1,193 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    {% if current_lang == 'ar' %}ملف المدرس: {{ teacher_profile.first_name }} {{ teacher_profile.last_name }} - اختبرني{% else %}Teacher Profile: {{ teacher_profile.first_name }} {{ teacher_profile.last_name }} - Ektbariny{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container main-page-content" style="margin-top: 30px; margin-bottom: 30px;">
+    {% if teacher_profile %}
+    <div class="row mb-5">
+        <div class="col-lg-8 offset-lg-2">
+            <div class="card p-4 shadow-sm teacher-profile-card">
+                <div class="text-center mb-4">
+                    <img src="{{ url_for('static', filename=teacher_profile.profile_picture_url) if teacher_profile.profile_picture_url else url_for('static', filename='images/default_profile.png') }}" 
+                         alt="{% if current_lang == 'ar' %}صورة الملف الشخصي للمدرس{% else %}Teacher Profile Picture{% endif %}" 
+                         class="img-thumbnail rounded-circle teacher-profile-img">
+                    <h2 class="section-main-title mt-3 mb-1">
+                        {% if current_lang == 'ar' %}الأستاذ/ة: {{ teacher_profile.first_name }} {{ teacher_profile.last_name }}{% else %}Teacher: {{ teacher_profile.first_name }} {{ teacher_profile.last_name }}{% endif %}
+                    </h2>
+                    <p class="text-muted">
+                        {% if teacher_profile.country %}{% if current_lang == 'ar' %}من: {{ teacher_profile.country }}{% else %}From: {{ teacher_profile.country }}{% endif %}{% endif %}
+                    </p>
+                </div>
+
+                <div class="mb-4">
+                    <h4 class="card-title">{% if current_lang == 'ar' %}نبذة عن المدرس{% else %}About the Teacher{% endif %}</h4>
+                    <p class="card-text">{{ teacher_profile.bio or ('لا توجد نبذة تعريفية.' if current_lang == 'ar' else 'No bio available.') }}</p>
+                </div>
+
+                {# Subscription Call to Action #}
+                {% if current_user_id and not is_subscribed %}
+                <div class="alert alert-warning text-center p-3 border-warning border-3 border-top-0 border-end-0 border-start-0">
+                    <h4 class="alert-heading">{% if current_lang == 'ar' %}اشترك مع هذا المدرس!{% else %}Subscribe to this Teacher!{% endif %}</h4>
+                    <p>{% if current_lang == 'ar' %}للوصول الكامل لجميع الفيديوهات والاختبارات، اشترك الآن في محتوى الأستاذ/ة {{ teacher_profile.first_name }}.{% else %}To get full access to all videos and quizzes, subscribe to {{ teacher_profile.first_name }}'s content now.{% endif %}</p>
+                    <button class="btn btn-warning btn-lg">{% if current_lang == 'ar' %}اشترك الآن{% else %}Subscribe Now{% endif %}</button> {# This button needs actual payment logic later #}
+                </div>
+                {% elif current_user_id and is_subscribed %}
+                <div class="alert alert-success text-center p-3 border-success border-3 border-top-0 border-end-0 border-start-0">
+                    <h4 class="alert-heading">{% if current_lang == 'ar' %}أنت مشترك بالفعل!{% else %}You are Subscribed!{% endif %}</h4>
+                    <p>{% if current_lang == 'ar' %}لديك وصول كامل لجميع محتويات الأستاذ/ة {{ teacher_profile.first_name }}.{% else %}You have full access to all of {{ teacher_profile.first_name }}'s content.{% endif %}</p>
+                </div>
+                {% elif not current_user_id %}
+                 <div class="alert alert-info text-center p-3 border-info border-3 border-top-0 border-end-0 border-start-0">
+                    <h4 class="alert-heading">{% if current_lang == 'ar' %}سجل دخولك أو أنشئ حساباً!{% else %}Login or Sign Up!{% endif %}</h4>
+                    <p>{% if current_lang == 'ar' %}سجل دخولك كطالب أو أنشئ حساباً جديداً للوصول إلى محتوى المدرسين المتميز.{% else %}Login as a student or create a new account to access premium teacher content.{% endif %}</p>
+                    <a href="{{ url_for('login_page') }}" class="btn btn-primary me-2">{% if current_lang == 'ar' %}تسجيل الدخول{% else %}Login{% endif %}</a>
+                    <a href="{{ url_for('choose_signup_role', role='student') }}" class="btn btn-outline-primary">{% if current_lang == 'ar' %}إنشاء حساب طالب{% else %}Sign Up as Student{% endif %}</a>
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+
+    {# Accordion for Course Content #}
+    <section class="dashboard-section mt-5 p-4 rounded shadow-sm bg-light-alpha">
+        <h3 class="section-title mb-4 text-center">
+            {% if current_lang == 'ar' %}محتوى الأستاذ/ة {{ teacher_profile.first_name }}{% else %}{{ teacher_profile.first_name }}'s Content{% endif %}
+        </h3>
+
+        <div class="accordion" id="teacherContentAccordion">
+            {# Videos Section #}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingVideos">
+                    <button class="accordion-button {% if not teacher_videos %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseVideos" aria-expanded="{% if teacher_videos %}true{% else %}false{% endif %}" aria-controls="collapseVideos">
+                        {% if current_lang == 'ar' %}الفيديوهات ({{ teacher_videos|length }}){% else %}Videos ({{ teacher_videos|length }}){% endif %}
+                    </button>
+                </h2>
+                <div id="collapseVideos" class="accordion-collapse collapse {% if teacher_videos %}show{% endif %}" aria-labelledby="headingVideos" data-bs-parent="#teacherContentAccordion">
+                    <div class="accordion-body">
+                        {% if teacher_videos %}
+                        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                            {% for video in teacher_videos %}
+                            <div class="col">
+                                <div class="card h-100 shadow-sm border-0 video-card {% if not video.has_access %}video-premium-preview{% endif %}">
+                                    <img src="{{ url_for('static', filename=video.thumbnail_path_or_url) if video.thumbnail_path_or_url else url_for('static', filename='images/default_video_thumbnail.jpg') }}" class="card-img-top" alt="{{ video.title }}">
+                                    <div class="card-body d-flex flex-column">
+                                        <h5 class="card-title">
+                                            {% if video.has_access %}
+                                            <a href="{{ url_for('student_view_video_page', video_id=video.id) }}" class="text-decoration-none">
+                                                {{ video.title }}
+                                            </a>
+                                            {% else %}
+                                            <a href="#" class="text-decoration-none disabled-link">
+                                                {{ video.title }}
+                                            </a>
+                                            {% endif %}
+                                        </h5>
+                                        <p class="card-text text-muted small">{{ video.description[:100] }}{% if video.description|length > 100 %}...{% endif %}</p>
+                                    </div>
+                                    {% if not video.has_access %}
+                                    <div class="premium-overlay">
+                                        <i class="fas fa-lock fa-3x"></i>
+                                        <p class="mb-0">{% if current_lang == 'ar' %}محتوى مدفوع{% else %}Premium Content{% endif %}</p>
+                                        {% if current_user_id %}
+                                        <button class="btn btn-warning btn-sm mt-2">{% if current_lang == 'ar' %}اشترك الآن{% else %}Subscribe Now{% endif %}</button>
+                                        {% else %}
+                                        <a href="{{ url_for('login_page', next=request.path) }}" class="btn btn-warning btn-sm mt-2">{% if current_lang == 'ar' %}سجل دخولك{% else %}Login to Subscribe{% endif %}</a>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class="text-center text-muted p-3">
+                            {% if current_lang == 'ar' %}لم يتم إضافة أي فيديوهات من هذا المدرس بعد.{% else %}No videos have been added by this teacher yet.{% endif %}
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            {# Quizzes Section #}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingQuizzes">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseQuizzes" aria-expanded="false" aria-controls="collapseQuizzes">
+                        {% if current_lang == 'ar' %}الاختبارات ({{ teacher_quizzes|length }}){% else %}Quizzes ({{ teacher_quizzes|length }}){% endif %}
+                    </button>
+                </h2>
+                <div id="collapseQuizzes" class="accordion-collapse collapse" aria-labelledby="headingQuizzes" data-bs-parent="#teacherContentAccordion">
+                    <div class="accordion-body">
+                        {% if teacher_quizzes %}
+                        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                            {% for quiz in teacher_quizzes %}
+                            <div class="col">
+                                <div class="card h-100 shadow-sm border-0 quiz-card {% if not quiz.has_access %}quiz-premium-preview{% endif %}">
+                                    <div class="card-body d-flex flex-column">
+                                        <h5 class="card-title">
+                                            {% if quiz.has_access %}
+                                            <a href="{{ url_for('student_take_quiz_page', quiz_id=quiz.id) }}" class="text-decoration-none">
+                                                {{ quiz.title }}
+                                            </a>
+                                            {% else %}
+                                            <a href="#" class="text-decoration-none disabled-link">
+                                                {{ quiz.title }}
+                                            </a>
+                                            {% endif %}
+                                        </h5>
+                                        <p class="card-text text-muted small mb-1">{{ quiz.description[:100] }}{% if quiz.description|length > 100 %}...{% endif %}</p>
+                                        {% if quiz.video_title %}
+                                        <p class="card-text text-muted small">
+                                            {% if current_lang == 'ar' %}مرتبط بـ: {{ quiz.video_title }}{% else %}Related to: {{ quiz.video_title }}{% endif %}
+                                        </p>
+                                        {% endif %}
+                                        <ul class="list-unstyled small text-muted mb-3">
+                                            <li>{% if current_lang == 'ar' %}عدد الأسئلة: {{ quiz.question_count }}{% else %}Questions: {{ quiz.question_count }}{% endif %}</li>
+                                            {% if quiz.time_limit_minutes %}
+                                            <li>{% if current_lang == 'ar' %}المدة: {{ quiz.time_limit_minutes }} دقيقة{% else %}Time Limit: {{ quiz.time_limit_minutes }} mins{% endif %}</li>
+                                            {% else %}
+                                            <li>{% if current_lang == 'ar' %}لا يوجد حد زمني{% else %}No Time Limit{% endif %}</li>
+                                            {% endif %}
+                                            <li>{% if current_lang == 'ar' %}درجة النجاح: {{ quiz.passing_score_percentage }}%{% else %}Pass Mark: {{ quiz.passing_score_percentage }}%{% endif %}</li>
+                                        </ul>
+                                    </div>
+                                    {% if not quiz.has_access %}
+                                    <div class="premium-overlay">
+                                        <i class="fas fa-lock fa-3x"></i>
+                                        <p class="mb-0">{% if current_lang == 'ar' %}يتطلب اشتراكاً{% else %}Subscription Required{% endif %}</p>
+                                        {% if current_user_id %}
+                                        <button class="btn btn-warning btn-sm mt-2">{% if current_lang == 'ar' %}اشترك الآن{% else %}Subscribe Now{% endif %}</button>
+                                        {% else %}
+                                        <a href="{{ url_for('login_page', next=request.path) }}" class="btn btn-warning btn-sm mt-2">{% if current_lang == 'ar' %}سجل دخولك{% else %}Login to Subscribe{% endif %}</a>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class="text-center text-muted p-3">
+                            {% if current_lang == 'ar' %}لم يتم إضافة أي اختبارات من هذا المدرس بعد.{% else %}No quizzes have been added by this teacher yet.{% endif %}
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% else %}
+    <div class="alert alert-danger text-center">
+        <h4 class="alert-heading">{% if current_lang == 'ar' %}خطأ!{% else %}Error!{% endif %}</h4>
+        <p>{% if current_lang == 'ar' %}معلومات المدرس لا يمكن تحميلها أو أنها غير صالحة.{% else %}Teacher information could not be loaded or is invalid.{% endif %}</p>
+        <a href="{{ url_for('explore_teachers_page') }}" class="btn btn-primary">
+            {% if current_lang == 'ar' %}العودة إلى استكشاف المعلمين{% else %}Go Back to Explore Teachers{% endif %}
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

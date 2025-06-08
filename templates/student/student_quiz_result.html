@@ -1,0 +1,114 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    {% if current_lang == 'ar' %}نتائج الاختبار: {{ attempt.quiz_title }} - اختبرني{% else %}Quiz Results: {{ attempt.quiz_title }} - Ektbariny{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container main-page-content" style="margin-top: 30px; margin-bottom: 30px;">
+    {% if attempt %}
+    <div class="row">
+        <div class="col-lg-10 offset-lg-1">
+            <h2 class="section-main-title text-center mb-4">
+                {% if current_lang == 'ar' %}نتائج اختبار: <em>{{ attempt.quiz_title }}</em>{% else %}Results for: <em>{{ attempt.quiz_title }}</em>{% endif %}
+            </h2>
+            <p class="text-muted text-center mb-4">
+                {% if current_lang == 'ar' %}تم تقديم الاختبار في: {{ attempt.submitted_at.strftime('%Y-%m-%d %H:%M') }}{% else %}Submitted on: {{ attempt.submitted_at.strftime('%Y-%m-%d %H:%M') }}{% endif %}
+                {% if attempt.time_taken_seconds %}
+                <br>{% if current_lang == 'ar' %}الزمن المستغرق: {{ '%02d:%02d' % (attempt.time_taken_seconds // 60, attempt.time_taken_seconds % 60) }}{% else %}Time taken: {{ '%02d:%02d' % (attempt.time_taken_seconds // 60, attempt.time_taken_seconds % 60) }}{% endif %}
+                {% endif %}
+            </p>
+
+            <div class="card p-4 mb-4 shadow-sm text-center">
+                <h3 class="card-title">{% if current_lang == 'ar' %}درجتك:{% else %}Your Score:{% endif %}</h3>
+                <p class="display-4 mb-0">
+                    <span class="text-{{ 'success' if attempt.passed else 'danger' }}">{{ attempt.score }}</span> / {{ attempt.max_possible_score }}
+                </p>
+                <p class="lead mt-2">
+                    {% if current_lang == 'ar' %}درجة النجاح: {{ attempt.passing_score_percentage }}%{% else %}Pass Mark: {{ attempt.passing_score_percentage }}%{% endif %}
+                </p>
+                <p class="lead">
+                    {% if attempt.passed %}
+                        <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle p-2">
+                            <i class="fas fa-trophy me-1"></i> {% if current_lang == 'ar' %}تهانينا، لقد نجحت!{% else %}Congratulations, You Passed!{% endif %}
+                        </span>
+                    {% else %}
+                        <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle p-2">
+                            <i class="fas fa-times-circle me-1"></i> {% if current_lang == 'ar' %}للأسف، لم تنجح بعد.{% else %}Unfortunately, You Did Not Pass.{% endif %}
+                        </span>
+                    {% endif %}
+                </p>
+            </div>
+
+            {% if attempt.allow_answer_review and answers_data %}
+            <div class="card p-4 shadow-sm mb-4">
+                <h4 class="card-title">{% if current_lang == 'ar' %}مراجعة الإجابات{% else %}Answer Review{% endif %}</h4>
+                {% for answer in answers_data %}
+                <div class="mb-4 p-3 {% if answer.is_mc_correct %}bg-success-light{% else %}bg-danger-light{% endif %} rounded">
+                    <h5 class="mb-2">
+                        {% if current_lang == 'ar' %}سؤال {{ loop.index }}: {% else %}Question {{ loop.index }}: {% endif %}
+                        {{ answer.question_text }}
+                    </h5>
+                    <p class="text-muted small mb-1">{% if current_lang == 'ar' %}الدرجة: {{ answer.points_awarded }} / {{ answer.question_max_points }}{% else %}Score: {{ answer.points_awarded }} / {{ answer.question_max_points }}{% endif %}</p>
+
+                    <p class="mb-1">
+                        {% if current_lang == 'ar' %}إجابتك: 
+                            <span class="font-weight-bold text-{{ 'success' if answer.is_mc_correct else 'danger' }}">
+                                {{ answer.student_choice_text or 'لم يتم الإجابة' }}
+                            </span>
+                        {% else %}
+                            Your Answer: 
+                            <span class="font-weight-bold text-{{ 'success' if answer.is_mc_correct else 'danger' }}">
+                                {{ answer.student_choice_text or 'No answer' }}
+                            </span>
+                        {% endif %}
+                    </p>
+                    {% if not answer.is_mc_correct %}
+                    <p class="mb-0">
+                        {% if current_lang == 'ar' %}الإجابة الصحيحة: 
+                            <span class="font-weight-bold text-success">{{ answer.correct_choice_text }}</span>
+                        {% else %}
+                            Correct Answer: 
+                            <span class="font-weight-bold text-success">{{ answer.correct_choice_text }}</span>
+                        {% endif %}
+                    </p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% elif not attempt.allow_answer_review %}
+            <div class="alert alert-info text-center mt-4">
+                {% if current_lang == 'ar' %}المدرس لم يسمح بمراجعة الإجابات لهذا الاختبار.{% else %}The teacher has not allowed answer review for this quiz.{% endif %}
+            </div>
+            {% else %}
+            <div class="alert alert-info text-center mt-4">
+                {% if current_lang == 'ar' %}لا توجد بيانات مراجعة للإجابات.{% else %}No answer review data available.{% endif %}
+            </div>
+            {% endif %}
+
+            <div class="text-center mt-4">
+                <a href="{{ url_for('student_dashboard_placeholder') }}" class="btn btn-primary">
+                    <i class="fas fa-arrow-left me-2"></i>
+                    {% if current_lang == 'ar' %}العودة إلى لوحة التحكم{% else %}Back to Dashboard{% endif %}
+                </a>
+                {% if attempt.quiz_id %}
+                <a href="{{ url_for('student_take_quiz_page', quiz_id=attempt.quiz_id) }}" class="btn btn-outline-secondary ms-2">
+                    <i class="fas fa-redo-alt me-2"></i>
+                    {% if current_lang == 'ar' %}إعادة الاختبار{% else %}Retake Quiz{% endif %}
+                </a>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-danger text-center">
+        <h4 class="alert-heading">{% if current_lang == 'ar' %}خطأ!{% else %}Error!{% endif %}</h4>
+        <p>{% if current_lang == 'ar' %}معلومات محاولة الاختبار لا يمكن تحميلها أو أنها غير صالحة.{% else %}Quiz attempt information could not be loaded or is invalid.{% endif %}</p>
+        <a href="{{ url_for('student_dashboard_placeholder') }}" class="btn btn-primary">
+            {% if current_lang == 'ar' %}العودة إلى لوحة التحكم{% else %}Go Back to Dashboard{% endif %}
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

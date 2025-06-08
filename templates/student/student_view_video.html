@@ -1,0 +1,72 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    {% if current_lang == 'ar' %}مشاهدة الفيديو: {{ video.title }} - اختبرني{% else %}Watch Video: {{ video.title }} - Ektbariny{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container main-page-content" style="margin-top: 30px; margin-bottom: 30px;">
+    {% if video %}
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2">
+            <h2 class="section-main-title text-center mb-4">
+                {{ video.title }}
+            </h2>
+            <p class="text-muted text-center">
+                {% if current_lang == 'ar' %}المدرس: {{ video.teacher_first_name }} {{ video.teacher_last_name }}{% else %}Teacher: {{ video.teacher_first_name }} {{ video.teacher_last_name }}{% endif %}
+            </p>
+
+            <div class="video-player-container mb-4">
+                {# تأكد أن مسار الفيديو صحيح بالنسبة للمجلد static/uploads/videos #}
+                <video controls controlsList="nodownload" class="w-100 rounded-lg shadow-lg">
+                    <source src="{{ url_for('static', filename=video.video_path_or_url) }}" type="video/mp4">
+                    {% if current_lang == 'ar' %}متصفحك لا يدعم تشغيل الفيديو. يرجى التحديث.{% else %}Your browser does not support the video tag. Please update.{% endif %}
+                </video>
+            </div>
+
+            <div class="card p-4 mb-4 shadow-sm">
+                <h4 class="card-title">{% if current_lang == 'ar' %}وصف الفيديو{% else %}Video Description{% endif %}</h4>
+                <p class="card-text">{{ video.description or ('لا يوجد وصف' if current_lang == 'ar' else 'No description available.') }}</p>
+            </div>
+
+            {% if quizzes %}
+            <div class="card p-4 shadow-sm mb-4">
+                <h4 class="card-title">{% if current_lang == 'ar' %}اختبارات مرتبطة بهذا الفيديو{% else %}Quizzes Related to This Video{% endif %}</h4>
+                <div class="list-group list-group-flush">
+                    {% for quiz in quizzes %}
+                    <a href="{{ url_for('student_take_quiz_page', quiz_id=quiz.id) }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-question-circle me-2"></i>
+                            {{ quiz.title }}
+                        </div>
+                        <span class="btn btn-sm btn-primary">{% if current_lang == 'ar' %}ابدأ الاختبار{% else %}Take Quiz{% endif %}</span>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-info text-center mt-4">
+                {% if current_lang == 'ar' %}لا توجد اختبارات مرتبطة بهذا الفيديو حالياً.{% else %}No quizzes are currently associated with this video.{% endif %}
+            </div>
+            {% endif %}
+
+            <div class="text-center mt-4">
+                <a href="{{ url_for('student_dashboard_placeholder') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>
+                    {% if current_lang == 'ar' %}العودة إلى لوحة التحكم{% else %}Back to Dashboard{% endif %}
+                </a>
+            </div>
+
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-danger text-center">
+        <h4 class="alert-heading">{% if current_lang == 'ar' %}خطأ!{% else %}Error!{% endif %}</h4>
+        <p>{% if current_lang == 'ar' %}معلومات الفيديو لا يمكن تحميلها أو أنها غير صالحة.{% else %}Video information could not be loaded or is invalid.{% endif %}</p>
+        <a href="{{ url_for('student_dashboard_placeholder') }}" class="btn btn-primary">
+            {% if current_lang == 'ar' %}العودة إلى لوحة التحكم{% else %}Go Back to Dashboard{% endif %}
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

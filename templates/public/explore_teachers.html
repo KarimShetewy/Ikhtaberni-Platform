@@ -42,7 +42,7 @@
                          alt="{% if current_lang == 'ar' %}صورة الملف الشخصي للمعلم{% else %}Teacher Profile Picture{% endif %}" 
                          class="teacher-card-img">
                     <div class="teacher-name-and-role">
-                        <a href="#" class="teacher-name-link"> {# This link will go to teacher's public profile/videos page later #}
+                        <a href="{{ url_for('public_teacher_profile_page', teacher_id=teacher.id) }}" class="teacher-name-link"> {# This link will go to teacher's public profile/videos page #}
                             {{ teacher.first_name }} {{ teacher.last_name }}
                         </a>
                         <span class="teacher-role">
@@ -52,14 +52,14 @@
                     </div>
                 </div>
                 <div class="teacher-card-body">
-                    <p class="teacher-bio">{{ teacher.bio | truncate(150, True) if teacher.bio else 'No bio available.' }}</p>
+                    <p class="teacher-bio">{{ teacher.bio | truncate(150, True) if teacher.bio else ('لا توجد نبذة تعريفية.' if current_lang == 'ar' else 'No bio available.') }}</p>
                     {# You can add more info here, e.g., number of videos, quizzes #}
                 </div>
                 <div class="teacher-card-footer">
-                    <a href="#" class="btn btn-sm btn-outline-primary"> {# This button will view teacher's videos/profile #}
+                    <a href="{{ url_for('public_teacher_profile_page', teacher_id=teacher.id) }}" class="btn btn-sm btn-outline-primary"> {# This button will view teacher's videos/profile #}
                         <i class="fas fa-video me-1"></i>
-                        <span class="lang-en">View Videos & Quizzes</span>
-                        <span class="lang-ar" style="display:none;">عرض الفيديوهات والاختبارات</span>
+                        <span class="lang-en">View Content</span>
+                        <span class="lang-ar" style="display:none;">عرض المحتوى</span>
                     </a>
                 </div>
             </div>

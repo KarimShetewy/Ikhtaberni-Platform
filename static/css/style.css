@@ -83,7 +83,7 @@
     --l-bg-surface: #FFFFFF;     
     --l-border-color: #dee2e6;   
 
-    --l-body-bg-grad-start: #FAF0E6; /* لون بيج/سكري فاتح (Linen) (جديد) */
+    --l-body-bg-grad-start: #FAF0E6; /* لون بيج/سكري فاتح (Linen) */
     --l-body-bg-grad-mid: #FFF5CC;   /* اصفر فاتح جداً/ذهبي باهت */
     --l-body-bg-grad-end: #E6D9FF;   /* موف أفتح (لافندر فاتح) */
     --l-body-text-color: var(--l-text-primary);
@@ -722,8 +722,13 @@ html[dir="rtl"] .text-danger-asterisk { margin-right: 2px; }
     border-top-left-radius: 0; border-top-right-radius: 0;
     margin-top: -1px; position: relative; z-index: 1;
 }
-#country_signup_select option.hidden-by-search, 
-#country_login_select option.hidden-by-search { display: none !important; }
+#country_signup_select option.hidden-by-search {
+    display: none !important;
+}
+
+#country_login_select option.hidden-by-search {
+    display: none !important; /* Added for login form too */
+}
 
 
 /* General Button Styles - btn-signup for header is already defined per theme */
@@ -848,9 +853,6 @@ body.theme-dark .teacher-name-link:hover {
     text-decoration: underline;
 }
 
-body.theme-light .teacher-name-link {
-    color: var(--l-text-primary);
-}
 body.theme-light .teacher-name-link:hover {
     color: var(--l-primary-color);
     text-decoration: underline;
@@ -1267,16 +1269,16 @@ body.theme-light .btn-group .btn:hover {
     border-color: #d39e00;
 }
 .btn.btn-primary { 
-    background-color: var(--d-primary-color);
+    background-color: var(--d-btn-primary-bg);
     color: var(--d-btn-primary-text);
-    border-color: var(--d-primary-color);
+    border-color: var(--d-btn-primary-bg);
 }
 .btn.btn-primary:hover {
     background-color: var(--d-primary-hover);
     border-color: var(--d-primary-hover);
 }
 body.theme-light .btn.btn-primary {
-    background-color: var(--l-primary-color);
+    background-color: var(--l-btn-primary-bg);
     color: var(--l-btn-primary-text);
     border-color: var(--l-primary-color);
 }
@@ -1293,173 +1295,407 @@ body.theme-light .btn.btn-primary:hover {
     border-radius: 0.25rem; 
 }
 
-/* Responsive adjustments for quiz table buttons (Stronger design) */
+/* Responsive adjustments for teacher tables */
 @media (max-width: 768px) {
-    /* Data labels from previous version are here */
-    
-    .table tbody td .btn-group { 
-        flex-direction: column;
-        width: 100%;
-        box-shadow: none; 
-        border-radius: 0;
-        margin-bottom: 0; 
-    }
-    .table tbody td .btn-group .btn {
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-        border-radius: 0 !important; 
-        margin-bottom: 8px; 
-        border: 1px solid !important; 
-    }
-    .table tbody td .btn-group .btn:last-child {
-        margin-bottom: 0;
-    }
-    .table tbody td .btn-group .btn:first-child {
-        border-top-left-radius: 0.3rem !important;
-        border-top-right-radius: 0.3rem !important;
-    }
-    .table tbody td .btn-group .btn:last-child {
-        border-bottom-left-radius: 0.3rem !important;
-        border-bottom-right-radius: 0.3rem !important;
-    }
-}
-
-
-/* -------------------------------------------------------------------------- */
-/* 12. الاستجابة للشاشات (Responsive)                     */
-/* -------------------------------------------------------------------------- */
-@media (max-width: 991px) { 
-    .hero-container, .about-content-grid { flex-direction: column; text-align:center; }
-    html[dir="rtl"] .hero-container, html[dir="rtl"] .about-content-grid { flex-direction: column; } 
-    .hero-text-content, .about-text-block { order: 1; } 
-    .hero-image-content, .about-image-block { order: 2; margin-top: 30px; }
-    html[dir="ltr"] .hero-text-content, html[dir="rtl"] .hero-text-content,
-    html[dir="ltr"] .about-text-block, html[dir="rtl"] .about-text-block { 
-        margin-right: 0; margin-left:0; padding-right:0; padding-left:0;
-    }
-    .hero-headline { font-size: 2.8rem; }
-    .section-main-title { font-size: 2.2rem; }
-}
-
-@media (max-width: 768px) {
-    header.main-header { padding: 0.8rem 1rem; position: relative; }
-    header.main-header .logo { margin-bottom: 0; }
-    html[dir="ltr"] header.main-header .logo { margin-right: auto !important; }
-    html[dir="rtl"] header.main-header .logo { margin-left: auto !important; margin-right: 0 !important; }
-    
-    header.main-header .main-nav { display: none !important; } 
-    
-    .settings-menu-container { 
-        position: absolute; 
-        top: 50%; 
-        transform: translateY(-50%); 
-        html[dir="ltr"] & { right: 1rem; margin-left:0; } 
-        html[dir="rtl"] & { left: 1rem; margin-right:0; } 
-    }
-    
-    .settings-dropdown-menu { 
-        position: absolute; 
-        top: calc(100% + 8px); 
-        min-width: 230px; 
-        border-radius: 8px; 
-        padding: 8px 0; 
-        z-index: 1050; 
-        display: block; 
-        opacity: 0; 
-        transform: translateY(-5px); 
-        visibility: hidden; 
-        transition: opacity 0.3s ease-out, transform 0.3s ease-out, visibility 0.3s ease-out;
-    }
-
-    html[dir="ltr"] .settings-dropdown-menu { right: 0; left: auto; transform: translateY(-5px); } 
-    html[dir="rtl"] .settings-dropdown-menu { left: 0; right: auto; transform: translateY(-5px); } 
-
-    .settings-dropdown-menu.show {
-        display: block; 
-        opacity: 1;
-        transform: translateY(0);
-        visibility: visible;
-    }
-
-    .settings-dropdown-menu .close-menu-button {
+    .table thead {
         display: none; 
     }
-
-    .settings-dropdown-menu .dropdown-item {
-        padding: 10px 15px; 
-        font-size: 0.95rem; 
-        border-bottom: none; 
+    .table tbody td {
+        display: block; 
+        text-align: right !important; 
+        padding-left: 50%; 
+        position: relative;
     }
-    body.theme-light .settings-dropdown-menu .dropdown-item {
-        border-bottom: none;
+    html[dir="ltr"] .table tbody td {
+        text-align: left !important; 
     }
-    .settings-dropdown-menu .dropdown-item:last-child {
-        border-bottom: none;
+    .table tbody td::before {
+        content: attr(data-label); 
+        position: absolute;
+        left: 0.75rem;
+        width: calc(50% - 1.5rem);
+        text-align: left !important; 
+        font-weight: var(--font-weight-semibold);
+        color: var(--d-text-primary); 
     }
-
-    .username-display-mobile {
-        display: flex;
-        align-items: center;
-        padding: 10px 15px;
-        font-size: 0.95rem;
-        font-weight: var(--font-weight-medium);
-        color: var(--dropdown-item-color-d); 
-        border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-    body.theme-light .username-display-mobile {
-        color: var(--dropdown-item-color-l);
-        border-bottom: 1px solid rgba(0,0,0,0.05);
-    }
-    .username-display-mobile i {
-        margin-right: 8px;
-        color: var(--dropdown-item-icon-color-d);
-    }
-    body.theme-light .username-display-mobile i {
-        color: var(--dropdown-item-icon-color-l);
-    }
-    .username-display {
-        display: none !important;
+    body.theme-light .table tbody td::before {
+        color: var(--l-text-primary);
     }
 
-    .hero-headline { font-size: 2.4rem; }
-    .hero-subheadline { font-size: 1.1rem; }
-    .section-main-title { font-size: 2rem; }
-    .features-grid { grid-template-columns: minmax(250px, 1fr); }
+    /* Data labels for videos_list.html */
+    .table tbody td:nth-child(1)::before { content: "Title"; }
+    .table tbody td:nth-child(2)::before { content: "Status"; }
+    .table tbody td:nth-child(3)::before { content: "Upload Date"; }
+    .table tbody td:nth-child(4)::before { content: "Actions"; }
     
-    .role-selection-box-container { flex-direction: column; align-items: center; gap: 20px; margin: 25px 0;}
-    .role-selection-box { max-width: 90%; padding: 25px 20px;} 
+    html[dir="rtl"] .table tbody td:nth-child(1)::before { content: "العنوان"; }
+    html[dir="rtl"] .table tbody td:nth-child(2)::before { content: "الحالة"; }
+    html[dir="rtl"] .table tbody td:nth-child(3)::before { content: "تاريخ الرفع"; }
+    html[dir="rtl"] .table tbody td:nth-child(4)::before { content: "إجراءات"; }
 
-    .flash-messages-container { top: 15px; }
-    body.minimal-page-bg .flash-messages-container { margin-top: 15px; width: 95%;}
-    .alert { font-size: 0.9rem; padding: 0.75rem 1rem; max-width: 95%; }
-    html[dir="ltr"] .close-alert-btn { right: 10px; }
-    html[dir="rtl"] .close-alert-btn { left: 10px; }
+    /* Quiz Table Specific Data Labels */
+    html[dir="rtl"] .table tbody td:nth-child(1)::before { content: "عنوان الاختبار"; }
+    html[dir="rtl"] .table tbody td:nth-child(2)::before { content: "الفيديو المرتبط"; }
+    html[dir="rtl"] .table tbody td:nth-child(3)::before { content: "الحالة"; }
+    html[dir="rtl"] .table tbody td:nth-child(4)::before { content: "تاريخ الإنشاء"; }
+    html[dir="rtl"] .table tbody td:nth-child(5)::before { content: "الإجراءات"; }
 
-
-    body.minimal-page-bg .card { padding: 25px 20px; width: calc(100% - 20px); max-width: calc(100% - 20px); margin: 15px auto;} 
-    body.minimal-page-bg .card .card-title { font-size: 1.6rem; } 
+    html[dir="ltr"] .table tbody td:nth-child(1)::before { content: "Quiz Title"; }
+    html[dir="ltr"] .table tbody td:nth-child(2)::before { content: "Linked Video"; }
+    html[dir="ltr"] .table tbody td:nth-child(3)::before { content: "Status"; }
+    html[dir="ltr"] .table tbody td:nth-child(4)::before { content: "Date Created"; }
+    html[dir="ltr"] .table tbody td:nth-child(5)::before { content: "Actions"; }
     
-    .form-names-row { flex-direction: column; gap: 0; margin-bottom: 0;} 
-    .form-names-row .form-group { margin-bottom: 1.2rem; }
+    .table tbody tr {
+        margin-bottom: 1rem;
+        display: block;
+        border: 1px solid var(--d-border-color);
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        padding: 0.5rem;
+    }
+    body.theme-light .table tbody tr {
+        border: 1px solid var(--l-border-color);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .table tbody tr:hover {
+        transform: translateY(-2px); 
+    }
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: transparent !important; 
+    }
+    .table tbody td .btn-sm {
+        width: 100%;
+        margin-bottom: 5px;
+    }
 }
 
-@media (max-width: 480px) {
-    .hero-headline { font-size: 2rem; }
-    .hero-subheadline { font-size: 1rem; }
-    .hero-cta-buttons { flex-direction: column; align-items: stretch; }
-    .btn.hero-btn-main, .btn.hero-btn-secondary { width: 100%; margin-bottom: 10px; }
-    .btn.hero-btn-main:last-child, .btn.hero-btn-secondary:last-child { margin-bottom: 0; }
+/* Alert styling within content */
+.alert.text-center.p-4 {
+    padding: 2rem !important; 
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+    border-width: 3px; 
+}
+body.theme-dark .alert.border-info { border-color: var(--d-info-color) !important; }
+body.theme-light .alert.border-info { border-color: var(--l-info-color) !important; }
 
-    .section-main-title { font-size: 1.8rem; }
-    .section-padding { padding: 60px 0; }
+.alert-heading {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    font-weight: var(--font-weight-bold);
+}
+.alert-heading .fa-2x {
+    font-size: 2.5rem !important;
+    margin-bottom: 0.75rem; 
+}
+.alert p.lead {
+    font-size: 1.15rem;
+    font-weight: var(--font-weight-medium);
+    margin-bottom: 0.75rem;
+}
+.alert hr.my-4 {
+    margin-top: 1.5rem !important;
+    margin-bottom: 1.5rem !important;
+}
+.alert .btn-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+    font-weight: var(--font-weight-semibold);
+    border-radius: 0.35rem;
+}
+/* Styles for Teacher Profile Page (public/teacher_profile.html) */
+.teacher-profile-card {
+    padding: 2.5rem !important;
+    border-radius: 15px !important;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+body.theme-dark .teacher-profile-card {
+    background-color: var(--d-bg-surface);
+    color: var(--d-text-primary);
+    border: 1px solid var(--d-border-color);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+}
+body.theme-light .teacher-profile-card {
+    background-color: var(--l-bg-surface);
+    color: var(--l-text-primary);
+    border: 1px solid var(--l-border-color);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.teacher-profile-img {
+    width: 180px;
+    height: 180px;
+    object-fit: cover;
+    border: 5px solid var(--primary-color);
+    box-shadow: 0 0 15px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+}
+.teacher-profile-img:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 20px rgba(0,0,0,0.25);
+}
+
+.teacher-profile-card .section-main-title { /* For the teacher name */
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+.teacher-profile-card .text-muted {
+    font-size: 1.1rem;
+}
+
+/* Accordion Specific Styles (from previous response, now integrated) */
+
+.accordion-item {
+    border: 1px solid var(--border-color);
+    margin-bottom: 10px; /* Space between accordion items */
+    border-radius: 8px; /* Match general card/section border-radius */
+    overflow: hidden; /* Ensures content respects border-radius */
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+body.theme-dark .accordion-item {
+    border-color: var(--d-border-color);
+    background-color: var(--d-bg-surface);
+}
+body.theme-light .accordion-item {
+    border-color: var(--l-border-color);
+    background-color: var(--l-bg-surface);
+}
+
+.accordion-header {
+    margin-bottom: 0;
+}
+
+.accordion-button {
+    background-color: var(--bg-secondary); /* Header background */
+    color: var(--text-primary); /* Header text color */
+    font-size: 1.15rem;
+    font-weight: var(--font-weight-semibold);
+    padding: 1rem 1.25rem;
+    width: 100%;
+    text-align: inherit; /* Align text based on LTR/RTL */
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s ease, color 0.2s ease;
+    border-radius: 8px; /* Apply to top corners */
+}
+
+body.theme-dark .accordion-button {
+    background-color: var(--d-bg-secondary);
+    color: var(--d-text-primary);
+    border-color: var(--d-border-color);
+}
+body.theme-light .accordion-button {
+    background-color: var(--l-bg-secondary);
+    color: var(--l-text-primary);
+    border-color: var(--l-border-color);
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: var(--primary-color); /* Highlight when open */
+    color: var(--d-btn-primary-text); /* Dark text on primary color */
+    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.125); /* Subtle shadow for open state */
+    border-bottom-color: transparent; /* No border for open state */
+}
+body.theme-dark .accordion-button:not(.collapsed) {
+    background-color: var(--d-primary-color);
+    color: var(--d-btn-primary-text); /* Dark text on yellow */
+}
+body.theme-light .accordion-button:not(.collapsed) {
+    background-color: var(--l-primary-color);
+    color: var(--l-btn-primary-text); /* Dark text on yellow */
+}
 
 
-    body.minimal-page-bg .card .card-title { font-size: 1.4rem; }
-    .form-group label { font-size: 0.85em; }
-    .form-control, .country-search-input { font-size: 0.85rem; padding: .6rem .7rem; }
-    html[dir="ltr"] .form-control[type="password"], html[dir="ltr"] .form-control[type="tel"] { padding-right: 35px !important; }
-    html[dir="rtl"] .form-control[type="password"], html[dir="rtl"] .form-control[type="tel"] { padding-left: 35px !important; }
+.accordion-button:hover {
+    filter: brightness(1.1); /* Slightly brighter on hover */
+}
 
-    .btn {padding: .5rem 1rem; font-size: 0.9rem;}
-    .btn-create-my-account, .btn.btn-continue-role-selection, .btn-login { font-size: 1rem; padding: 10px 25px; }
+.accordion-button:focus {
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(var(--d-primary-color-rgb, 255, 193, 7), 0.25); /* Primary color glow on focus */
+}
+body.theme-light .accordion-button:focus {
+    box-shadow: 0 0 0 0.25rem rgba(var(--l-primary-color-rgb, 255, 193, 7), 0.25);
+}
+
+
+.accordion-body {
+    padding: 1.5rem;
+    background-color: var(--bg-surface); /* Body background */
+    color: var(--text-secondary); /* Body text */
+    border-top: 1px solid var(--border-color);
+}
+
+body.theme-dark .accordion-body {
+    background-color: var(--d-bg-surface);
+    color: var(--d-text-secondary);
+    border-color: var(--d-border-color);
+}
+body.theme-light .accordion-body {
+    background-color: var(--l-bg-surface);
+    color: var(--l-text-secondary);
+    border-color: var(--l-border-color);
+}
+
+/* Ensure inner row/cols work correctly */
+.accordion-body .row {
+    margin-left: -0.5rem; /* Compensate for g-4 if needed */
+    margin-right: -0.5rem;
+}
+.accordion-body .col {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+/* Fix accordion button arrow direction for RTL */
+html[dir="rtl"] .accordion-button:not(.collapsed)::after {
+    transform: rotate(-180deg) !important; /* Rotate arrow to point up for open */
+}
+html[dir="rtl"] .accordion-button.collapsed::after {
+    transform: rotate(0deg) !important; /* Point down for closed */
+}
+
+/* Override default Bootstrap arrow (if default still visible) */
+.accordion-button::after {
+    background-image: var(--accordion-button-icon) !important; /* Use custom icon */
+    transform: rotate(-90deg); /* Default pointing down for LTR */
+    transition: transform 0.2s ease;
+}
+
+body.theme-dark .accordion-button::after {
+    --accordion-button-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23fff'%3e%3cpath d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e") !important;
+}
+body.theme-light .accordion-button::after {
+    --accordion-button-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23212529'%3e%3cpath d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3c/svg%3e") !important;
+}
+
+html[dir="rtl"] .accordion-button::after {
+    margin-left: 0;
+    margin-right: auto; /* Push arrow to the left in RTL */
+    transform: rotate(90deg) !important; /* Start pointing right for closed state */
+}
+html[dir="rtl"] .accordion-button:not(.collapsed)::after {
+    transform: rotate(-90deg) !important; /* Point left for open state */
+}
+
+/* --- New styles for Premium Content Preview --- */
+
+/* Basic styling for the preview card overlay */
+.video-premium-preview .premium-overlay,
+.quiz-premium-preview .premium-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.75); /* Darker overlay for premium content */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #fff; /* White text on overlay */
+    font-size: 1.1rem;
+    font-weight: var(--font-weight-semibold);
+    text-align: center;
+    opacity: 1; /* Always visible */
+    transition: opacity 0.3s ease;
+    z-index: 5; /* Ensure it's above the card content */
+    border-radius: 12px; /* Match card border-radius */
+    overflow: hidden; /* Important for rounded corners */
+}
+
+/* Ensure images and links behind overlay are not interactable */
+.video-premium-preview img,
+.quiz-premium-preview .card-title a,
+.video-premium-preview .card-body,
+.quiz-premium-preview .card-body {
+    pointer-events: none;
+    user-select: none;
+}
+
+/* Style for the lock icon */
+.premium-overlay i.fa-lock {
+    font-size: 3.5rem;
+    margin-bottom: 15px;
+    color: var(--d-primary-color); /* Use a distinct color for the lock, e.g., yellow/gold */
+}
+body.theme-light .premium-overlay i.fa-lock {
+    color: var(--l-primary-color);
+}
+
+/* Style for the premium text */
+.premium-overlay p {
+    margin-bottom: 15px;
+    font-size: 1.1em;
+    font-weight: var(--font-weight-bold);
+}
+
+/* Style for the subscribe button on the overlay */
+.premium-overlay .btn {
+    font-size: 0.9rem;
+    padding: 8px 20px;
+    border-radius: 6px;
+    background-color: var(--d-warning-color); /* Yellow subscribe button */
+    border-color: var(--d-warning-color);
+    color: #212529; /* Dark text on warning button */
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+body.theme-light .premium-overlay .btn {
+    background-color: var(--l-warning-color);
+    border-color: var(--l-warning-color);
+    color: var(--l-text-primary);
+}
+
+.premium-overlay .btn:hover {
+    background-color: #e0a800; /* Darker yellow on hover */
+    border-color: #d39e00;
+    transform: translateY(-2px);
+}
+
+/* Style for the "disabled" link, preventing clicks */
+.disabled-link {
+    pointer-events: none;
+    cursor: default;
+    text-decoration: none !important;
+}
+body.theme-dark .disabled-link { color: var(--d-text-secondary); }
+body.theme-light .disabled-link { color: var(--l-text-secondary); }
+
+/* Small badge for "Premium Content" on normal cards (if desired to combine with lock) */
+.premium-badge {
+    position: absolute;
+    top: 10px; /* Adjust as needed */
+    right: 10px; /* Adjust as needed */
+    background-color: var(--d-primary-color);
+    color: #212529;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-size: 0.75rem;
+    font-weight: var(--font-weight-semibold);
+    z-index: 10; /* Ensure it's above other elements */
+    opacity: 0.9;
+}
+body.theme-light .premium-badge {
+    background-color: var(--l-primary-color);
+    color: var(--l-text-primary);
+}
+.premium-badge i {
+    font-size: 0.8em;
+    margin-right: 3px;
+}
+html[dir="rtl"] .premium-badge {
+    left: 10px; /* Adjust as needed */
+    right: auto;
+}
+html[dir="rtl"] .premium-badge i {
+    margin-right: 0;
+    margin-left: 3px;
+}
+
+/* Adjust card body padding when overlay is present if needed */
+.video-card.video-premium-preview .card-body,
+.quiz-card.quiz-premium-preview .card-body {
+    padding-bottom: 0; /* Remove extra space if overlay covers footer */
 }

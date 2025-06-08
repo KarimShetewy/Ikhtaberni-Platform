@@ -1,29 +1,263 @@
-{% extends "layout.html" %} {# أو أي قالب أساسي تستخدمه لصفحات الطلاب #}
+{% extends 'layout.html' %}
 
-{% block title %}
-    <span class="lang-en">My Dashboard - Ektbariny</span>
-    <span class="lang-ar" style="display:none;">لوحة التحكم الخاصة بي - اختبرني</span>
-{% endblock %}
+{% block title %}{% if current_lang == 'ar' %}لوحة تحكم الطالب{% else %}Student Dashboard{% endif %}{% endblock %}
 
 {% block content %}
-<div class="container main-page-content" style="margin-top: 30px;">
-    <h2 class="section-main-title">
-        <span class="lang-en">Welcome to Your Student Dashboard, {{ username }}!</span>
-        <span class="lang-ar" style="display:none;">أهلاً بك في لوحة تحكم الطالب، {{ username }}!</span>
-    </h2>
-    <p>
-        <span class="lang-en">This is where you will find your courses, progress, and other student-specific information. Content will be added here soon.</span>
-        <span class="lang-ar" style="display:none;">هنا ستجد كورساتك، تقدمك، ومعلومات أخرى خاصة بك كطالب. سيتم إضافة المحتوى هنا قريبًا.</span>
-    </p>
-    
-    {# يمكنك إضافة روابط أو محتوى للطالب هنا لاحقًا #}
-    {# مثال:
-    <div class="mt-4">
-        <a href="#" class="btn btn-primary">
-            <span class="lang-en">Browse Available Courses</span>
-            <span class="lang-ar" style="display:none;">تصفح الكورسات المتاحة</span>
-        </a>
+<main class="container-fluid mt-4 mb-5">
+    <div class="row">
+        <div class="col-12 text-center">
+            <h1 class="mb-4 display-5">
+                {% if current_lang == 'ar' %}أهلاً بك يا {{ username }}{% else %}Welcome, {{ username }}{% endif %}
+            </h1>
+            <p class="lead">
+                {% if current_lang == 'ar' %}هنا يمكنك متابعة تقدمك واستكشاف محتوى جديد.{% else %}Here you can track your progress and explore new content.{% endif %}
+            </p>
+        </div>
     </div>
-    #}
-</div>
+
+    <section class="dashboard-section mt-5 p-4 rounded shadow-sm bg-light-alpha">
+        <h2 class="section-title mb-4">
+            {% if current_lang == 'ar' %}ملخص سريع{% else %}Quick Summary{% endif %}
+        </h2>
+        <div class="row text-center">
+            <div class="col-md-4 mb-3">
+                <div class="card bg-info text-white shadow-sm h-100">
+                    <div class="card-body">
+                        <h4 class="card-title">{% if current_lang == 'ar' %}فيديوهات شاهدتها{% else %}Videos Watched{% endif %}</h4>
+                        <p class="card-text display-4">{{ recently_watched_videos|length if recently_watched_videos else 0 }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card bg-success text-white shadow-sm h-100">
+                    <div class="card-body">
+                        <h4 class="card-title">{% if current_lang == 'ar' %}اختبارات قمت بها{% else %}Quizzes Taken{% endif %}</h4>
+                        <p class="card-text display-4">{{ latest_quiz_attempts|length if latest_quiz_attempts else 0 }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card bg-warning text-dark shadow-sm h-100">
+                    <div class="card-body">
+                        <h4 class="card-title">{% if current_lang == 'ar' %}مدرسون مشترك معهم{% else %}Teachers Subscribed To{% endif %}</h4>
+                        <p class="card-text display-4">0</p> {# Placeholder for now #}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="dashboard-section mt-5 p-4 rounded shadow-sm bg-light-alpha">
+        <h2 class="section-title mb-4">
+            {% if current_lang == 'ar' %}أحدث الفيديوهات التي شاهدتها{% else %}Recently Watched Videos{% endif %}
+        </h2>
+        {% if recently_watched_videos %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for video in recently_watched_videos %}
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0 video-card">
+                    <img src="{{ url_for('static', filename=video.thumbnail_path_or_url) if video.thumbnail_path_or_url else url_for('static', filename='images/default_video_thumbnail.jpg') }}" class="card-img-top" alt="{{ video.video_title }}">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">
+                            <a href="{{ url_for('student_view_video_page', video_id=video.video_id) }}" class="text-decoration-none">
+                                {{ video.video_title }}
+                            </a>
+                        </h5>
+                        <p class="card-text text-muted small mt-auto">
+                            {% if current_lang == 'ar' %}المدرس: {{ video.teacher_first_name }} {{ video.teacher_last_name }}{% else %}Teacher: {{ video.teacher_first_name }} {{ video.teacher_last_name }}{% endif %}
+                        </p>
+                        <p class="card-text small text-muted">
+                            {% if current_lang == 'ar' %}شوهد في: {{ video.watched_at.strftime('%Y-%m-%d %H:%M') }}{% else %}Watched on: {{ video.watched_at.strftime('%Y-%m-%d %H:%M') }}{% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-center text-muted">
+            {% if current_lang == 'ar' %}لم تشاهد أي فيديوهات مؤخراً. ابدأ في استكشاف الفيديوهات المتاحة!{% else %}You haven't watched any videos recently. Start exploring available videos!{% endif %}
+        </p>
+        {% endif %}
+        <div class="text-center mt-4">
+            <a href="{{ url_for('explore_teachers_page') }}" class="btn btn-primary">
+                {% if current_lang == 'ar' %}استكشف المزيد من الفيديوهات{% else %}Explore More Videos{% endif %}
+            </a>
+        </div>
+    </section>
+
+    <section class="dashboard-section mt-5 p-4 rounded shadow-sm bg-light-alpha">
+        <h2 class="section-title mb-4">
+            {% if current_lang == 'ar' %}أحدث محاولات الاختبارات{% else %}Latest Quiz Attempts{% endif %}
+        </h2>
+        {% if latest_quiz_attempts %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th scope="col">{% if current_lang == 'ar' %}الاختبار{% else %}Quiz{% endif %}</th>
+                        <th scope="col" class="text-center">{% if current_lang == 'ar' %}الدرجة{% else %}Score{% endif %}</th>
+                        <th scope="col" class="text-center">{% if current_lang == 'ar' %}حالة النجاح{% else %}Pass Status{% endif %}</th>
+                        <th scope="col" class="text-center">{% if current_lang == 'ar' %}تاريخ المحاولة{% else %}Attempt Date{% endif %}</th>
+                        <th scope="col" class="text-center">{% if current_lang == 'ar' %}الإجراءات{% else %}Actions{% endif %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for attempt in latest_quiz_attempts %}
+                    <tr>
+                        <td>{{ attempt.quiz_title }}</td>
+                        <td class="text-center">
+                            <strong>{{ attempt.score }}</strong> / {{ attempt.max_possible_score }}
+                            <span class="text-muted small">({{ attempt.passing_score_percentage }}% {% if current_lang == 'ar' %}حد النجاح{% else %}pass mark{% endif %})</span>
+                        </td>
+                        <td class="text-center">
+                            {% if attempt.passed == True %}
+                                <span class="badge bg-success">{% if current_lang == 'ar' %}ناجح{% else %}Passed{% endif %}</span>
+                            {% elif attempt.passed == False %}
+                                <span class="badge bg-danger">{% if current_lang == 'ar' %}راسب{% else %}Failed{% endif %}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{% if current_lang == 'ar' %}لم يحدد{% else %}N/A{% endif %}</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {{ attempt.submitted_at.strftime('%Y-%m-%d %H:%M') if attempt.submitted_at else ('N/A' if current_lang == 'ar' else 'N/A') }}
+                        </td>
+                        <td class="text-center">
+                            <a href="{{ url_for('student_quiz_result_page', attempt_id=attempt.id) }}" class="btn btn-sm btn-outline-info">
+                                {% if current_lang == 'ar' %}عرض النتيجة{% else %}View Result{% endif %}
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-center text-muted">
+            {% if current_lang == 'ar' %}لم تحل أي اختبارات مؤخراً. ابدأ في تحدي نفسك!{% else %}You haven't taken any quizzes recently. Start challenging yourself!{% endif %}
+        </p>
+        {% endif %}
+        <div class="text-center mt-4">
+            <a href="{{ url_for('explore_teachers_page') }}" class="btn btn-secondary">
+                {% if current_lang == 'ar' %}استكشف المزيد من الاختبارات{% else %}Explore More Quizzes{% endif %}
+            </a>
+        </div>
+    </section>
+
+    <section class="dashboard-section mt-5 p-4 rounded shadow-sm bg-light-alpha">
+        <h2 class="section-title mb-4">
+            {% if current_lang == 'ar' %}فيديوهات مقترحة لك{% else %}Suggested Videos For You{% endif %}
+        </h2>
+        {% if available_videos %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for video in available_videos %}
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0 video-card {% if video.is_watched %}video-watched-overlay{% endif %}">
+                    <img src="{{ url_for('static', filename=video.thumbnail_path_or_url) if video.thumbnail_path_or_url else url_for('static', filename='images/default_video_thumbnail.jpg') }}" class="card-img-top" alt="{{ video.title }}">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">
+                            <a href="{{ url_for('student_view_video_page', video_id=video.id) }}" class="text-decoration-none">
+                                {{ video.title }}
+                            </a>
+                        </h5>
+                        <p class="card-text text-muted small">{{ video.description[:100] }}{% if video.description|length > 100 %}...{% endif %}</p>
+                        <p class="card-text text-muted small mt-auto">
+                            {% if current_lang == 'ar' %}المدرس: {{ video.teacher_first_name }} {{ video.teacher_last_name }}{% else %}Teacher: {{ video.teacher_first_name }} {{ video.teacher_last_name }}{% endif %}
+                        </p>
+                    </div>
+                     {% if video.is_watched %}
+                        <div class="video-watched-badge">
+                            <i class="fas fa-check-circle"></i> {% if current_lang == 'ar' %}شوهد{% else %}Watched{% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-center text-muted">
+            {% if current_lang == 'ar' %}لا توجد فيديوهات متاحة حالياً. ابدأ باستكشاف المدرسين أو انتظر محتوى جديد!{% else %}No videos currently available. Start exploring teachers or wait for new content!{% endif %}
+        </p>
+        {% endif %}
+        <div class="text-center mt-4">
+            <a href="{{ url_for('explore_teachers_page') }}" class="btn btn-primary">
+                {% if current_lang == 'ar' %}اكتشف المزيد من المدرسين والفيديوهات{% else %}Discover More Teachers & Videos{% endif %}
+            </a>
+        </div>
+    </section>
+
+    <section class="dashboard-section mt-5 p-4 rounded shadow-sm bg-light-alpha">
+        <h2 class="section-title mb-4">
+            {% if current_lang == 'ar' %}اختبارات مقترحة لك{% else %}Suggested Quizzes For You{% endif %}
+        </h2>
+        {% if available_quizzes %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for quiz in available_quizzes %}
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0 quiz-card">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">
+                            <a href="{{ url_for('student_take_quiz_page', quiz_id=quiz.id) }}" class="text-decoration-none">
+                                {{ quiz.title }}
+                            </a>
+                        </h5>
+                        <p class="card-text text-muted small mb-1">{{ quiz.description[:100] }}{% if quiz.description|length > 100 %}...{% endif %}</p>
+                        {% if quiz.video_title %}
+                        <p class="card-text text-muted small">
+                            {% if current_lang == 'ar' %}مرتبط بـ: {{ quiz.video_title }}{% else %}Related to: {{ quiz.video_title }}{% endif %}
+                        </p>
+                        {% endif %}
+                        <p class="card-text text-muted small mt-auto">
+                            {% if current_lang == 'ar' %}المدرس: {{ quiz.teacher_first_name }} {{ quiz.teacher_last_name }}{% else %}Teacher: {{ quiz.teacher_first_name }} {{ quiz.teacher_last_name }}{% endif %}
+                        </p>
+                        <ul class="list-unstyled small text-muted mb-3">
+                            <li>{% if current_lang == 'ar' %}عدد الأسئلة: {{ quiz.question_count }}{% else %}Questions: {{ quiz.question_count }}{% endif %}</li>
+                            {% if quiz.time_limit_minutes %}
+                            <li>{% if current_lang == 'ar' %}المدة: {{ quiz.time_limit_minutes }} دقيقة{% else %}Time Limit: {{ quiz.time_limit_minutes }} mins{% endif %}</li>
+                            {% else %}
+                            <li>{% if current_lang == 'ar' %}لا يوجد حد زمني{% else %}No Time Limit{% endif %}</li>
+                            {% endif %}
+                            <li>{% if current_lang == 'ar' %}درجة النجاح: {{ quiz.passing_score_percentage }}%{% else %}Pass Mark: {{ quiz.passing_score_percentage }}%{% endif %}</li>
+                        </ul>
+                        
+                        {% if quiz.last_attempt_score is not none %}
+                            <div class="alert alert-info py-2 px-3 small">
+                                {% if current_lang == 'ar' %}
+                                    آخر محاولة: <strong class="text-dark">{{ quiz.last_attempt_score }} / {{ quiz.last_attempt_max_score }}</strong> 
+                                    ({% if quiz.last_attempt_passed %}ناجح{% else %}راسب{% endif %}) - بتاريخ: 
+                                    {{ quiz.last_attempt_date.strftime('%Y-%m-%d') if quiz.last_attempt_date else ('N/A' if current_lang == 'ar' else 'N/A') }}
+                                {% else %}
+                                    Last attempt: <strong class="text-dark">{{ quiz.last_attempt_score }} / {{ quiz.last_attempt_max_score }}</strong> 
+                                    ({% if quiz.last_attempt_passed %}Passed{% else %}Failed{% endif %}) - on 
+                                    {{ quiz.last_attempt_date.strftime('%Y-%m-%d') if quiz.last_attempt_date else 'N/A' }}
+                                {% endif %}
+                                <a href="{{ url_for('student_quiz_result_page', attempt_id=quiz.last_attempt_id) }}" class="btn btn-link btn-sm p-0 ms-2">
+                                    {% if current_lang == 'ar' %}عرض النتيجة{% else %}View Result{% endif %}
+                                </a>
+                            </div>
+                        {% endif %}
+
+                        <div class="mt-auto">
+                            <a href="{{ url_for('student_take_quiz_page', quiz_id=quiz.id) }}" class="btn btn-sm btn-success">
+                                {% if current_lang == 'ar' %}ابدأ الاختبار{% else %}Take Quiz{% endif %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-center text-muted">
+            {% if current_lang == 'ar' %}لا توجد اختبارات متاحة حالياً. تفقد المدرسين أو انتظر محتوى جديد!{% else %}No quizzes currently available. Check out teachers or wait for new content!{% endif %}
+        </p>
+        {% endif %}
+        <div class="text-center mt-4">
+            <a href="{{ url_for('explore_teachers_page') }}" class="btn btn-secondary">
+                {% if current_lang == 'ar' %}ابحث عن مدرسين آخرين{% else %}Find Other Teachers{% endif %}
+            </a>
+        </div>
+    </section>
+
+</main>
 {% endblock %}
