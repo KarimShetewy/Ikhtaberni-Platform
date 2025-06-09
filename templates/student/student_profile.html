@@ -1,0 +1,98 @@
+{% extends 'layout.html' %}
+{% block title %}
+    <span class="lang-en">My Profile - Ektbariny</span>
+    <span class="lang-ar" style="display:none;">ملفي الشخصي - اختبرني</span>
+{% endblock %}
+{% block content %}
+    <div class="container main-page-content" style="margin-top: 30px; margin-bottom: 30px;">
+        <h2 class="section-main-title text-center mb-4">
+            <span class="lang-en">My Profile</span>
+            <span class="lang-ar" style="display:none;">ملفي الشخصي</span>
+        </h2>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card p-4 shadow-sm" style="border-radius: 15px;">
+                    {# قسم المعلومات الشخصية #}
+                    <div class="text-center mb-4">
+                        <img src="{{ url_for('static', filename=student_profile.profile_picture_url) if student_profile.profile_picture_url else url_for('static', filename='images/default_profile.png') }}"
+                             alt="{% if current_lang == 'ar' %}صورة الملف الشخصي{% else %}Profile Picture{% endif %}"
+                             class="img-thumbnail rounded-circle" style="width: 150px; height: 150px; object-fit: cover; border: 3px solid var(--primary-color);">
+                        <h3 class="mt-3 mb-1 section-main-title" style="font-size: 1.8rem;">
+                            {{ student_profile.first_name }} {{ student_profile.last_name }}
+                        </h3>
+                        <p class="text-muted mb-0">
+                            {% if current_lang == 'ar' %}البريد الإلكتروني:{% else %}Email:{% endif %} {{ student_profile.email }}
+                        </p>
+                        {% if student_profile.phone_number %}
+                            <p class="text-muted mb-0">
+                                {% if current_lang == 'ar' %}الهاتف:{% else %}Phone:{% endif %} {{ student_profile.phone_number }}
+                            </p>
+                        {% endif %}
+                        {% if student_profile.country %}
+                            <p class="text-muted">
+                                {% if current_lang == 'ar' %}الدولة:{% else %}Country:{% endif %} {{ student_profile.country }}
+                            </p>
+                        {% endif %}
+                        <a href="{{ url_for('edit_student_profile') }}" class="btn btn-sm btn-outline-primary mt-3">
+                            <i class="fas fa-edit me-1"></i>
+                            <span class="lang-en">Edit Profile</span>
+                            <span class="lang-ar" style="display:none;">تعديل الملف الشخصي</span>
+                        </a>
+                    </div>
+
+                    <hr class="my-4">
+
+                    {# قسم المحفظة المالية #}
+                    <div class="mb-4 text-center">
+                        <h4 class="card-title mb-3">
+                            <span class="lang-en">My Wallet</span>
+                            <span class="lang-ar" style="display:none;">محفظتي</span>
+                        </h4>
+                        <p class="display-4 fw-bold">
+                            {{ student_profile.wallet_balance|default(0.00)|int }}
+                            <span class="text-muted" style="font-size: 0.5em;">{% if current_lang == 'ar' %}جنيه مصري{% else %}EGP{% endif %}</span>
+                        </p>
+                        <a href="{{ url_for('add_wallet_balance') }}" class="btn btn-success btn-lg mt-2">
+                            <i class="fas fa-plus-circle me-2"></i>
+                            <span class="lang-en">Add Balance</span>
+                            <span class="lang-ar" style="display:none;">إضافة رصيد</span>
+                        </a>
+                    </div>
+
+                    <hr class="my-4">
+
+                    {# قسم الدورات المشترك فيها #}
+                    <h4 class="card-title mb-3">
+                        <span class="lang-en">My Subscriptions</span>
+                        <span class="lang-ar" style="display:none;">اشتراكاتي</span>
+                    </h4>
+                    {% if student_subscriptions %}
+                        <div class="list-group list-group-flush">
+                            {% for sub in student_subscriptions %}
+                            <a href="{{ url_for('public_teacher_profile_page', teacher_id=sub.teacher_id) }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="fas fa-chalkboard-teacher me-2"></i>
+                                    {% if current_lang == 'ar' %}الأستاذ/ة: {{ sub.teacher_first_name }} {{ sub.teacher_last_name }}{% else %}Teacher: {{ sub.teacher_first_name }} {{ sub.teacher_last_name }}{% endif %}
+                                </div>
+                                <span class="badge bg-success">
+                                    {% if current_lang == 'ar' %}مشترك{% else %}Active{% endif %}
+                                    {% if sub.expiry_date %}({% if current_lang == 'ar' %}ينتهي في{% else %}Expires:{% endif %} {{ sub.expiry_date.strftime('%Y-%m-%d') }}){% endif %}
+                                </span>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info text-center mt-3">
+                            <span class="lang-en">You don't have any active subscriptions yet.</span>
+                            <span class="lang-ar" style="display:none;">ليس لديك أي اشتراكات نشطة حتى الآن.</span>
+                            <a href="{{ url_for('explore_teachers_page') }}" class="btn btn-sm btn-primary mt-2">
+                                <span class="lang-en">Explore Teachers</span>
+                                <span class="lang-ar" style="display:none;">استكشف المعلمين</span>
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

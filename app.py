@@ -102,7 +102,8 @@ def create_tables():
       `profile_picture_url` VARCHAR(255) NULL, `bio` TEXT NULL,
       `free_video_uploads_remaining` TINYINT UNSIGNED DEFAULT 3, `free_quiz_creations_remaining` TINYINT UNSIGNED DEFAULT 3,
       `is_active` BOOLEAN DEFAULT TRUE, `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      `wallet_balance` DECIMAL(10, 2) DEFAULT 0.00
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     CREATE TABLE IF NOT EXISTS `videos` (
       `id` INT AUTO_INCREMENT PRIMARY KEY, `teacher_id` INT NOT NULL, `title` VARCHAR(255) NOT NULL, `description` TEXT NULL,
@@ -163,7 +164,8 @@ def create_tables():
       CONSTRAINT `fk_subscription_student` FOREIGN KEY (`student_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
       CONSTRAINT `fk_subscription_teacher` FOREIGN KEY (`teacher_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
       UNIQUE INDEX `uq_student_teacher_active_subscription` (`student_id` ASC, `teacher_id` ASC, `status` ASC),
-      INDEX `idx_subscription_student` (`student_id` ASC), INDEX `idx_subscription_teacher` (`teacher_id` ASC)
+      INDEX `idx_subscription_student` (`student_id` ASC),
+      INDEX `idx_subscription_teacher` (`teacher_id` ASC)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     CREATE TABLE IF NOT EXISTS `student_watched_videos` (
       `id` INT AUTO_INCREMENT PRIMARY KEY, `student_id` INT NOT NULL, `video_id` INT NOT NULL, `teacher_id` INT NOT NULL,
@@ -172,7 +174,8 @@ def create_tables():
       CONSTRAINT `fk_watched_video` FOREIGN KEY (`video_id`) REFERENCES `videos`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
       CONSTRAINT `fk_watched_teacher_convenience` FOREIGN KEY (`teacher_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
       UNIQUE INDEX `uq_student_video_watch` (`student_id` ASC, `video_id` ASC),
-      INDEX `idx_watched_student` (`student_id` ASC), INDEX `idx_watched_video` (`video_id` ASC),
+      INDEX `idx_watched_student` (`student_id` ASC),
+      INDEX `idx_watched_video` (`video_id` ASC),
       INDEX `idx_watched_teacher` (`teacher_id` ASC)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     CREATE TABLE IF NOT EXISTS `platform_payments` (
@@ -596,13 +599,17 @@ def public_teacher_profile_page(teacher_id):
 
         # Fetch videos for this teacher
         cursor.execute("""
-            SELECT v.id, v.title, v.description, v.thumbnail_path_or_url, v.is_viewable_free_for_student,
+            SELECT v.id, v.title, v.description, v.video_path_or_url, v.thumbnail_path_or_url,
+                   v.teacher_id, u.first_name as teacher_first_name, u.last_name as teacher_last_name, u.profile_picture_url as teacher_profile_pic,
+                   v.is_viewable_free_for_student, -- Get this directly for access logic
                    CASE WHEN v.is_viewable_free_for_student = TRUE THEN TRUE
                         WHEN %s IS NOT NULL AND %s = TRUE THEN TRUE -- If current_user_id is logged in AND subscribed
                         ELSE FALSE
                    END as has_access
             FROM videos v
-            WHERE v.teacher_id = %s AND v.status = 'published'
+            JOIN users u ON v.teacher_id = u.id
+            LEFT JOIN student_watched_videos swv ON v.id = swv.video_id AND swv.student_id = %s
+            WHERE v.status = 'published'
             ORDER BY v.upload_timestamp DESC
         """, (current_user_id, is_subscribed, teacher_id)) # Pass current_user_id and is_subscribed for conditional access
         teacher_videos = cursor.fetchall()
@@ -611,7 +618,7 @@ def public_teacher_profile_page(teacher_id):
         cursor.execute("""
             SELECT q.id, q.title, q.description, q.time_limit_minutes, q.passing_score_percentage,
                    (SELECT COUNT(DISTINCT qst.id) FROM questions qst WHERE qst.quiz_id = q.id) AS question_count,
-                   q.video_id, v.is_viewable_free_for_student as video_is_free, -- Added q.video_id and v.is_viewable_free_for_student for access control logic
+                   q.video_id, COALESCE(v.is_viewable_free_for_student, FALSE) as video_is_free, -- Added q.video_id and v.is_viewable_free_for_student for access control logic
                    CASE WHEN v.is_viewable_free_for_student = TRUE THEN TRUE -- Linked to free video
                         WHEN %s IS NOT NULL AND %s = TRUE THEN TRUE -- User is subscribed to this teacher (covers standalone and premium linked videos)
                         ELSE FALSE
@@ -1169,7 +1176,7 @@ def add_question_to_quiz_page(quiz_id):
             flash(f"A database error occurred while adding the question: {str(e_db_add_q.msg)[:100]}.", "danger")
         except Exception as e_gen_add_q:
             if conn_insert_new_q: conn_insert_new_q.rollback()
-            app.logger.critical(f"ADD_QUESTION_GENERAL_ERROR (QuizID {quiz_id}): {e_gen_add_q}", exc_info=True)
+            app.logger.critical(f"ADD_QUESTION_GENERAL_ERROR (QuizID {quiz_id}): {e_gen_add_add_q}", exc_info=True)
             flash("An unexpected error occurred while adding the question. Please try again.", "danger")
         finally:
             if cursor_insert_new_q: cursor_insert_new_q.close()
@@ -1298,7 +1305,7 @@ def edit_question_page(quiz_id, question_id):
             for idx, choice_text_val in enumerate(updated_choices_texts_from_form):
                 if choice_text_val: # Only insert choices that have text
                     is_this_choice_correct_updated = (idx == updated_correct_choice_idx)
-                    cursor_insert_new_q.execute(sql_insert_updated_choice, (question_id, choice_text_val, is_this_choice_correct_updated))
+                    cursor_update_edited_q.execute(sql_insert_updated_choice, (question_id, choice_text_val, is_this_choice_correct_updated))
             
             conn_update_edited_q.commit()
             flash(f"Question in quiz '{quiz_info_for_edit_q['title']}' has been updated successfully!", "success")
@@ -1348,7 +1355,7 @@ def edit_teacher_profile():
         if not conn_fetch_profile: raise Error("DB connection failed loading profile for edit.")
         cursor_fetch_profile = conn_fetch_profile.cursor(dictionary=True)
         cursor_fetch_profile.execute("""
-            SELECT first_name, last_name, email, phone_number, country, bio, profile_picture_url 
+            SELECT first_name, last_name, email, phone_number, country, bio, profile_picture_url
             FROM users WHERE id = %s
         """, (teacher_id,))
         user_profile_data_from_db = cursor_fetch_profile.fetchone()
@@ -1412,7 +1419,8 @@ def edit_teacher_profile():
             # form_data_for_template already has submitted data
             return render_template('teacher/edit_profile.html', 
                                    form_data=form_data_for_template, 
-                                   current_profile_pic_url=current_profile_pic_url_for_template)
+                                   current_profile_pic_url=current_profile_pic_url_for_template,
+                                   teacher_id_for_preview=teacher_id) # Pass teacher_id_for_preview
 
         # Proceed with file saving and DB update
         conn_update_profile_db = None; cursor_update_profile_db = None
@@ -1480,12 +1488,14 @@ def edit_teacher_profile():
         # If POST failed, re-render with submitted data (form_data_for_template already has POST data)
         return render_template('teacher/edit_profile.html', 
                                form_data=form_data_for_template, 
-                               current_profile_pic_url=current_profile_pic_url_for_template) # Show original pic if update failed
+                               current_profile_pic_url=current_profile_pic_url_for_template,
+                               teacher_id_for_preview=teacher_id) # Pass teacher_id_for_preview
 
     # For GET request: form_data_for_template was filled from user_profile_data_from_db
     return render_template('teacher/edit_profile.html', 
                            form_data=form_data_for_template, 
-                           current_profile_pic_url=current_profile_pic_url_for_template)
+                           current_profile_pic_url=current_profile_pic_url_for_template,
+                           teacher_id_for_preview=teacher_id) # Pass teacher_id_for_preview
 
 
 # --- 12. Placeholder Dashboard Routes & Language Switch ---
@@ -1641,6 +1651,81 @@ def student_dashboard_placeholder():
                            recently_watched_videos=recently_watched_videos,
                            is_minimal_layout=False)
 
+@app.route('/student/profile')
+@student_required
+def student_profile_page():
+    student_id = session['user_id']
+    student_profile_data = None
+    student_subscriptions_list = []
+
+    conn = None
+    cursor = None
+    try:
+        conn = get_db_connection()
+        if not conn:
+            flash("Database connection error. Please try again later.", "danger")
+            return redirect(url_for('student_dashboard_placeholder'))
+
+        cursor = conn.cursor(dictionary=True)
+
+        # Fetch student's personal data and wallet balance
+        cursor.execute("""
+            SELECT id, first_name, last_name, email, phone_number, country, profile_picture_url, wallet_balance
+            FROM users
+            WHERE id = %s AND role = 'student'
+        """, (student_id,))
+        student_profile_data = cursor.fetchone()
+
+        if not student_profile_data:
+            flash("Your profile could not be found.", "warning")
+            return redirect(url_for('student_dashboard_placeholder'))
+
+        # Fetch active subscriptions for the student
+        cursor.execute("""
+            SELECT ss.teacher_id, ss.subscription_date, ss.expiry_date,
+                   u.first_name as teacher_first_name, u.last_name as teacher_last_name
+            FROM student_subscriptions ss
+            JOIN users u ON ss.teacher_id = u.id
+            WHERE ss.student_id = %s AND ss.status = 'active'
+            ORDER BY ss.subscription_date DESC
+        """, (student_id,))
+        student_subscriptions_list = cursor.fetchall()
+
+    except Error as e:
+        app.logger.error(f"STUDENT_PROFILE_DB_ERROR for student {student_id}: {e.msg}", exc_info=False)
+        flash("An error occurred while loading your profile. Please try again.", "danger")
+        return redirect(url_for('student_dashboard_placeholder'))
+    finally:
+        if cursor:
+            cursor.close()
+        if conn and conn.is_connected():
+            conn.close()
+
+    return render_template('student/student_profile.html',
+                           student_profile=student_profile_data,
+                           student_subscriptions=student_subscriptions_list)
+
+# route for editing student profile (similar to teacher's)
+@app.route('/student/profile/edit', methods=['GET', 'POST'])
+@student_required
+def edit_student_profile():
+    # Implementation will be very similar to edit_teacher_profile,
+    # but specific to student fields and role.
+    # You would copy/adapt the logic from edit_teacher_profile here.
+    # Make sure to handle profile_picture_url, phone_number, country, bio if you want to add them.
+    # For now, let's just show a placeholder, or you can implement it fully.
+    flash("Edit Student Profile page is under construction!", "info")
+    return redirect(url_for('student_profile_page'))
+
+# Placeholder route for adding wallet balance
+@app.route('/student/wallet/add_balance', methods=['GET', 'POST'])
+@student_required
+def add_wallet_balance():
+    # This route would handle the logic for adding money to the wallet.
+    # It would involve form submission and potentially integration with a payment gateway.
+    flash("Add Wallet Balance functionality is coming soon!", "info")
+    return redirect(url_for('student_profile_page'))
+
 @app.route('/student/videos/<int:video_id>')
 @student_required
 def student_view_video_page(video_id):
@@ -1729,7 +1814,7 @@ def student_take_quiz_page(quiz_id):
         # Get quiz info
         cursor.execute("""
             SELECT q.id, q.title, q.description, q.time_limit_minutes, q.passing_score_percentage, q.allow_answer_review, q.teacher_id, q.video_id,
-                   COALESCE(v.is_viewable_free_for_student, FALSE) as video_is_free -- Use COALESCE for safety
+                   COALESCE(v.is_viewable_free_for_student, FALSE) as video_is_free -- Use COALESCE for safety when video_id is NULL
             FROM quizzes q
             LEFT JOIN videos v ON q.video_id = v.id
             WHERE q.id = %s AND q.is_active = TRUE AND EXISTS (SELECT 1 FROM questions WHERE quiz_id = q.id)

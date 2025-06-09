@@ -1,14 +1,10 @@
 <!DOCTYPE html>
-{# يتم التحكم باللغة والاتجاه بواسطة JavaScript الرئيسي (main.js) بناءً على إعدادات المستخدم المحفوظة #}
-{# الافتراضي الأولي عند أول تحميل بدون إعدادات محفوظة هو ما يتم تعيينه هنا أو في <body> #}
-<html lang="en" dir="ltr"> {# يتم تحديث هذه السمات بواسطة JS #}
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>
         {% block title %}
-            {# عنوان افتراضي لصفحات المصادقة، سيتم تغييره من الصفحات التي ترث #}
-            {# والنصوص ستُعرض بناءً على اللغة المختارة بواسطة JS #}
             <span class="lang-en">Account Process - Ektbariny</span>
             <span class="lang-ar" style="display:none;">عملية الحساب - اختبرني</span>
         {% endblock %}
@@ -17,46 +13,27 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     
     {% block head_extra_minimal %}
-    {#
-        ملاحظة للمطور: هذا البلوك مخصص لأي إضافات ضرورية جدًا لـ <head>
-        في صفحات المصادقة فقط (مثل <meta> tags خاصة أو <link> لملف CSS صغير جدًا خاص).
-        في الوقت الحالي، معظم الأنماط يتم التحكم بها من style.css العام.
-    #}
-    <style>
-        /* 
-         تم إبقاء هذا الوسم <style> فارغًا عمدًا لتجنب أي أخطاء في بناء الجملة.
-         إذا كنت بحاجة لإضافة أنماط CSS مخصصة جدًا لهذا التخطيط فقط،
-         ضعها هنا وتأكد أنها قواعد CSS صالحة تمامًا.
-         يُفضل دائمًا وضع معظم الأنماط في ملف style.css الرئيسي.
-        */
-    </style>
     {% endblock %}
 </head>
 <body class="minimal-page-bg" data-current-theme="light" data-current-lang="en"> 
-    {# 
-      `minimal-page-bg` كلاس يطبق من style.css التصميم الفاتح الثابت لهذه الصفحات.
-      `data-current-theme="light"`: يشير إلى أن هذه الصفحات يجب أن تبقى دائمًا في "الوضع النهاري" الخاص بها.
-      `data-current-lang="en"`: يتم تحديثها بواسطة main.js لتعكس اللغة المختارة.
-    #}
 
-    <header class="simplified-header-for-auth"> {# هذا الهيدر مُصمم في style.css #}
+    <header class="simplified-header-for-auth">
         <div class="logo-minimal-auth">
             <a href="{{ url_for('home') }}">
-                 {# النص هنا أيضًا سيعتمد على اللغة المطبقة بواسطة JS #}
                  <span class="lang-en">Ektbariny</span>
                  <span class="lang-ar" style="display:none;">اختبرني</span>
             </a>
         </div>
     </header>
 
-    <div class="content-wrapper-auth"> {# حاوية لتوسيط المحتوى وتحديد عرضه في صفحات المصادقة #}
+    <div class="content-wrapper-auth">
         {# عرض رسائل التنبيه (Flash Messages) #}
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
-            <div class="flash-messages-container"> {# يتم تعديل موضع هذا في style.css لـ minimal-page-bg #}
+            <div class="flash-messages-container">
             {% for category, message in messages %}
               <div class="alert alert-{{ category if category else 'info' }}" role="alert">
-                {{ message | safe }} {# رسائل الفلاش يجب أن تُترجم من جانب الخادم (Flask) إذا أردت ترجمتها #}
+                {{ message | safe }}
                 <button type="button" class="close-alert-btn" aria-label="Close alert">×</button>
               </div>
             {% endfor %}
@@ -65,19 +42,25 @@
         {% endwith %}
 
         {# هذا البلوك هو المكان الذي سيتم فيه حقن محتوى نماذج المصادقة الفردية #}
-        {% block content_minimal %}
-            <div class="card" style="text-align:center; padding: 40px;"> {# مثال لعنصر نائب #}
-                <p class="lang-en" style="font-size: 1.2em;">Loading specific authentication page content...</p>
-                <p class="lang-ar" style="display:none; font-size: 1.2em;">يتم تحميل محتوى صفحة المصادقة المحددة...</p>
+        <div class="auth-page-layout">
+            <div class="auth-form-container">
+                {% block content_minimal %}
+                    <div class="card" style="text-align:center; padding: 40px;">
+                        <p class="lang-en" style="font-size: 1.2em;">Loading specific authentication page content...</p>
+                        <p class="lang-ar" style="display:none; font-size: 1.2em;">يتم تحميل محتوى صفحة المصادقة المحددة...</p>
+                    </div>
+                {% endblock %}
             </div>
-        {% endblock %}
+            <div class="auth-image-area">
+                {# يمكنك هنا استبدال مسار الصورة بصورة مناسبة لكل صفحة إذا لزم الأمر، 
+                   أو يمكنك تمرير اسم ملف الصورة كمتغير في Flask view #}
+                <img src="{{ url_for('static', filename='images/auth_illustration_placeholder.svg') }}" 
+                     alt="{% if current_lang == 'ar' %}صورة توضيحية لصفحات المصادقة{% else %}Authentication illustration{% endif %}"
+                     class="auth-illustration">
+            </div>
+        </div>
     </div>
     
-    {# 
-      يتم تحميل ملف main.js العام أولاً.
-      scripts_extra_minimal هو مكان لوضع JavaScript خاص جدًا بالصفحة الفرعية
-      (مثل دوال التحقق من صحة النموذج المخصصة أو تبديل رؤية كلمة المرور إذا لم تكن عامة).
-    #}
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     {% block scripts_extra_minimal %}{% endblock %}
 </body>

@@ -146,6 +146,12 @@
                             <span class="lang-en">Edit Profile</span>
                             <span class="lang-ar" style="display:none;">تعديل ملفي الشخصي</span>
                         </a>
+                    {% elif session.get('role') == 'student' %}
+                         <a href="{{ url_for('student_profile_page') }}" class="dropdown-item">
+                            <i class="fas fa-user"></i>
+                            <span class="lang-en">My Profile</span>
+                            <span class="lang-ar" style="display:none;">ملفي الشخصي</span>
+                        </a>
                     {% endif %}
                     <a href="{{ url_for('explore_teachers_page') }}" class="dropdown-item">
                         <i class="fas fa-chalkboard-teacher"></i>
