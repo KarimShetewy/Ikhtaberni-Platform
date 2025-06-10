@@ -23,13 +23,12 @@
     --d-success-rgb: 76, 175, 80;
     --d-danger-color: #ef5350;
     --d-info-color: #26c6da;
-    --d-warning-color: #ffc107; /* Consistent with primary for warning overlays maybe */
+    --d-warning-color: #ffc107;
 
     --d-text-primary: #e0e0e0;
     --d-text-secondary: #b0bec5;
     --d-text-muted: #757575;
 
-    /* --- NEW/ADJUSTED FOR DARK THEME BUTTON TEXT --- */
     --d-btn-primary-text: #1a1a1a; /* Dark text for primary buttons on gold bg */
 
     --d-bg-primary: #1f1f1f;
@@ -45,7 +44,7 @@
     --d-header-text-color: var(--d-text-primary);
     --d-header-link-hover: var(--d-primary-hover);
     --d-header-btn-signup-bg: var(--d-primary-color);
-    --d-header-btn-signup-text: var(--d-btn-primary-text); /* Use consistent dark text */
+    --d-header-btn-signup-text: var(--d-btn-primary-text);
     --d-header-btn-signup-hover-bg: var(--d-primary-hover);
     --d-header-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
 
@@ -61,7 +60,7 @@
     --d-footer-text-color: var(--d-text-muted);
 
     /* --- Light Theme Variables --- */
-    --l-primary-color: #ffc107; /* Keep gold for light theme consistency */
+    --l-primary-color: #ffc107;
     --l-primary-hover: #e0a800;
     --l-primary-active: #c89500;
     --l-primary-rgb: 255, 193, 7;
@@ -77,7 +76,6 @@
     --l-text-secondary: #616161;
     --l-text-muted: #9e9e9e;
 
-    /* --- NEW/ADJUSTED FOR LIGHT THEME BUTTON TEXT --- */
     --l-btn-primary-text: #212121; /* Dark text for light theme primary buttons */
 
     --l-bg-primary: #fafafa;
@@ -93,7 +91,7 @@
     --l-header-text-color: var(--l-text-primary);
     --l-header-link-hover: var(--l-primary-hover);
     --l-header-btn-signup-bg: var(--l-primary-color);
-    --l-header-btn-signup-text: var(--l-btn-primary-text); /* Use consistent dark text */
+    --l-header-btn-signup-text: var(--l-btn-primary-text);
     --l-header-btn-signup-hover-bg: var(--l-primary-hover);
     --l-header-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
 
@@ -148,7 +146,6 @@
     --shadow-large: rgba(0, 0, 0, 0.6);
 }
 
-
 /* ==========================================================================
    2. Base Styles and Theming (Dark/Light)
    ========================================================================== */
@@ -159,7 +156,7 @@
 }
 
 html {
-    font-size: 16px; /* Base font size */
+    font-size: 16px;
     scroll-behavior: smooth;
 }
 
@@ -169,7 +166,7 @@ body {
     min-height: 100vh;
     font-family: var(--font-family);
     line-height: 1.7;
-    background-size: 400% 400% !important;
+    background-size: 400% 400% !important; /* Important might be needed if other styles override */
     overflow-x: hidden;
     transition: background 0.4s ease, color 0.4s ease;
 }
@@ -206,19 +203,20 @@ body.theme-light a { color: var(--l-primary-color); }
 body.theme-light a:hover { color: var(--l-primary-hover); text-decoration: underline; }
 body.theme-light h1, body.theme-light h2, body.theme-light h3, body.theme-light h4 { color: var(--l-text-primary); }
 
+/* General Typography and Elements */
 img { display: block; max-width: 100%; height: auto; }
 a { text-decoration: none; transition: color 0.2s ease; }
 h1, h2, h3, h4, h5, h6 { margin-bottom: 0.8em; font-weight: var(--font-weight-bold); line-height: 1.35; }
 p { margin-bottom: 1.1em; }
-hr { border-color: var(--d-border-color); opacity: 0.3; transition: border-color 0.3s ease, opacity 0.3s ease; }
-body.theme-light hr { border-color: var(--l-border-color); opacity: 0.7; }
+hr { border: 0; border-top: 1px solid var(--d-border-color); opacity: 0.3; transition: border-color 0.3s ease, opacity 0.3s ease; }
+body.theme-light hr { border-top-color: var(--l-border-color); opacity: 0.7; } /* Ensure hr has border-top-color */
 .text-muted { color: var(--d-text-muted) !important; }
 body.theme-light .text-muted { color: var(--l-text-muted) !important; }
 .container { width: 90%; max-width: 1280px; margin-right: auto; margin-left: auto; padding-right: 25px; padding-left: 25px; }
 
 
 /* ==========================================================================
-   3. Header Navigation (Main and Settings) - (Kept as previously adjusted)
+   3. Header Navigation (Main and Settings)
    ========================================================================== */
 header.main-header { position: sticky; top: 0; z-index: 1020; display: flex; align-items: center; width: 100%; padding: 1.2rem 2.5rem; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: background-color 0.3s ease, box-shadow 0.3s ease; }
 body.theme-dark header.main-header { background: var(--d-header-bg); box-shadow: var(--d-header-shadow); }
@@ -226,7 +224,7 @@ body.theme-light header.main-header { background: var(--l-header-bg); border-bot
 header.main-header .logo { font-size: 2.2rem; font-weight: var(--font-weight-extrabold); }
 html[dir="ltr"] header.main-header .logo { margin-right: auto; } html[dir="rtl"] header.main-header .logo { margin-left: auto; }
 header.main-header .logo a { color: var(--d-header-text-color); } body.theme-light header.main-header .logo a { color: var(--l-header-text-color); }
-header.main-header .logo a:hover { color: var(--d-primary-hover); } body.theme-light header.main-header .logo a:hover { color: var(--l-primary-hover); }
+header.main-header .logo a:hover { color: var(--d-primary-hover); text-decoration: none; } body.theme-light header.main-header .logo a:hover { color: var(--l-primary-hover); } /* Ensure no underline from general a:hover */
 header.main-header .main-nav { display: flex; align-items: center; }
 html[dir="ltr"] header.main-header .main-nav { margin-right: 30px; } html[dir="rtl"] header.main-header .main-nav { margin-left: 30px; }
 header.main-header .main-nav a { padding: 0 16px; color: var(--d-header-text-color); font-size: 1.1em; font-weight: var(--font-weight-medium); transition: color 0.25s ease, text-decoration 0.25s ease; }
@@ -262,9 +260,9 @@ body.theme-light .close-menu-button { color: var(--dropdown-item-color-l); }
 body.theme-light .close-menu-button:hover { color: var(--l-danger-color); }
 
 /* ==========================================================================
-   4. Hero Section V2 (Modernized) - (Kept as previously adjusted)
+   4. Hero Section V2 (Modernized)
    ========================================================================== */
-.hero-section-v2 { display: flex; align-items: center; min-height: calc(100vh - 80px); padding: 100px 0; overflow: hidden; }
+.hero-section-v2 { display: flex; align-items: center; min-height: calc(100vh - 80px); /* Adjust 80px if header height changes */ padding: 100px 0; overflow: hidden; }
 .hero-container { display: flex; flex-wrap: wrap; align-items: center; gap: 80px; }
 .hero-text-content { flex: 1 1 50%; min-width: 350px; }
 .hero-headline { margin-bottom: 30px; font-size: 4.5rem; font-weight: var(--font-weight-extrabold); line-height: 1.15; }
@@ -284,7 +282,7 @@ body.theme-light .btn.hero-btn-secondary:hover { color: var(--l-primary-color); 
 .hero-main-img { max-width: 100%; max-height: 550px; height: auto; object-fit: contain; }
 
 /* ==========================================================================
-   5. Features Section V2 (Modernized) - (Kept as previously adjusted)
+   5. Features Section V2 (Modernized)
    ========================================================================== */
 .section-padding { padding: 100px 0; }
 .text-center { text-align: center !important; }
@@ -294,7 +292,7 @@ body.theme-light .btn.hero-btn-secondary:hover { color: var(--l-primary-color); 
 .feature-item { padding: 35px; border-radius: 15px; transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); will-change: transform, box-shadow; }
 body.theme-dark .feature-item { background-color: var(--d-bg-surface); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
 body.theme-light .feature-item { background-color: var(--l-bg-surface); border: 1px solid var(--l-border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
-.feature-item:hover { transform: translateY(-12px) scale(1.02); box-shadow: 0 25px 50px rgba(0,0,0,0.4); }
+.feature-item:hover { transform: translateY(-12px) scale(1.02); }
 body.theme-dark .feature-item:hover { box-shadow: 0 25px 50px rgba(var(--d-primary-rgb),0.35); }
 body.theme-light .feature-item:hover { box-shadow: 0 25px 50px rgba(var(--l-primary-rgb),0.25); }
 .feature-icon { margin-bottom: 30px; font-size: 3.8rem; }
@@ -303,7 +301,7 @@ body.theme-dark .feature-icon i { color: var(--d-primary-color); } body.theme-li
 .feature-description { font-size: 1.1em; line-height: 1.75; opacity: 0.9; }
 
 /* ==========================================================================
-   6. About Sections V2 (Modernized) - (Kept as previously adjusted)
+   6. About Sections V2 (Modernized)
    ========================================================================== */
 .alt-bg { transition: background-color 0.3s ease; }
 body.theme-dark .alt-bg { background-color: var(--d-bg-secondary); } body.theme-light .alt-bg { background-color: var(--l-bg-secondary); }
@@ -316,129 +314,86 @@ body.theme-dark .about-image-block img { box-shadow: 0 20px 50px rgba(0,0,0,0.5)
 body.theme-light .about-image-block img { box-shadow: 0 15px 40px var(--shadow-medium); }
 
 /* ==========================================================================
-   7. Final CTA Section - (Kept as previously adjusted)
+   7. Final CTA Section
    ========================================================================== */
 .final-cta-section .section-main-title { margin-bottom: 25px; font-size: 3.8rem; }
 .final-cta-section .section-subtitle { margin-bottom: 60px; max-width: 800px; font-size: 1.5rem; opacity: 0.95; }
 .btn.btn-xl.final-cta-btn { padding: 22px 65px; font-size: 1.6rem; font-weight: var(--font-weight-bold); text-transform: uppercase; }
 
 /* ==========================================================================
-   8. Footer - (Kept as previously adjusted)
+   8. Footer
    ========================================================================== */
 footer.main-footer { width: 100%; margin-top: auto; padding: 3.5rem 2.5rem; font-size: 1rem; text-align: center; border-top-style: solid; border-top-width: 1px; transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
 body.theme-dark footer.main-footer { background: var(--d-footer-bg); color: var(--d-footer-text-color); border-top-color: rgba(255,255,255,0.15); }
 body.theme-light footer.main-footer { background: var(--l-footer-bg); color: var(--l-footer-text-color); border-top-color: var(--l-border-color); }
 
 /* ==========================================================================
-   9. Flash Messages (Alerts) - (Kept as previously adjusted)
+   9. Flash Messages (Alerts)
    ========================================================================== */
-.flash-messages-container { position: fixed; top: 110px; z-index: 2020; display: flex; flex-direction: column; align-items: center; width: auto; max-width: 95%; pointer-events: none; }
+.flash-messages-container { position: fixed; top: 110px; /* Adjust if header height is different */ z-index: 2020; display: flex; flex-direction: column; align-items: center; width: auto; max-width: 95%; pointer-events: none; }
 html[dir="ltr"] .flash-messages-container { left: 50%; transform: translateX(-50%); } html[dir="rtl"] .flash-messages-container { right: 50%; transform: translateX(50%); }
-.alert { position: relative; min-width: 400px; max-width: 700px; margin-bottom: 1.2rem; padding: 1.5rem 2rem; font-size: 1.05em; text-align: center; border: 2px solid transparent; border-radius: .6rem; opacity: 0.99; box-shadow: 0 6px 25px rgba(0,0,0,0.3); pointer-events: all; transition: opacity 0.3s ease-out, transform 0.4s ease-out; }
-.alert-success { background-color: var(--alert-success-bg); border-color: var(--alert-success-border); color: var(--alert-success-text);}
-.alert-danger  { background-color: var(--alert-danger-bg); border-color: var(--alert-danger-border); color: var(--alert-danger-text);}
-.alert-warning { background-color: var(--alert-warning-bg); border-color: var(--alert-warning-border); color: var(--alert-warning-text);}
-.alert-info    { background-color: var(--alert-info-bg); border-color: var(--alert-info-border); color: var(--alert-info-text);}
-.close-alert-btn { position: absolute; top: 50%; padding: 0.8rem 1.2rem; color: inherit; font-size: 1.6rem; line-height: 1; background: transparent; border: none; opacity: 0.8; cursor: pointer; transform: translateY(-50%); transition: opacity 0.2s ease, transform 0.2s ease; }
-html[dir="ltr"] .close-alert-btn { right: 20px; } html[dir="rtl"] .close-alert-btn { left: 20px; }
-.close-alert-btn:hover { opacity: 1; transform: translateY(-50%) scale(1.2); }
+.alert { position: relative; min-width: 320px; /* Adjusted min-width */ max-width: 600px; /* Adjusted max-width */ margin-bottom: 1.2rem; padding: 1rem 1.5rem; /* Adjusted padding */ font-size: 1em; /* Adjusted font-size */ text-align: center; border: 1px solid transparent; /* Changed to 1px border */ border-radius: .4rem; /* Adjusted border-radius */ opacity: 0.99; box-shadow: 0 6px 25px rgba(0,0,0,0.25); /* Adjusted shadow */ pointer-events: all; transition: opacity 0.3s ease-out, transform 0.4s ease-out; }
+/* Theme-specific alert styles */
+.alert.alert-success { background-color: var(--alert-success-bg); border-color: var(--alert-success-border); color: var(--alert-success-text);}
+.alert.alert-danger  { background-color: var(--alert-danger-bg); border-color: var(--alert-danger-border); color: var(--alert-danger-text);}
+.alert.alert-warning { background-color: var(--alert-warning-bg); border-color: var(--alert-warning-border); color: var(--alert-warning-text);}
+.alert.alert-info    { background-color: var(--alert-info-bg); border-color: var(--alert-info-border); color: var(--alert-info-text);}
+/* Close button for alerts */
+.close-alert-btn { position: absolute; top: 50%; padding: 0.5rem 1rem; /* Adjusted padding */ color: inherit; font-size: 1.4rem; /* Adjusted size */ line-height: 1; background: transparent; border: none; opacity: 0.7; /* Adjusted opacity */ cursor: pointer; transform: translateY(-50%); transition: opacity 0.2s ease, transform 0.2s ease; }
+html[dir="ltr"] .close-alert-btn { right: 15px; } html[dir="rtl"] .close-alert-btn { left: 15px; } /* Adjusted position */
+.close-alert-btn:hover { opacity: 1; transform: translateY(-50%) scale(1.15); } /* Adjusted hover effect */
 
 /* ==========================================================================
-   10. Authentication Pages (Minimal Layout) - Includes new adjustments
+   10. Authentication Pages (Minimal Layout)
    ========================================================================== */
-body.minimal-page-bg { background: var(--d-bg-primary) !important; }
+body.minimal-page-bg { background: var(--d-bg-primary) !important; } /* important to override gradient */
 body.theme-light.minimal-page-bg { background: var(--l-bg-primary) !important; }
 
-body.minimal-page-bg header.simplified-header-for-auth { position: sticky; top: 0; z-index: 999; width: 100%; margin-bottom: 50px; padding: 2rem 0; }
-body.theme-dark.minimal-page-bg header.simplified-header-for-auth { background: var(--d-header-bg); box-shadow: var(--d-header-shadow); }
-body.theme-light.minimal-page-bg header.simplified-header-for-auth { background: var(--l-header-bg); border-bottom: 1px solid var(--l-border-color); box-shadow: var(--l-header-shadow); }
-body.minimal-page-bg header.simplified-header-for-auth .logo-minimal-auth a { color: var(--minimal-header-text-color-d); font-size: 2.6rem; font-weight: var(--font-weight-extrabold); }
-body.theme-light.minimal-page-bg header.simplified-header-for-auth .logo-minimal-auth a { color: var(--minimal-header-text-color-l); }
+header.simplified-header-for-auth { position: sticky; top: 0; z-index: 999; width: 100%; margin-bottom: 50px; padding: 2rem 0; }
+body.theme-dark header.simplified-header-for-auth { background: var(--d-header-bg); box-shadow: var(--d-header-shadow); }
+body.theme-light header.simplified-header-for-auth { background: var(--l-header-bg); border-bottom: 1px solid var(--l-border-color); box-shadow: var(--l-header-shadow); }
+header.simplified-header-for-auth .logo-minimal-auth a { color: var(--minimal-header-text-color-d); font-size: 2.6rem; font-weight: var(--font-weight-extrabold); text-decoration: none; }
+body.theme-light header.simplified-header-for-auth .logo-minimal-auth a { color: var(--minimal-header-text-color-l); }
 
 body.minimal-page-bg footer.main-footer { display: none !important; }
-body.minimal-page-bg .content-wrapper-auth { max-width: 550px; margin: 50px auto 80px auto; padding: 0 30px; }
-body.minimal-page-bg .flash-messages-container { position: static; max-width:100%; margin: 30px 0; padding: 0; transform: none; }
+.content-wrapper-auth { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; /* Changed to flex-start for messages at top */ width: 100%; max-width: 1150px; /* Same as auth-page-layout max-width */ margin: 0 auto 80px auto; /* Removed top margin, added bottom */ padding: 0 15px; /* Add some padding */ }
 
-body.minimal-page-bg .card { width: 100%; margin: 0 auto 40px auto; padding: 50px 60px; text-align: center; border-radius: 20px; transition: all 0.3s ease; }
-body.theme-dark.minimal-page-bg .card { color: var(--d-text-primary); background: var(--d-bg-surface); border: 1px solid var(--d-border-color); box-shadow: 0 15px 40px rgba(0,0,0,0.6); }
-body.theme-light.minimal-page-bg .card { color: var(--l-text-primary); background: var(--l-bg-surface); border: 1px solid var(--l-border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+body.minimal-page-bg .card { /* This is a general card style you had */ width: 100%; margin: 0 auto 40px auto; padding: 50px 60px; text-align: center; border-radius: 20px; transition: all 0.3s ease; }
+body.theme-dark body.minimal-page-bg .card { color: var(--d-text-primary); background: var(--d-bg-surface); border: 1px solid var(--d-border-color); box-shadow: 0 15px 40px rgba(0,0,0,0.6); }
+body.theme-light body.minimal-page-bg .card { color: var(--l-text-primary); background: var(--l-bg-surface); border: 1px solid var(--l-border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
 body.minimal-page-bg .card .card-title { margin-bottom: 30px; font-size: 2.8rem; font-weight: var(--font-weight-bold); }
-body.theme-dark.minimal-page-bg .card .card-title { color: var(--d-text-primary); } body.theme-light.minimal-page-bg .card .card-title { color: var(--l-text-primary); }
+body.theme-dark body.minimal-page-bg .card .card-title { color: var(--d-text-primary); } body.theme-light body.minimal-page-bg .card .card-title { color: var(--l-text-primary); }
 body.minimal-page-bg .card .card-subtitle { font-size: 1.1rem; margin-bottom: 45px; color: var(--d-text-secondary); line-height: 1.8; }
-body.theme-light.minimal-page-bg .card .card-subtitle { color: var(--l-text-secondary); }
+body.theme-light body.minimal-page-bg .card .card-subtitle { color: var(--l-text-secondary); }
 
-/* Layout for Auth Pages (Form + Image), e.g., Choose Role / Signup - ADJUSTED SIZE */
-.auth-page-layout {
-    display: flex;
-    align-items: stretch;
-    width: 100%;
-    max-width: 1150px; /* INCREASED from 1000px */
-    min-height: 650px; /* INCREASED from 600px */
-    margin: 5vh auto;
-    background-color: var(--d-bg-surface);
-    border-radius: 20px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.6);
-    overflow: hidden;
-}
-body.theme-light .auth-page-layout {
-    background-color: var(--l-bg-surface);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-}
 
-/* Auth Form Container (part of .auth-page-layout or standalone) - ADJUSTED FLEX */
-.auth-form-container {
-    flex: 1 1 45%; /* ADJUSTED from 1 to give image more space if needed */
-    padding: 50px 60px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-width: 400px; /* REDUCED from 450px */
-}
-body.minimal-page-bg .auth-form-container:not(.auth-page-layout > *) { max-width: 550px; margin: 50px auto; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.6); }
-body.theme-light.minimal-page-bg .auth-form-container:not(.auth-page-layout > *) { box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
-body.theme-dark .auth-form-container { background-color: var(--d-bg-surface); color: var(--d-text-primary); }
-body.theme-light .auth-form-container { background-color: var(--l-bg-surface); color: var(--l-text-primary); }
+.auth-page-layout { display: flex; align-items: stretch; width: 100%; /* Takes full width of .content-wrapper-auth */ max-width: 1150px; /* Default max width */ min-height: auto; /* Let content define height */ margin: 0 auto; /* Centering */ background-color: var(--d-bg-surface); border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.6); overflow: hidden; }
+body.theme-light .auth-page-layout { background-color: var(--l-bg-surface); box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
 
-/* Auth Image Area (part of .auth-page-layout) - ADJUSTED FLEX & PADDING */
-.auth-image-area {
-    flex: 1 1 55%; /* ADJUSTED from 1 */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 450px; /* INCREASED from 350px */
-    padding: 40px; /* INCREASED from 30px */
-    background-color: var(--d-bg-secondary);
-    position: relative;
-}
+.auth-form-container { flex: 1 1 45%; padding: 40px 50px; /* Adjusted padding */ display: flex; flex-direction: column; justify-content: center; min-width: 320px; /* Ensure it doesn't get too small */ }
+/* If .auth-form-container is used standalone (not in .auth-page-layout) apply card styles */
+body.minimal-page-bg .auth-form-container:not(.auth-page-layout > *) { max-width: 550px; margin: 0 auto; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.6); background-color: var(--d-bg-surface); color: var(--d-text-primary); }
+body.theme-light.minimal-page-bg .auth-form-container:not(.auth-page-layout > *) { box-shadow: 0 10px 30px rgba(0,0,0,0.25); background-color: var(--l-bg-surface); color: var(--l-text-primary); }
+
+
+.auth-image-area { flex: 1 1 55%; display: flex; align-items: center; justify-content: center; min-width: 350px; /* Adjust as needed */ padding: 40px; background-color: var(--d-bg-secondary); position: relative; }
 body.theme-light .auth-image-area { background-color: var(--l-bg-secondary); }
 .auth-illustration { max-width: 100%; max-height: 100%; height: auto; object-fit: contain; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
 body.theme-light .auth-illustration { box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
 
 /* HIDE IMAGE AREA and ADJUST LAYOUT FOR LOGIN CONTEXT */
-/* Add class="login-page-context" to body or .auth-page-layout on login page */
-.login-page-context .auth-page-layout .auth-image-area {
-    display: none;
-}
-.login-page-context .auth-page-layout .auth-form-container {
-    flex-basis: 100%;
-    max-width: 550px;
-    margin: 0 auto;
-    min-width: auto;
-}
-.login-page-context .auth-page-layout {
-    max-width: 650px; /* Or whatever fits the form nicely */
-    min-height: auto;
-    /* padding: 30px 0; /* Add some padding if it looks too cramped vertically */
-}
+.login-page-context .auth-page-layout .auth-image-area { display: none; }
+.login-page-context .auth-page-layout .auth-form-container { flex-basis: 100%; max-width: 550px; /* Suitable for forms */ margin: 0 auto; /* Center it since image is gone */ min-width: auto; }
+.login-page-context .auth-page-layout { max-width: 650px; /* Max width for the whole "card" when login form */ min-height: auto; }
 
 
-/* Role Selection (Choose Role Page) - (Kept as previously adjusted font sizes etc.) */
 .role-selection-box-container { display: flex; flex-wrap: wrap; justify-content: center; margin: 50px 0; gap: 40px; }
 .role-selection-box { position: relative; width: 100%; max-width: 350px; padding: 40px 35px; text-align: center; border: 3px solid; border-radius: 20px; overflow: hidden; cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
-.role-selection-box:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+.role-selection-box:hover { transform: translateY(-10px); }
 .role-selection-box h3 { margin-bottom: 0.75em; font-size: 1.4rem; }
 .role-selection-box p { font-size: 1rem; line-height: 1.6; }
-body.theme-dark.minimal-page-bg .role-selection-box { color: var(--d-text-primary); background-color: rgba(var(--d-bg-surface-rgb, 66, 66, 66), 0.9); border-color: #9e9e9e; box-shadow: 0 6px 18px rgba(0,0,0,0.3); }
+/* Role selection theme specific styles */
+body.theme-dark.minimal-page-bg .role-selection-box { color: var(--d-text-primary); background-color: rgba(var(--d-bg-surface-rgb, 56, 56, 56), 0.9); border-color: var(--d-form-input-border); box-shadow: 0 6px 18px rgba(0,0,0,0.3); }
 body.theme-dark.minimal-page-bg .role-selection-box:hover { border-color: var(--d-primary-color); box-shadow: 0 20px 40px rgba(var(--d-primary-rgb), 0.35); }
 body.theme-dark.minimal-page-bg .role-selection-box.selected { background-color: rgba(var(--d-primary-rgb), 0.2); border-color: var(--d-primary-color); box-shadow: 0 10px 30px rgba(var(--d-primary-rgb), 0.3); }
 body.theme-dark.minimal-page-bg .role-selection-box i { color: var(--d-primary-color); font-size: 2.5rem; margin-bottom: 1rem;}
@@ -447,7 +402,7 @@ body.theme-dark.minimal-page-bg .role-selection-box p { color: var(--d-text-seco
 body.theme-dark.minimal-page-bg .custom-radio-indicator { background-color: #888; border: 2px solid #b0b0b0; }
 body.theme-dark.minimal-page-bg .role-selection-box.selected .custom-radio-indicator { background-color: var(--d-primary-color); border-color: var(--d-primary-color); }
 body.theme-dark.minimal-page-bg .custom-radio-indicator::after { border-color: var(--d-header-btn-signup-text); }
-body.theme-light.minimal-page-bg .role-selection-box { color: var(--l-text-primary); background-color: rgba(255, 255, 255, 0.98); border-color: #b0b0b0; box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
+body.theme-light.minimal-page-bg .role-selection-box { color: var(--l-text-primary); background-color: rgba(255, 255, 255, 0.98); border-color: var(--l-border-color); box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
 body.theme-light.minimal-page-bg .role-selection-box:hover { border-color: var(--l-primary-color); box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
 body.theme-light.minimal-page-bg .role-selection-box.selected { background-color: rgba(var(--l-primary-rgb), 0.15); border-color: var(--l-primary-color); box-shadow: 0 10px 30px rgba(var(--l-primary-rgb), 0.3); }
 body.theme-light.minimal-page-bg .role-selection-box i { color: var(--l-primary-color); font-size: 2.5rem; margin-bottom: 1rem;}
@@ -472,10 +427,14 @@ body.theme-light.minimal-page-bg .login-link-prompt a, body.theme-light.minimal-
 body.theme-light.minimal-page-bg .login-link-prompt a:hover, body.theme-light.minimal-page-bg .signup-prompt-login a:hover { color: #388e3c;}
 
 /* ==========================================================================
-   11. Forms and Inputs - (Kept as previously adjusted font sizes etc.)
+   11. Forms and Inputs
    ========================================================================== */
-.signup-form-container-actual, .login-form-container-actual { max-width: 550px; margin: 50px auto; }
-.form-group { margin-bottom: 1.8rem; text-align: inherit; }
+/* Container for forms like signup/login when not full page layout */
+.signup-form-container-actual, .login-form-container-actual { /* You might not need this if auth-form-container handles it */
+    max-width: 550px;
+    margin: 50px auto; 
+}
+.form-group { margin-bottom: 1.8rem; text-align: inherit; /* Inherit from body's dir attribute */ }
 .form-group label { display: block; margin-bottom: 0.6rem; font-size: 1rem; font-weight: var(--font-weight-semibold); }
 .form-control { display: block; width: 100%; padding: 1rem 1.2rem; font-size: 1.05rem; font-weight: var(--font-weight-normal); line-height: 1.6; background-clip: padding-box; appearance: none; border-radius: 10px; transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out; }
 .form-control::placeholder { opacity: 0.8; }
@@ -497,11 +456,11 @@ body.theme-dark .password-toggle-icon { color: #c0c0c0; } body.theme-dark .phone
 body.theme-light .password-toggle-icon { color: #757575; } body.theme-light .phone-input-icon { color: #a0a0a0; }
 html[dir="ltr"] .password-toggle-icon, html[dir="ltr"] .phone-input-icon { right: 15px; }
 html[dir="rtl"] .password-toggle-icon, html[dir="rtl"] .phone-input-icon { left: 15px; }
-html[dir="ltr"] .form-control[type="password"], html[dir="ltr"] .form-control[type="tel"] { padding-right: 45px !important; padding-left: 1.2rem !important; }
-html[dir="rtl"] .form-control[type="password"], html[dir="rtl"] .form-control[type="tel"] { padding-left: 45px !important; padding-right: 1.2rem !important; }
-.form-group input[type="tel"].form-control { direction: ltr; text-align: left; }
+html[dir="ltr"] .form-control[type="password"], html[dir="ltr"] .form-control[type="tel"] { padding-right: 45px !important; padding-left: 1.2rem !important; } /* Added !important cautiously */
+html[dir="rtl"] .form-control[type="password"], html[dir="rtl"] .form-control[type="tel"] { padding-left: 45px !important; padding-right: 1.2rem !important; } /* Added !important cautiously */
+.form-group input[type="tel"].form-control { direction: ltr; text-align: left; } /* Ensure tel inputs are LTR for numbers */
 .form-check-custom { display: flex; align-items: flex-start; margin-bottom: 25px; font-size: 0.95em; line-height: 1.6;}
-.form-check-custom input[type="checkbox"] { margin-top: 4px; width: 22px; height: 22px; cursor: pointer; }
+.form-check-custom input[type="checkbox"] { margin-top: 4px; width: 22px; height: 22px; cursor: pointer; flex-shrink: 0; } /* Added flex-shrink */
 html[dir="ltr"] .form-check-custom input[type="checkbox"] { margin-right: 12px; } html[dir="rtl"] .form-check-custom input[type="checkbox"] { margin-left: 12px; }
 .form-check-custom label { margin-bottom: 0; cursor: pointer; font-weight: normal;}
 .form-check-custom label a { text-decoration: underline;}
@@ -525,21 +484,24 @@ html[dir="ltr"] .text-danger-asterisk { margin-left: 3px; } html[dir="rtl"] .tex
 .country-select-group option.hidden-by-search { display: none !important; }
 
 /* ==========================================================================
-   12. General Button Styles - (Kept as previously adjusted)
+   12. General Button Styles
    ========================================================================== */
 .btn { display: inline-block; position: relative; padding: .8rem 1.6rem; font-size: 1.1rem; font-weight: var(--font-weight-semibold); line-height: 1.5; text-align: center; text-decoration: none; vertical-align: middle; cursor: pointer; user-select: none; background-color: transparent; border: 1px solid transparent; border-radius: .5rem; transition: all 0.3s ease-in-out; overflow: hidden; will-change: transform, box-shadow; }
-.btn:hover { transform: translateY(-4px); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); }
+.btn:hover { transform: translateY(-4px); /* Default hover lift */ }
+body.theme-dark .btn:hover { box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); /* Dark theme stronger shadow */ }
+body.theme-light .btn:hover { box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); /* Light theme softer shadow */ }
 .btn:active { transform: translateY(-1px); box-shadow: none; }
 @keyframes ripple { from { transform: scale(0); opacity: 1; } to { transform: scale(4); opacity: 0; } }
-.btn-ripple { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.5); animation: ripple 0.6s linear forwards; pointer-events: none; transform: translate(-50%, -50%); z-index: 10; }
-body.theme-light .btn-ripple { background: rgba(0, 0, 0, 0.15); }
+.btn-ripple { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.4); /* Adjusted ripple opacity */ animation: ripple 0.6s linear forwards; pointer-events: none; transform: translate(-50%, -50%); z-index: 10; }
+body.theme-light .btn-ripple { background: rgba(0, 0, 0, 0.1); } /* Lighter ripple for light theme */
+/* Button Variants (success, info, primary, danger) */
 .btn-success { background-color: var(--d-success-color); color: #fff; border-color: var(--d-success-color); }
 .btn-success:hover { background-color: #388e3c; border-color: #388e3c; }
-body.theme-light .btn-success { background-color: var(--l-success-color); border-color: var(--l-success-color); } /* color #fff implicit or explicitly var(--l-btn-primary-text) or var(--l-text-on-accent) */
+body.theme-light .btn-success { background-color: var(--l-success-color); border-color: var(--l-success-color); color: #fff;} /* Text color for light theme */
 body.theme-light .btn-success:hover { background-color: #388e3c; border-color: #388e3c; }
 .btn-info { background-color: var(--d-info-color); color: #fff; border-color: var(--d-info-color); }
 .btn-info:hover { background-color: #00bcd4; border-color: #00bcd4; }
-body.theme-light .btn-info { background-color: var(--l-info-color); border-color: var(--l-info-color); color: #fff; } /* Light theme info button text explicitly white or a dedicated var */
+body.theme-light .btn-info { background-color: var(--l-info-color); border-color: var(--l-info-color); color: #fff; }
 body.theme-light .btn-info:hover { background-color: #00bcd4; border-color: #00bcd4; }
 .btn-primary { background-color: var(--d-primary-color); color: var(--d-btn-primary-text); border-color: var(--d-primary-color); }
 .btn-primary:hover { background-color: var(--d-primary-hover); border-color: var(--d-primary-hover); }
@@ -547,43 +509,43 @@ body.theme-light .btn-primary { background-color: var(--l-primary-color); color:
 body.theme-light .btn-primary:hover { background-color: var(--l-primary-hover); border-color: var(--l-primary-hover); }
 .btn-danger { background-color: var(--d-danger-color); color: #fff; border-color: var(--d-danger-color); }
 .btn-danger:hover { background-color: #d32f2f; border-color: #d32f2f; }
-body.theme-light .btn-danger { background-color: var(--l-danger-color); color: #fff; border-color: var(--l-danger-color); } /* Light theme danger text */
+body.theme-light .btn-danger { background-color: var(--l-danger-color); color: #fff; border-color: var(--l-danger-color); }
 body.theme-light .btn-danger:hover { background-color: #d32f2f; border-color: #d32f2f; }
 .btn-outline-secondary { border: 2px solid var(--d-secondary-color); color: var(--d-secondary-color); background-color: transparent; }
-.btn-outline-secondary:hover { background-color: var(--d-secondary-color); color: var(--d-bg-primary); box-shadow: 0 6px 18px rgba(0,0,0,0.3); }
+.btn-outline-secondary:hover { background-color: var(--d-secondary-color); color: var(--d-bg-primary); box-shadow: 0 6px 18px rgba(0,0,0,0.3); } /* Removed duplicate shadow hover for general btn */
 body.theme-light .btn-outline-secondary { border-color: var(--l-secondary-color); color: var(--l-secondary-color); }
-body.theme-light .btn-outline-secondary:hover { background-color: var(--l-secondary-color); color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+body.theme-light .btn-outline-secondary:hover { background-color: var(--l-secondary-color); color: #fff; } /* Removed duplicate shadow */
 .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.95rem; border-radius: 0.35rem; }
 .btn-lg { padding: 1rem 2rem; font-size: 1.25rem; border-radius: 0.55rem; }
 
-
 /* ==========================================================================
-   13. Teacher/Student Dashboards and Lists (Tables, Cards) - (Kept as previously adjusted)
+   13. Teacher/Student Dashboards and Lists (Tables, Cards)
    ========================================================================== */
 .main-page-content { padding-top: 50px; padding-bottom: 50px; }
 .main-page-content .section-main-title { font-size: 3rem; margin-bottom: 35px; }
 body.theme-dark .main-page-content .section-main-title { color: var(--d-text-primary); } body.theme-light .main-page-content .section-main-title { color: var(--l-text-primary); }
-.card { padding: 35px; border-radius: 18px; transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); will-change: transform, box-shadow; }
+.card { padding: 35px; border-radius: 18px; transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); will-change: transform, box-shadow; /* Shared card styling */ }
 .card h1, .card h2, .card h3, .card h4 { line-height: 1.3; margin-bottom: 0.75em;} .card p { margin-bottom: 1em; line-height: 1.65; }
 body.theme-dark .card { background-color: var(--d-bg-surface); border: 1px solid var(--d-border-color); box-shadow: 0 8px 25px rgba(0,0,0,0.4); }
 body.theme-light .card { background-color: var(--l-bg-surface); border: 1px solid var(--l-border-color); box-shadow: 0 6px 20px rgba(0,0,0,0.18); }
-.card:hover { transform: translateY(-10px) scale(1.008); }
+.card:hover { transform: translateY(-10px) scale(1.008); } /* Consistent hover lift for cards */
 body.theme-dark .card:hover { box-shadow: 0 25px 55px rgba(var(--d-primary-rgb),0.3); } body.theme-light .card:hover { box-shadow: 0 25px 55px rgba(var(--l-primary-rgb),0.2); }
-.img-thumbnail.rounded-circle { border: 5px solid var(--d-primary-color); transition: all 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease; }
+.img-thumbnail.rounded-circle { width: 150px; height: 150px; object-fit: cover; /* To ensure images fill circle */ border: 5px solid var(--d-primary-color); transition: all 0.4s ease; } /* Added width/height & object-fit */
 body.theme-light .img-thumbnail.rounded-circle { border-color: var(--l-primary-color); }
-.img-thumbnail.rounded-circle:hover { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(var(--d-primary-rgb), 0.5); }
-body.theme-light .img-thumbnail.rounded-circle:hover { box-shadow: 0 0 0 8px rgba(var(--l-primary-rgb), 0.4); }
-.table-responsive { overflow-x: auto; }
+.img-thumbnail.rounded-circle:hover { transform: scale(1.1); } /* Simplified hover */
+body.theme-dark .img-thumbnail.rounded-circle:hover { box-shadow: 0 0 0 8px rgba(var(--d-primary-rgb), 0.4); } /* Specific shadow for dark */
+body.theme-light .img-thumbnail.rounded-circle:hover { box_shadow: 0 0 0 8px rgba(var(--l-primary-rgb), 0.35); } /* Specific shadow for light */
+.table-responsive { overflow-x: auto; margin-bottom: 1rem; /* Added margin bottom */ }
 .table { width: 100%; margin-bottom: 2rem; color: inherit; border-collapse: separate; border-spacing: 0; }
-.table thead th { vertical-align: middle; border-bottom: 2px solid; padding: 1.2rem 1rem; font-size: 1.05em; font-weight: var(--font-weight-semibold); text-align: inherit; color: var(--d-text-primary); background-color: var(--d-bg-secondary); }
-body.theme-light .table thead th { color: var(--l-text-primary); background-color: var(--l-bg-secondary); }
+.table thead th { vertical-align: middle; border-bottom-width: 2px; /* Explicit width */ border-bottom-style: solid; border-bottom-color: var(--d-border-color); padding: 1.2rem 1rem; font-size: 1.05em; font-weight: var(--font-weight-semibold); text-align: inherit; color: var(--d-text-primary); background-color: var(--d-bg-secondary); }
+body.theme-light .table thead th { border-bottom-color: var(--l-border-color); color: var(--l-text-primary); background-color: var(--l-bg-secondary); }
 .table thead tr:first-child th:first-child { border-top-left-radius: 12px; } .table thead tr:first-child th:last-child { border-top-right-radius: 12px; }
 .table tbody tr { transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease; }
 .table tbody tr:hover { background-color: rgba(var(--d-primary-rgb), 0.1); transform: translateY(-4px); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
 body.theme-light .table tbody tr:hover { background-color: rgba(var(--l-primary-rgb), 0.08); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
 .table tbody td { padding: 1.2rem 1rem; font-size: 1em; vertical-align: middle; border-top: 1px solid var(--d-border-color); color: var(--d-text-secondary); }
 body.theme-light .table tbody td { border-color: var(--l-border-color); color: var(--l-text-secondary); }
-.badge { padding: 0.5em 1em; font-size: 0.9em; font-weight: var(--font-weight-bold); border-radius: 0.4rem; transition: all 0.2s ease; }
+.badge { display: inline-block; /* Ensure it behaves like a block for padding/margin */ padding: 0.5em 1em; font-size: 0.9em; font-weight: var(--font-weight-bold); border-radius: 0.4rem; transition: all 0.2s ease; line-height: 1; /* Added for better vertical alignment of text */ }
 .badge:hover { transform: translateY(-3px); box-shadow: 0 3px 8px rgba(0,0,0,0.25); }
 .badge.bg-success-subtle { background-color: rgba(var(--d-success-rgb), 0.3) !important; color: var(--d-success-color) !important; border: 1px solid var(--d-success-color) !important; }
 body.theme-light .badge.bg-success-subtle { background-color: rgba(var(--l-success-rgb), 0.2) !important; color: var(--l-success-color) !important; border: 1px solid var(--l-success-color) !important; }
@@ -592,81 +554,109 @@ body.theme-light .badge.bg-secondary-subtle { background-color: rgba(108, 117, 1
 .btn-group { display: inline-flex; vertical-align: middle; margin-right: -1px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border-radius: 0.6rem; overflow: hidden; }
 body.theme-light .btn-group { box-shadow: 0 3px 10px rgba(0,0,0,0.2); }
 .btn-group .btn { padding: 0.7rem 1.3rem; font-weight: var(--font-weight-medium); box-shadow: none !important; transform: none !important; transition: all 0.25s ease; }
-.btn-group .btn:hover { z-index: 1; transform: translateY(-3px) !important; box-shadow: 0 6px 18px rgba(0,0,0,0.25) !important; }
-body.theme-light .btn-group .btn:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important; }
+.btn-group .btn:hover { z-index: 1; transform: translateY(-3px) !important; } /* Keep hover lift but rely on general .btn hover shadow */
 .btn-group .btn + .btn { margin-left: -1px; }
 .btn-group > .btn:not(:last-child):not(.dropdown-toggle) { border-top-right-radius: 0; border-bottom-right-radius: 0; }
 .btn-group > .btn:not(:first-child) { border-top-left-radius: 0; border-bottom-left-radius: 0; }
-.btn.btn-warning.text-dark { background-color: var(--d-warning-color); color: #212121 !important; border-color: var(--d-warning-color); }
+.btn.btn-warning.text-dark { background-color: var(--d-warning-color); color: var(--d-btn-primary-text) !important; border-color: var(--d-warning-color); } /* Use var for text color */
 .btn.btn-warning.text-dark:hover { background-color: var(--d-primary-hover); border-color: var(--d-primary-hover); }
-body.theme-light .btn.btn-warning.text-dark { background-color: var(--l-warning-color); color: var(--l-text-primary) !important; border-color: var(--l-warning-color); }
+body.theme-light .btn.btn-warning.text-dark { background-color: var(--l-warning-color); color: var(--l-btn-primary-text) !important; border-color: var(--l-warning-color); }
 body.theme-light .btn.btn-warning.text-dark:hover { background-color: var(--l-primary-hover); border-color: var(--l-primary-hover); }
 
 /* ==========================================================================
-   15. Accordion Styles (for teacher_profile.html) - (Kept as previously adjusted)
+   15. Accordion Styles (for teacher_profile.html)
    ========================================================================== */
-.accordion-item { border: 1px solid var(--d-border-color); margin-bottom: 20px; border-radius: 15px; overflow: hidden; transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); will-change: transform, box-shadow; }
+.accordion-item { border: 1px solid var(--d-border-color); margin-bottom: 20px; border-radius: 15px; overflow: hidden; transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
 body.theme-light .accordion-item { border-color: var(--l-border-color); }
-.accordion-item:hover { transform: translateY(-10px); box-shadow: 0 20px 45px rgba(0,0,0,0.25); }
+.accordion-item:hover { transform: translateY(-10px); }
 body.theme-dark .accordion-item:hover { box-shadow: 0 20px 45px rgba(var(--d-primary-rgb),0.2); }
 body.theme-light .accordion-item:hover { box-shadow: 0 20px 45px rgba(var(--l-primary-rgb),0.15); }
-.accordion-header { margin-bottom: 0; }
-.accordion-button { background-color: var(--d-bg-secondary); color: var(--d-text-primary); font-size: 1.4rem; font-weight: var(--font-weight-semibold); padding: 1.5rem 1.8rem; width: 100%; text-align: inherit; border: none; border-bottom: 1px solid var(--d-border-color); transition: background-color 0.2s ease, color 0.2s ease, border-radius 0.2s ease; border-radius: 15px; }
+.accordion-header { margin-bottom: 0; } /* Usually .accordion-header > .accordion-button */
+.accordion-button { display: flex; /* For icon alignment */ align-items: center; /* For icon alignment */ justify-content: space-between; /* Pushes icon to end */ background-color: var(--d-bg-secondary); color: var(--d-text-primary); font-size: 1.4rem; font-weight: var(--font-weight-semibold); padding: 1.5rem 1.8rem; width: 100%; text-align: inherit; /* Respect body dir */ border: none; border-bottom: 1px solid var(--d-border-color); transition: background-color 0.2s ease, color 0.2s ease, border-radius 0.2s ease; border-radius: 15px; /* Apply to button initially */ }
 body.theme-light .accordion-button { background-color: var(--l-bg-secondary); color: var(--l-text-primary); border-color: var(--l-border-color); }
-.accordion-button:not(.collapsed) { background-color: var(--d-primary-color); color: var(--d-btn-primary-text); box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.2); border-bottom-color: transparent; border-radius: 15px 15px 0 0; }
+.accordion-button:not(.collapsed) { background-color: var(--d-primary-color); color: var(--d-btn-primary-text); box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.2); border-bottom-color: transparent; border-radius: 15px 15px 0 0; /* Change radius when open */ }
 body.theme-light .accordion-button:not(.collapsed) { background-color: var(--l-primary-color); color: var(--l-btn-primary-text); }
-.accordion-button:hover { filter: brightness(1.2); }
-.accordion-button:focus { outline: 0; box-shadow: 0 0 0 0.35rem rgba(var(--d-primary-rgb), 0.4); }
-body.theme-light .accordion-button:focus { box-shadow: 0 0 0 0.35rem rgba(var(--l-primary-rgb), 0.35); }
-.accordion-body { padding: 2rem; font-size: 1.05em; line-height: 1.7; background-color: var(--d-bg-surface); color: var(--d-text-secondary); border-top: 1px solid var(--d-border-color); }
+.accordion-button:hover { filter: brightness(1.1); } /* General hover brightness */
+.accordion-button:focus { outline: 0; /* Always good for accessibility */ box-shadow: 0 0 0 0.25rem rgba(var(--d-primary-rgb), 0.4); } /* Focus ring consistent with inputs */
+body.theme-light .accordion-button:focus { box-shadow: 0 0 0 0.25rem rgba(var(--l-primary-rgb), 0.35); }
+.accordion-body { padding: 2rem; font-size: 1.05em; line-height: 1.7; background-color: var(--d-bg-surface); color: var(--d-text-secondary); border-top: 1px solid var(--d-border-color); /* Separator if button doesn't have bottom border */ }
 body.theme-light .accordion-body { background-color: var(--l-bg-surface); color: var(--l-text-secondary); border-color: var(--l-border-color); }
-.accordion-body .row { margin-left: -1rem; margin-right: -1rem; } .accordion-body .col { padding-left: 1rem; padding-right: 1rem; }
-.accordion-button::after { flex-shrink: 0; width: 1.25rem; height: 1.25rem; margin-left: auto; content: ""; background-image: var(--accordion-button-icon) !important; background-repeat: no-repeat; background-size: 1.25rem; transition: transform 0.2s ease-in-out; transform: rotate(-90deg); }
-body.theme-dark .accordion-button::after { --accordion-button-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23fff'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e") !important; }
-body.theme-light .accordion-button::after { --accordion-button-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23212121'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e") !important; }
-.accordion-button:not(.collapsed)::after { transform: rotate(0deg) !important; }
-html[dir="rtl"] .accordion-button::after { margin-left: 0; margin-right: auto; transform: rotate(90deg) !important; }
-html[dir="rtl"] .accordion-button:not(.collapsed)::after { transform: rotate(0deg) !important; }
+/* Accordion Icon (Bootstrap 5 like) - Needs to be set in :root as well if not an SVG */
+/* This CSS expects a .collapsed class to be on the button when closed */
+.accordion-button::after { /* Re-target after, assumed in HTML or JS will add it */
+    flex-shrink: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+    /* margin-left: auto; // Not needed with justify-content: space-between */
+    content: "";
+    background-image: var(--d-accordion-btn-icon, url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23e0e0e0'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e"));
+    background-repeat: no-repeat;
+    background-size: 1.25rem;
+    transition: transform 0.2s ease-in-out;
+    transform: rotate(-90deg); /* Initial state (closed) for RTL/LTR if icon points down */
+}
+body.theme-light .accordion-button::after {
+    background-image: var(--l-accordion-btn-icon, url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23212121'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e"));
+}
+.accordion-button:not(.collapsed)::after { transform: rotate(0deg); }
+html[dir="rtl"] .accordion-button::after { /* If icon needs flipping for RTL (e.g. if it's a chevron pointing right initially) */
+    transform: rotate(90deg);
+}
+html[dir="rtl"] .accordion-button:not(.collapsed)::after {
+    transform: rotate(0deg); /* Pointing down when open */
+}
 
 /* ==========================================================================
-   16. Premium Content Preview (Overlay) - (Kept as previously adjusted)
+   16. Premium Content Preview (Overlay)
    ========================================================================== */
-.video-premium-preview, .quiz-premium-preview { position: relative; overflow: hidden; border-radius: 15px; }
-.premium-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; color: #fff; font-size: 1.2rem; font-weight: var(--font-weight-semibold); text-align: center; opacity: 1; transition: opacity 0.3s ease; z-index: 5; border-radius: 15px; }
-.video-premium-preview img, .quiz-premium-preview .card-title a, .video-premium-preview .card-body, .quiz-premium-preview .card-body { pointer-events: none; user-select: none; }
-.premium-overlay i.fa-lock { font-size: 4.8rem; margin-bottom: 25px; color: var(--d-primary-color); }
+.video-premium-preview, .quiz-premium-preview { position: relative; overflow: hidden; border-radius: 15px; /* Consistent with other cards */ }
+.premium-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); /* Slightly darker overlay */ display: flex; flex-direction: column; justify-content: center; align-items: center; color: #fff; font-size: 1.2rem; font-weight: var(--font-weight-semibold); text-align: center; opacity: 1; /* Start visible if this class is applied */ transition: opacity 0.3s ease; z-index: 5; border-radius: inherit; /* Inherit border radius */ }
+/* To make underlying content unclickable if overlay is present (though pointer-events on parent works better) */
+.video-premium-preview img, .quiz-premium-preview .card-title a, 
+.video-premium-preview .card-body, .quiz-premium-preview .card-body { 
+    /* pointer-events: none; This might be too aggressive, depends on JS interaction */
+    user-select: none; /* Prevent text selection */
+}
+.premium-overlay i.fa-lock { font-size: 4.8rem; margin-bottom: 25px; color: var(--d-primary-color); } /* Assumes Font Awesome is used */
 body.theme-light .premium-overlay i.fa-lock { color: var(--l-primary-color); }
 .premium-overlay p { margin-bottom: 25px; font-size: 1.35em; font-weight: var(--font-weight-bold); }
-.premium-overlay .btn { background-color: var(--d-warning-color); border-color: var(--d-warning-color); color: #212121; transition: all 0.25s ease; } /* uses general .btn for sizing */
-body.theme-light .premium-overlay .btn { background-color: var(--l-warning-color); border-color: var(--l-warning-color); color: var(--l-text-primary); }
-.premium-overlay .btn:hover { background-color: var(--d-primary-hover); border-color: var(--d-primary-hover); transform: translateY(-4px); box-shadow: 0 6px 15px rgba(0,0,0,0.4); }
-.disabled-link { pointer-events: none; cursor: default; text-decoration: none !important; opacity: 0.5; }
-body.theme-dark .disabled-link { color: var(--d-text-secondary); } body.theme-light .disabled-link { color: var(--l-text-secondary); }
-.premium-badge { position: absolute; top: 20px; right: 20px; padding: 8px 15px; border-radius: 10px; font-size: 0.95rem; font-weight: var(--font-weight-bold); z-index: 10; opacity: 0.98; background-color: var(--d-primary-color); color: #212121; }
-body.theme-light .premium-badge { background-color: var(--l-primary-color); color: var(--l-text-primary); }
+.premium-overlay .btn { background-color: var(--d-warning-color); border-color: var(--d-warning-color); color: var(--d-btn-primary-text); }
+body.theme-light .premium-overlay .btn { background-color: var(--l-warning-color); border-color: var(--l-warning-color); color: var(--l-btn-primary-text); }
+/* Hover on overlay button inherited from general .btn hover, but can be specific */
+.disabled-link { pointer-events: none !important; /* Ensure it's truly disabled */ cursor: default; text-decoration: none !important; opacity: 0.5 !important; /* Stronger opacity */ }
+body.theme-dark .disabled-link { color: var(--d-text-muted) !important; } body.theme-light .disabled-link { color: var(--l-text-muted) !important; } /* Specific color override */
+.premium-badge { position: absolute; top: 20px; padding: 8px 15px; border-radius: 10px; font-size: 0.95rem; font-weight: var(--font-weight-bold); z-index: 10; opacity: 0.98; background-color: var(--d-primary-color); color: var(--d-btn-primary-text); }
+body.theme-light .premium-badge { background-color: var(--l-primary-color); color: var(--l-btn-primary-text); }
 .premium-badge i { font-size: 1em; }
-html[dir="ltr"] .premium-badge i { margin-right: 6px; } html[dir="rtl"] .premium-badge { left: 20px; right: auto; }
-html[dir="rtl"] .premium-badge i { margin-right: 0; margin-left: 6px; }
-.video-card.video-premium-preview .card-body, .quiz-card.quiz-premium-preview .card-body { padding-bottom: 0; }
+html[dir="ltr"] .premium-badge i { margin-right: 6px; } html[dir="ltr"] .premium-badge { right: 20px; }
+html[dir="rtl"] .premium-badge { left: 20px; right: auto; } html[dir="rtl"] .premium-badge i { margin-right: 0; margin-left: 6px; }
+.video-card.video-premium-preview .card-body, .quiz-card.quiz-premium-preview .card-body { padding-bottom: 0; } /* If specific card classes are used */
+
 
 /* ==========================================================================
-   17. Student Profile Page Styles - (Kept as previously adjusted)
+   17. Student Profile Page Styles
    ========================================================================== */
-.student-profile-card { padding: 50px; border-radius: 25px; text-align: center; transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); will-change: transform, box-shadow; }
+.student-profile-card { padding: 50px; border-radius: 25px; text-align: center; transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
 body.theme-dark .student-profile-card { background-color: var(--d-bg-surface); color: var(--d-text-primary); border: 1px solid var(--d-border-color); box-shadow: 0 12px 35px rgba(0,0,0,0.6); }
 body.theme-light .student-profile-card { background-color: var(--l-bg-surface); color: var(--l-text-primary); border: 1px solid var(--l-border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
-.student-profile-card:hover { transform: translateY(-10px) scale(1.008); }
+.student-profile-card:hover { transform: translateY(-10px) scale(1.008); } /* Inherits from general card hover too */
 body.theme-dark .student-profile-card:hover { box-shadow: 0 30px 65px rgba(var(--d-primary-rgb), 0.4); }
 body.theme-light .student-profile-card:hover { box-shadow: 0 30px 65px rgba(var(--l-primary-rgb), 0.3); }
 .student-profile-card .display-4 { font-size: 4.2rem; font-weight: var(--font-weight-extrabold); color: var(--d-text-primary); margin-bottom: 15px; }
 body.theme-light .student-profile-card .display-4 { color: var(--l-text-primary); }
 .student-profile-card .display-4 span.text-muted { font-size: 0.6em; opacity: 0.9; font-weight: var(--font-weight-normal); }
-.student-profile-card .list-group-item { display: flex; justify-content: space-between; align-items: center; padding: 20px 30px; margin-bottom: 12px; border-radius: 12px; font-size: 1.1em; transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease; }
+.list-group-item { /* Generic styling for list group items */ display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; margin-bottom: -1px; /* Overlap borders */ background-color: #fff; border: 1px solid rgba(0,0,0,.125); }
+.list-group-item:first-child { border-top-left-radius: .25rem; border-top-right-radius: .25rem; }
+.list-group-item:last-child { margin-bottom: 0; border-bottom-right-radius: .25rem; border-bottom-left-radius: .25rem; }
+/* Styles for list group items within student profile card specifically */
+.student-profile-card .list-group-item { padding: 20px 30px; margin-bottom: 12px; border-radius: 12px; font-size: 1.1em; transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease; }
 body.theme-dark .student-profile-card .list-group-item { background-color: var(--d-bg-secondary); border: 1px solid var(--d-border-color); color: var(--d-text-secondary); }
 body.theme-light .student-profile-card .list-group-item { background-color: var(--l-bg-secondary); border: 1px solid var(--l-border-color); color: var(--l-text-secondary); }
 .student-profile-card .list-group-item:hover { background-color: rgba(var(--d-primary-rgb), 0.15); box-shadow: 0 6px 20px rgba(0,0,0,0.2); transform: translateY(-4px); }
 body.theme-light .student-profile-card .list-group-item:hover { background-color: rgba(var(--l-primary-rgb), 0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-.student-profile-card .list-group-item i { color: var(--d-primary-color); margin-right: 15px; font-size: 1.25em; }
+.student-profile-card .list-group-item i { color: var(--d-primary-color); font-size: 1.25em; }
+html[dir="ltr"] .student-profile-card .list-group-item i { margin-right: 15px; }
+html[dir="rtl"] .student-profile-card .list-group-item i { margin-left: 15px; }
 body.theme-light .student-profile-card .list-group-item i { color: var(--l-primary-color); }
 .student-profile-card .list-group-item .badge { font-size: 0.95em; padding: 0.6em 1.2em; }
 
@@ -680,7 +670,7 @@ body.theme-light .student-profile-card .list-group-item i { color: var(--l-prima
 body.no-scroll { overflow: hidden; }
 
 /* ==========================================================================
-   19. Responsive Adjustments - (Kept as previously adjusted, review after changes)
+   19. Responsive Adjustments
    ========================================================================== */
 @media (max-width: 1200px) {
     .container { max-width: 95%; }
@@ -689,38 +679,39 @@ body.no-scroll { overflow: hidden; }
     .btn.hero-btn-main, .btn.hero-btn-secondary { font-size: 1.25rem; }
     .final-cta-section .section-main-title { font-size: 3.2rem; }
     .btn.btn-xl.final-cta-btn { font-size: 1.5rem; }
-    /* Auth page layout at this breakpoint */
-    .auth-page-layout { max-width: 1000px; /* Adjust if it's too wide for 1200px screens */ }
-    .auth-form-container { flex-basis: 50%; min-width: 380px; } /* Adjust flex basis if needed */
+    .auth-page-layout { max-width: 1000px; }
+    .auth-form-container { flex-basis: 50%; min-width: 380px; }
     .auth-image-area { flex-basis: 50%; min-width: 400px; }
 }
 
 @media (max-width: 992px) {
     header.main-header { padding: 1rem 1.5rem; justify-content: space-between; }
-    header.main-header .main-nav { display: none; }
-    header.main-header .logo { margin-right: auto; margin-left: auto; }
+    header.main-header .main-nav { display: none; } /* Consider a mobile menu toggle */
+    header.main-header .logo { margin-right: auto; margin-left: auto; /* Centers logo when nav is hidden */ }
     .settings-menu-container { margin-left: 0; margin-right: 0; }
     .hero-container { flex-direction: column; text-align: center; gap: 50px; }
     .hero-text-content, .hero-image-content { flex: 1 1 100%; max-width: 100%; }
     .hero-headline { font-size: 3.5rem; }
-    .btn.hero-btn-main, .btn.hero-btn-secondary { width: 80%; max-width: 300px; }
+    .btn.hero-btn-main, .btn.hero-btn-secondary { width: 80%; max-width: 300px; } /* Center buttons on mobile */
     .section-main-title { font-size: 2.8rem; } .section-subtitle { font-size: 1.2rem; }
-    /* Auth pages - Stack layout here and control individual element sizes */
-    .auth-page-layout { flex-direction: column; min-height: auto; margin: 30px auto; max-width: 600px; /* Further reduce for stacked layout */ }
-    .auth-form-container { flex-basis: auto; min-width: auto; width: 100%; padding: 40px; }
-    .auth-image-area { min-height: 250px; max-height: 300px; width: 100%; flex: 0 0 250px; }
-    /* No image area in login context */
-    .login-page-context .auth-page-layout { max-width: 500px; /* Even smaller for just login form */ }
-
+    /* Auth pages - Stack layout */
+    .auth-page-layout { flex-direction: column; min-height: auto; margin: 30px auto; max-width: 600px; }
+    .auth-form-container { flex-basis: auto; min-width: auto; width: 100%; padding: 30px 40px; /* Adjusted padding */ }
+    .auth-image-area { display: none; /* Usually hide image on smaller stacked layouts unless critical */ }
+    /* Login specific adjustments for smaller screens */
+    .login-page-context .auth-page-layout { max-width: 500px; }
+    /* Responsive Tables */
     .table thead { display: none; }
-    .table tbody tr { display: block; margin-bottom: 2rem; padding: 1rem; border: 1px solid var(--d-border-color); border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
-    body.theme-light .table tbody tr { border-color: var(--l-border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-    .table tbody tr:hover { transform: translateY(-4px); }
-    .table tbody td { display: block; position: relative; padding-left: 45%; text-align: right !important; border-top: none; border-bottom: 1px dashed var(--d-border-color); }
-    .table tbody td:last-child { border-bottom: none; }
-    body.theme-light .table tbody td { border-bottom-color: var(--l-border-color); }
-    .table tbody td::before { content: attr(data-label); position: absolute; top: 1.2rem; left: 1rem; width: calc(45% - 2rem); padding-right: 10px; font-weight: bold; white-space: nowrap; text-align: left; }
-    html[dir="rtl"] .table tbody td { padding-left: 1rem; padding-right: 45%; text-align: left !important; }
+    .table tbody, .table tr, .table td { display: block; width: 100%; }
+    .table tbody tr { margin-bottom: 1.5rem; border: 1px solid var(--d-border-color); border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    body.theme-light .table tbody tr { border-color: var(--l-border-color); }
+    .table tbody tr:hover { transform: none; box-shadow: 0 4px 10px rgba(0,0,0,0.15); } /* Simpler hover for mobile */
+    .table tbody td { padding-left: 50% !important; /* Ensure this !important is reviewed */ position: relative; text-align: right !important; border: none; }
+    .table tbody td:not(:last-child) { border-bottom: 1px dashed var(--d-border-color); }
+    body.theme-light .table tbody td:not(:last-child) { border-bottom-color: var(--l-border-color); }
+    .table tbody td::before { content: attr(data-label); position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); width: calc(50% - 2rem); padding-right: 10px; font-weight: bold; white-space: nowrap; text-align: left; color: var(--d-text-primary); } /* Data labels */
+    body.theme-light .table tbody td::before { color: var(--l-text-primary); }
+    html[dir="rtl"] .table tbody td { padding-left: 1rem !important; padding-right: 50% !important; text-align: left !important; }
     html[dir="rtl"] .table tbody td::before { left: auto; right: 1rem; text-align: right; }
     .btn-group { flex-direction: column; width: 100%; box-shadow: none; }
     .btn-group .btn { border-radius: 0.5rem !important; margin-bottom: 8px; width: 100%; }
@@ -731,19 +722,21 @@ body.no-scroll { overflow: hidden; }
     header.main-header { padding: 1rem 1rem; }
     header.main-header .logo { font-size: 1.9rem; }
     .settings-menu-button { width: 40px; height: 40px; font-size: 1.5rem; }
-    .hero-headline { font-size: 3rem; } .hero-subheadline { font-size: 1.2rem; }
-    .btn.hero-btn-main, .btn.hero-btn-secondary { font-size: 1.15rem; }
-    .section-main-title { font-size: 2.4rem; } .section-subtitle { font-size: 1.1rem; }
-    .feature-item { padding: 25px; } .feature-title { font-size: 1.3rem; }
+    .hero-headline { font-size: 2.5rem; /* Adjusted further */ } .hero-subheadline { font-size: 1.1rem; }
+    .btn.hero-btn-main, .btn.hero-btn-secondary { font-size: 1rem; padding: 15px 30px; }
+    .section-main-title { font-size: 2rem; } .section-subtitle { font-size: 1rem; }
+    .feature-item { padding: 20px; } .feature-title { font-size: 1.2rem; }
     /* Auth pages for very small screens */
-    .auth-page-layout { margin: 20px 15px; /* Add side margin */ padding: 0;}
-    body.minimal-page-bg .card .card-title { font-size: 2rem; }
-    body.minimal-page-bg .card .card-subtitle { font-size: 1rem; }
-    .auth-form-container { padding: 30px 20px; } /* Less padding */
-    .role-selection-box { padding: 30px 20px; }
-    .role-selection-box h3 { font-size: 1.2rem; } .role-selection-box p { font-size: 0.9rem; }
-    .form-control { padding: 0.9rem 1rem; font-size: 1rem; }
-    .form-group label { font-size: 0.95rem; }
-    .form-names-row { flex-direction: column; gap: 0; }
-    .form-names-row .form-group { margin-bottom: 1.8rem; }
+    .auth-page-layout { margin: 20px 10px; /* Reduced margin */ padding: 0;}
+    body.minimal-page-bg .card .card-title { font-size: 1.8rem; } /* Specific to auth card title */
+    body.minimal-page-bg .card .card-subtitle { font-size: 0.95rem; }
+    .auth-form-container { padding: 25px 20px; /* Further reduced padding */ }
+    .role-selection-box { padding: 25px 15px; }
+    .role-selection-box h3 { font-size: 1.1rem; } .role-selection-box p { font-size: 0.85rem; }
+    .form-control { padding: 0.8rem 1rem; font-size: 0.95rem; }
+    .form-group label { font-size: 0.9rem; }
+    .form-names-row { flex-direction: column; gap: 0; /* No gap, rely on form-group margin */ }
+    .form-names-row .form-group { margin-bottom: 1.5rem; /* Consistent margin */ }
+    .flash-messages-container { max-width: calc(100% - 20px); /* Ensure it doesn't overflow */ }
+    .alert { min-width: auto; /* Allow it to shrink */ width: 100%; padding: 0.8rem 1rem; font-size: 0.95em; }
 }

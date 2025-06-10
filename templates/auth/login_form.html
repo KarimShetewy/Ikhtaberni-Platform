@@ -1,145 +1,151 @@
-{% extends "auth/layout_minimal.html" %} {# يرث من القالب المبسّط لصفحات المصادقة #}
+<!DOCTYPE html>
+<html lang="{{ current_lang | default('ar') }}" 
+      dir="{{ 'rtl' if (current_lang | default('ar')) == 'ar' else 'ltr' }}" 
+      class="{{ 'theme-dark' if session.get('theme', 'dark') == 'dark' else 'theme-light' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول - اختبرني</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> 
+</head>
+<body class="minimal-page-bg login-page-context">
 
-{% block title %}
-    {# عنوان الصفحة، النصوص سيتم تبديلها بواسطة JavaScript #}
-    <span class="lang-en">Login - Ektbariny</span>
-    <span class="lang-ar" style="display:none;">تسجيل الدخول - اختبرني</span>
-{% endblock %}
+    <header class="simplified-header-for-auth">
+        <div class="container">
+            <div class="logo-minimal-auth animated-auth-element" style="text-align: center;"> <!-- Added animation class -->
+                <a href="{{ url_for('home') }}">اختبرني</a>
+            </div>
+        </div>
+    </header>
 
-{% block content_minimal %}
-<div class="card login-form-container-actual"> {# كلاس لتحديد عرض البطاقة إذا لزم الأمر #}
-    <h2 class="card-title">
-        <span class="lang-en">Log In to Ektbariny</span>
-        <span class="lang-ar" style="display:none;">تسجيل الدخول إلى اختبرني</span>
-    </h2>
+    <div class="content-wrapper-auth">
 
-    <form method="POST" action="{{ url_for('login_page') }}" novalidate>
-        
-        <div class="form-group">
-            <label for="email_login">
-                <span class="lang-en">Email Address</span><span class="lang-ar" style="display:none;">البريد الإلكتروني</span>
-                <span class="text-danger-asterisk">*</span>
-            </label>
-            <input type="email" class="form-control" id="email_login" name="email" 
-                   value="{{ form_data.get('email', '') }}" required autocomplete="email"
-                   aria-describedby="emailHelpLogin" aria-required="true"
-                   data-placeholder-en="Enter your email address" 
-                   data-placeholder-ar="أدخل عنوان بريدك الإلكتروني">
+        <div class="flash-messages-container" style="position: relative; top: auto; margin-top: 20px; margin-bottom: 20px; transform: none; left: auto; right: auto; max-width: 550px; margin-left: auto; margin-right:auto;">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category if category in ['success', 'danger', 'warning', 'info'] else 'info' }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            <div id="global-message" class="alert hidden-section"></div>
         </div>
 
-        <div class="form-group password-field-container">
-            <label for="password_login">
-                <span class="lang-en">Password</span><span class="lang-ar" style="display:none;">كلمة المرور</span>
-                <span class="text-danger-asterisk">*</span>
-            </label>
-            <input type="password" class="form-control" id="password_login" name="password" 
-                   required autocomplete="current-password" aria-describedby="passwordHelpLogin">
-            <span class="password-toggle-icon" onclick="togglePasswordVisibilityLogin('password_login', this)" 
-                  role="button" tabindex="0" aria-pressed="false" 
-                  data-title-en="Show/Hide Password" data-title-ar="إظهار/إخفاء كلمة المرور"
-                  data-aria-label-en="Toggle password visibility" data-aria-label-ar="تبديل رؤية كلمة المرور">
-                  <i class="fas fa-eye"></i>
-            </span>
-        </div>
-        
-        {# رابط "نسيت كلمة المرور؟" (سيحتاج لتفعيل مساره لاحقًا) #}
-        <div style="text-align: right; margin-bottom: 15px; font-size: 0.85em;"> {# تم تعديل text-align #}
-            <a href="#" style="text-decoration:none;" class="forgot-password-link"> {# مسار وهمي حاليًا #}
-                <span class="lang-en">Forgot password?</span>
-                <span class="lang-ar" style="display:none;">نسيت كلمة المرور؟</span>
-            </a>
-        </div>
-         {# محاذاة النص لرابط نسيت كلمة المرور ستتبع اتجاه الصفحة (rtl/ltr) بسبب text-align:inherit على .form-group #}
-         {# إذا أردت دائمًا لليمين أو اليسار، يمكنك تعديل الـ div هنا #}
-         {# مثال لجعله دائمًا على اليسار: style="text-align: left;" #}
-         {# مثال لجعله دائمًا على اليمين: style="text-align: right;" #}
+        <div class="auth-page-layout"> 
+            <div class="auth-form-container"> 
+                
+                <div id="login-section"> 
+                    <h1 class="card-title animated-auth-element" style="font-size: 2.2rem; margin-bottom: 25px; text-align:center;">تسجيل الدخول إلى حسابك</h1>
+                    
+                    <form id="login-form" method="POST" action="{{ url_for('login_page') }}">
+                        <input type="hidden" name="next" value="{{ request.args.get('next', '') }}">
 
+                        <div class="form-group animated-auth-element">
+                            <label for="login_identifier">البريد الإلكتروني أو رقم الموبايل<span class="text-danger-asterisk">*</span></label>
+                            <input type="text" class="form-control" id="login_identifier" name="login_identifier" required
+                                   value="{{ form_data.get('login_identifier', '') }}"
+                                   placeholder="ادخل بريدك الإلكتروني أو رقم الموبايل">
+                        </div>
 
-        <button type="submit" class="btn btn-login">
-            <i class="fas fa-sign-in-alt"></i> 
-            <span class="lang-en">Log In</span>
-            <span class="lang-ar" style="display:none;">تسجيل الدخول</span>
-        </button>
-    </form>
+                        <div class="form-group animated-auth-element">
+                            <label for="password">كلمة المرور<span class="text-danger-asterisk">*</span></label>
+                            <div class="password-field-container">
+                                <input type="password" class="form-control" id="password" name="password" required
+                                       placeholder="ادخل كلمة المرور">
+                            </div>
+                            <div style="margin-top: 10px; text-align: {% if current_lang|default('ar') == 'ar' %}left{% else %}right{% endif %};">
+                                <a href="#" id="forgot-password-trigger" class="auth-links" style="font-size: 0.9em;">نسيت كلمة المرور؟</a>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg animated-auth-element" style="width: 100%; margin-top: 20px; margin-bottom: 20px; padding: 0.9rem 1.5rem; font-size: 1.1rem;">
+                            تسجيل الدخول
+                        </button>
+                    </form>
 
-    <p class="signup-prompt-login">
-        <span class="lang-en">Don't have an account?</span><span class="lang-ar" style="display:none;">ليس لديك حساب؟</span>
-        <a href="{{ url_for('choose_signup_role') }}">
-            <span class="lang-en">Create a new account</span>
-            <span class="lang-ar" style="display:none;">أنشئ حسابًا جديدًا</span>
-        </a>
-    </p>
-</div>
-{% endblock content_minimal %}
+                    <div class="signup-prompt-login animated-auth-element" style="text-align: center; margin-top: 25px; padding-top: 20px; font-size: 1em;">
+                        ليس لديك حساب؟ <a href="{{ url_for('choose_signup_role') }}" class="auth-links">إنشاء حساب جديد</a>
+                    </div>
+                </div>
 
-{% block scripts_extra_minimal %}
-{# JavaScript خاص بهذه الصفحة لتبديل رؤية كلمة المرور #}
-<script>
-    function togglePasswordVisibilityLogin(fieldId, iconElement) {
-        const passwordField = document.getElementById(fieldId);
-        const icon = iconElement.querySelector('i');
-        const currentLang = document.documentElement.lang || 'en';
+                <!-- Request OTP Section -->
+                <div id="request-otp-section" class="hidden-section">
+                    <h1 class="card-title animated-auth-element" style="font-size: 2rem; margin-bottom: 15px; text-align:center;">استعادة كلمة المرور</h1>
+                    <p class="card-subtitle animated-auth-element" style="font-size: 0.95rem; margin-bottom: 25px; text-align:center;">أدخل رقم موبايلك المسجل لإرسال رمز التأكيد.</p>
+                    <form id="request-otp-form">
+                        <div class="form-group animated-auth-element">
+                            <label for="otp_phone_number">رقم الموبايل<span class="text-danger-asterisk">*</span></label>
+                            <input type="tel" class="form-control" id="otp_phone_number" name="otp_phone_number" required
+                                   placeholder="ادخل رقم الموبايل المسجل"
+                                   value=""> 
+                        </div>
+                        <button type="submit" class="btn btn-primary animated-auth-element" style="width: 100%; margin-bottom: 15px; padding: 0.8rem 1.5rem;">إرسال رمز التأكيد</button>
+                        <div style="text-align: center;" class="animated-auth-element">
+                            <a href="#" class="auth-links back-to-login-link" data-target="login-section" style="font-size: 0.9em;">العودة إلى تسجيل الدخول</a>
+                        </div>
+                    </form>
+                </div>
 
-        // نصوص مترجمة لـ title و aria-label
-        const titles = {
-            en: { show: 'Show password', hide: 'Hide password' },
-            ar: { show: 'إظهار كلمة المرور', hide: 'إخفاء كلمة المرور' }
-        };
-        const currentTitles = titles[currentLang] || titles.en; // fallback to English
+                <!-- Verify OTP Section -->
+                <div id="verify-otp-section" class="hidden-section">
+                    <h1 class="card-title animated-auth-element" style="font-size: 2rem; margin-bottom: 15px; text-align:center;">إدخال رمز التأكيد</h1>
+                    <p class="card-subtitle animated-auth-element" style="font-size: 0.95rem; margin-bottom: 25px; text-align:center;">تم إرسال رمز تأكيد مكون من 8 أرقام إلى رقم موبايلك.</p>
+                    <form id="verify-otp-form">
+                        <div class="form-group animated-auth-element">
+                            <label for="otp_code">رمز التأكيد (8 أرقام)<span class="text-danger-asterisk">*</span></label>
+                            <input type="text" class="form-control" id="otp_code" name="otp_code" maxlength="8" pattern="\d{8}" required
+                                   placeholder="ادخل الرمز المكون من 8 أرقام" style="text-align: center; letter-spacing: 2px; font-size: 1.2em;">
+                        </div>
+                        <button type="submit" class="btn btn-primary animated-auth-element" style="width: 100%; margin-bottom: 15px; padding: 0.8rem 1.5rem;">التحقق من الرمز</button>
+                        <div style="text-align: center;" class="animated-auth-element">
+                            <a href="#" class="auth-links back-to-login-link" data-target="request-otp-section" style="font-size: 0.9em;">إعادة إرسال الرمز / تغيير الرقم</a>
+                        </div>
+                    </form>
+                </div>
 
-        if (passwordField && icon) { 
-            if (passwordField.type === "password") {
-                passwordField.type = "text";
-                icon.classList.remove("fa-eye");
-                icon.classList.add("fa-eye-slash");
-                iconElement.setAttribute('aria-pressed', 'true');
-                iconElement.setAttribute('aria-label', currentTitles.hide);
-                iconElement.setAttribute('title', currentTitles.hide);
-            } else {
-                passwordField.type = "password";
-                icon.classList.remove("fa-eye-slash");
-                icon.classList.add("fa-eye");
-                iconElement.setAttribute('aria-pressed', 'false');
-                iconElement.setAttribute('aria-label', currentTitles.show);
-                iconElement.setAttribute('title', currentTitles.show);
-            }
-        }
-    }
-
-    // دالة لتحديث النصوص المعتمدة على سمات البيانات عند تغيير اللغة
-    function updateLoginFormLocalizations(lang) {
-        // تحديث placeholders
-        document.querySelectorAll('#login_form_page input[data-placeholder-en]').forEach(el => { // افترض أن للـ form id أو class
-            const placeholderKey = `placeholder${lang.charAt(0).toUpperCase() + lang.slice(1)}`;
-            const placeholderText = el.dataset[placeholderKey] || el.dataset.placeholderEn;
-            if (placeholderText !== undefined) el.placeholder = placeholderText;
-        });
-        
-        // تحديث title و aria-label لأزرار تبديل كلمة المرور
-        document.querySelectorAll('#login_form_page .password-toggle-icon').forEach(iconElement => {
-            const titles = { en: { show: 'Show password', hide: 'Hide password' }, ar: { show: 'إظهار كلمة المرور', hide: 'إخفاء كلمة المرور' }};
-            const currentTitles = titles[lang] || titles.en;
-            const isPasswordVisible = iconElement.getAttribute('aria-pressed') === 'true';
+                <!-- Reset Password Section -->
+                <div id="reset-password-section" class="hidden-section">
+                    <h1 class="card-title animated-auth-element" style="font-size: 2rem; margin-bottom: 15px; text-align:center;">إعادة تعيين كلمة المرور</h1>
+                     <p class="card-subtitle animated-auth-element" style="font-size: 0.95rem; margin-bottom: 25px; text-align:center;">اختر كلمة مرور جديدة وقوية لحسابك.</p>
+                    <form id="reset-password-form">
+                        <div class="form-group animated-auth-element">
+                            <label for="new_password">كلمة المرور الجديدة<span class="text-danger-asterisk">*</span></label>
+                            <input type="password" class="form-control" id="new_password" name="new_password" required minlength="8"
+                                   placeholder="8 أحرف على الأقل">
+                        </div>
+                        <div class="form-group animated-auth-element">
+                            <label for="confirm_password">تأكيد كلمة المرور الجديدة<span class="text-danger-asterisk">*</span></label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required minlength="8"
+                                   placeholder="أعد إدخال كلمة المرور">
+                        </div>
+                        <button type="submit" class="btn btn-primary animated-auth-element" style="width: 100%; margin-bottom: 15px; padding: 0.8rem 1.5rem;">حفظ كلمة المرور الجديدة</button>
+                         <div style="text-align: center;" class="animated-auth-element">
+                            <a href="#" class="auth-links back-to-login-link" data-target="login-section" style="font-size: 0.9em;">العودة إلى تسجيل الدخول</a>
+                        </div>
+                    </form>
+                </div>
+            </div> <!-- End of .auth-form-container -->
             
-            iconElement.setAttribute('aria-label', isPasswordVisible ? currentTitles.hide : currentTitles.show);
-            iconElement.setAttribute('title', isPasswordVisible ? currentTitles.hide : currentTitles.show);
-        });
-    }
+            <div class="auth-image-area"></div> <!-- This is hidden by .login-page-context CSS -->
+        </div> <!-- End of .auth-page-layout -->
+    </div> <!-- End of .content-wrapper-auth -->
 
-    document.addEventListener('DOMContentLoaded', function() {
-        // نفترض أن لنموذج تسجيل الدخول حاوية رئيسية لها ID
-        const loginFormContainer = document.querySelector('.login-form-container-actual');
-        if (loginFormContainer) loginFormContainer.id = 'login_form_page'; // إضافة ID مؤقت إذا لم يكن موجودًا للـ JS
-
-        const currentLang = document.documentElement.lang || 'en';
-        updateLoginFormLocalizations(currentLang); // تحديث عند تحميل الصفحة
-
-        // استماع لحدث تغيير اللغة العام من main.js
-        document.addEventListener('languageChanged', function(e) {
-            if (e.detail && e.detail.lang) {
-                updateLoginFormLocalizations(e.detail.lang);
-            }
-        });
-    });
-</script>
-{% endblock scripts_extra_minimal %}
+    <script>
+        var authApiEndpoints = {
+            requestOtp: "{{ url_for('api_request_otp') }}",
+            verifyOtp: "{{ url_for('api_verify_otp') }}",
+            resetPassword: "{{ url_for('api_reset_password') }}"
+        };
+    </script>
+    <!-- تأكد من أن auth_script.js يأتي قبل main.js إذا كان main.js سيعتمد على شيء تم تهيئته في auth_script -->
+    <!-- أو إذا كانت الحركات العامة ستطبق على كل شيء -->
+    <script src="{{ url_for('static', filename='js/auth_script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script> 
+    <!-- تأكد من استدعاء main.js إذا كنت ستعتمد على كود الحركة العام فيه -->
+</body>
+</html>
