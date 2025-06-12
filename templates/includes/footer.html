@@ -1,0 +1,8 @@
+<footer class="main-footer">
+    <p>
+        {# يتم تحديث السنة بواسطة متغير 'now' من context_processor في app.py #}
+        <span class="lang-en">© {{ now.year if now else datetime.utcnow().year }} - Ektbariny Platform. All rights reserved.</span>
+        <span class="lang-ar" style="display:none;">© {{ now.year if now else datetime.utcnow().year }} - منصة اختبرني. جميع الحقوق محفوظة.</span>
+    </p>
+    {# يمكن إضافة روابط أخرى في الفوتر هنا #}
+</footer>

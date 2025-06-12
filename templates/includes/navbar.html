@@ -1,0 +1,242 @@
+<header class="main-header">
+    <div class="header-left-section"> {# قسم جديد لجمع الشعار وزر تبديل الثيم #}
+        <div class="logo">
+            <a href="{{ url_for('home') }}" id="platformLogo">
+                 <span class="lang-en">Ektbariny</span>
+                 <span class="lang-ar" style="display:none;">اختبرني</span>
+            </a>
+        </div>
+        
+        {# === بداية: كود زر تبديل الثيم المحدث لسطح المكتب === #}
+        {% if not is_minimal_layout %}
+        <div class="theme-toggle-desktop-container">
+            <button id="themeToggleDesktop" class="theme-switch" 
+                    aria-label-light="{% if current_lang == 'ar' %}التبديل إلى الوضع الليلي{% else %}Switch to Dark Mode{% endif %}"
+                    aria-label-dark="{% if current_lang == 'ar' %}التبديل إلى الوضع النهاري{% else %}Switch to Light Mode{% endif %}"
+                    title="{% if current_lang == 'ar' %}تبديل الوضع{% else %}Toggle Theme{% endif %}">
+                <span class="theme-switch__track">
+                    <span class="theme-switch__icon theme-switch__icon--sun">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                            <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.106a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 17.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z" />
+                        </svg>
+                    </span>
+                    <span class="theme-switch__icon theme-switch__icon--moon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                            <path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-3.51 1.713-6.638 4.383-8.531a.75.75 0 01.818.161z" clip-rule="evenodd" />
+                        </svg>
+                    </span>
+                </span>
+                <span class="theme-switch__knob">
+                    <svg class="knob-icon--sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+                        <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.106a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 17.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z" />
+                    </svg>
+                    <svg class="knob-icon--moon" style="display:none;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+                         <path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-3.51 1.713-6.638 4.383-8.531a.75.75 0 01.818.161z" clip-rule="evenodd" />
+                    </svg>
+                </span>
+            </button>
+        </div>
+        {% endif %}
+        {# === نهاية: كود زر تبديل الثيم المحدث لسطح المكتب === #}
+    </div>
+
+    {# شريط التنقل الرئيسي على الشاشات الكبيرة (يظهر فقط إذا لم تكن الصفحة ذات تصميم مبسط) #}
+    {# هذا الـ nav يختفي على الشاشات الصغيرة بواسطة CSS #}
+    {% if not is_minimal_layout %} 
+    <nav class="main-nav">
+        {# روابط التنقل الرئيسية #}
+        <a href="{{ url_for('teacher_dashboard_placeholder') if session.get('role') == 'teacher' else url_for('student_dashboard_placeholder') }}" class="nav-link">
+            <i class="fas fa-tachometer-alt nav-icon"></i>
+            <span class="lang-en">Dashboard</span>
+            <span class="lang-ar" style="display:none;">لوحة التحكم</span>
+        </a>
+        {% if session.get('role') == 'teacher' %}
+            <a href="{{ url_for('teacher_videos_list_page') }}" class="nav-link">
+                <i class="fas fa-video nav-icon"></i>
+                <span class="lang-en">My Videos</span>
+                <span class="lang-ar" style="display:none;">فيديوهاتي</span>
+            </a>
+            <a href="{{ url_for('teacher_quizzes_list_page') }}" class="nav-link">
+                <i class="fas fa-question-circle nav-icon"></i>
+                <span class="lang-en">My Quizzes</span>
+                <span class="lang-ar" style="display:none;">اختباراتي</span>
+            </a>
+        {% elif session.get('role') == 'student' %}
+            <a href="{{ url_for('student_profile_page') }}" class="nav-link"> {# مسار صفحة الاشتراكات للطالب #}
+                <i class="fas fa-credit-card nav-icon"></i> 
+                <span class="lang-en">My Subscriptions</span>
+                <span class="lang-ar" style="display:none;">اشتراكاتي</span>
+            </a>
+        {% endif %}
+        <a href="{{ url_for('explore_teachers_page') }}" class="nav-link">
+            <i class="fas fa-chalkboard-teacher nav-icon"></i>
+            <span class="lang-en">Explore Teachers</span>
+            <span class="lang-ar" style="display:none;">استكشف المعلمين</span>
+        </a>
+
+        {# START: User Profile Dropdown (زر مع الصورة الصغيرة الدائرية والقائمة المنسدلة) - للشاشات الكبيرة فقط #}
+        {% if session.get('user_id') %}
+            <div class="user-profile-dropdown-container">
+                <button id="userProfileButton" class="user-profile-button" 
+                        aria-label="{% if current_lang == 'ar' %}قائمة المستخدم{% else %}User Menu{% endif %}" 
+                        aria-expanded="false">
+                    {# الصورة الشخصية الصغيرة والدائرية هنا #}
+                    <img src="{{ url_for('static', filename=current_user.profile_picture_url) if current_user and current_user.profile_picture_url else url_for('static', filename='images/default_profile.png') }}" 
+                         alt="{% if current_lang == 'ar' %}صورة الملف الشخصي{% else %}Profile Picture{% endif %}" 
+                         class="profile-pic-navbar">
+                </button>
+                <div id="userDropdown" class="user-dropdown-menu">
+                    {# رأس القائمة المنسدلة (اسم المستخدم والدور) #}
+                    <div class="dropdown-header">
+                        <i class="fas fa-user-circle"></i>
+                        <span class="user-name-display">{{ session.get('username', 'مستخدم') }}</span>
+                        <span class="user-role-display text-muted small">({{ session.get('role', 'زائر') }})</span>
+                    </div>
+                    <hr class="dropdown-divider">
+                    {# رابط الملف الشخصي #}
+                    <a href="{{ url_for('edit_teacher_profile') if session.get('role') == 'teacher' else url_for('edit_student_profile') }}" class="dropdown-item">
+                        <i class="fas fa-user"></i> 
+                        <span class="lang-en">My Profile</span>
+                        <span class="lang-ar" style="display:none;">ملفي الشخصي</span>
+                    </a>
+                    {# فاصل #}
+                    <hr class="dropdown-divider">
+                    {# رابط تسجيل الخروج #}
+                    <a href="{{ url_for('logout') }}" class="dropdown-item logout-item">
+                        <i class="fas fa-sign-out-alt"></i> 
+                        <span class="lang-en">Logout</span>
+                        <span class="lang-ar" style="display:none;">تسجيل الخروج</span>
+                    </a>
+                </div>
+            </div>
+        {% else %} {# للزوار غير المسجلين (Login/Sign Up) #}
+            <a href="{{ url_for('login_page') }}" class="nav-link">
+                <span class="lang-en">Login</span>
+                <span class="lang-ar" style="display:none;">تسجيل الدخول</span>
+            </a>
+            <a href="{{ url_for('choose_signup_role') }}" class="btn btn-signup">
+                <span class="lang-en">Sign Up</span>
+                <span class="lang-ar" style="display:none;">إنشاء حساب</span>
+            </a>
+        {% endif %}
+    </nav>
+    {% endif %} {# نهاية التحقق من is_minimal_layout #}
+
+    {# حاوية قائمة الإعدادات (زر الهامبرجر والثيم/اللغة) - تظهر فقط على الشاشات الصغيرة #}
+    <div class="settings-menu-container">
+        <button id="settingsMenuButton" class="settings-menu-button" 
+                aria-label="{% if current_lang == 'ar' %}قائمة الإعدادات{% else %}Settings Menu{% endif %}" 
+                aria-expanded="false"
+                data-title-en="Settings" data-title-ar="الإعدادات">
+            <i class="fas fa-bars"></i> {# أيقونة القائمة (Hamburger) #}
+        </button>
+        <div id="settingsDropdown" class="settings-dropdown-menu">
+            <button class="close-menu-button" id="closeMenuButton" 
+                    aria-label="{% if current_lang == 'ar' %}إغلاق القائمة{% else %}Close menu{% endif %}">
+                <i class="fas fa-times"></i> {# أيقونة X للإغلاق #}
+            </button>
+            
+            {# روابط القائمة المنسدلة في الهامبرجر (مكررة من الـ main-nav لتظهر في قائمة الجوال) #}
+            {% if session.get('user_id') %}
+                <div class="dropdown-header username-display-mobile"> {# عرض اسم المستخدم في القائمة #}
+                    <i class="fas fa-user-circle"></i>
+                    <span class="user-name-display"><span class="lang-en">Hello, </span><span class="lang-ar" style="display:none;">أهلاً، </span>{{ session.get('username', 'User') }}</span>
+                </div>
+                <a href="{{ url_for('teacher_dashboard_placeholder') if session.get('role') == 'teacher' else url_for('student_dashboard_placeholder') }}" class="dropdown-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span class="lang-en">Dashboard</span>
+                    <span class="lang-ar" style="display:none;">لوحة التحكم</span>
+                </a>
+                {% if session.get('role') == 'teacher' %}
+                    <a href="{{ url_for('teacher_videos_list_page') }}" class="dropdown-item">
+                        <i class="fas fa-video"></i>
+                        <span class="lang-en">My Videos</span>
+                        <span class="lang-ar" style="display:none;">فيديوهاتي</span>
+                    </a>
+                    <a href="{{ url_for('teacher_quizzes_list_page') }}" class="dropdown-item">
+                        <i class="fas fa-question-circle"></i>
+                        <span class="lang-en">My Quizzes</span>
+                        <span class="lang-ar" style="display:none;">اختباراتي</span>
+                    </a>
+                    <a href="{{ url_for('edit_teacher_profile') }}" class="dropdown-item">
+                        <i class="fas fa-user-edit"></i>
+                        <span class="lang-en">Edit Profile</span>
+                        <span class="lang-ar" style="display:none;">تعديل ملفي الشخصي</span>
+                    </a>
+                {% elif session.get('role') == 'student' %}
+                    <a href="{{ url_for('student_profile_page') }}" class="dropdown-item"> {# مسار صفحة الاشتراكات للطالب #}
+                        <i class="fas fa-credit-card"></i> 
+                        <span class="lang-en">My Subscriptions</span>
+                        <span class="lang-ar" style="display:none;">اشتراكاتي</span>
+                    </a>
+                     <a href="{{ url_for('student_profile_page') }}" class="dropdown-item">
+                        <i class="fas fa-user"></i>
+                        <span class="lang-en">My Profile</span>
+                        <span class="lang-ar" style="display:none;">ملفي الشخصي</span>
+                    </a>
+                {% endif %}
+                <a href="{{ url_for('explore_teachers_page') }}" class="dropdown-item">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    <span class="lang-en">Explore Teachers</span>
+                    <span class="lang-ar" style="display:none;">استكشف المعلمين</span>
+                </a>
+                <a href="{{ url_for('logout') }}" class="dropdown-item">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="lang-en">Logout</span>
+                    <span class="lang-ar" style="display:none;">تسجيل الخروج</span>
+                </a>
+            {% else %} {# للزوار غير المسجلين #}
+                <a href="{{ url_for('login_page') }}" class="dropdown-item">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span class="lang-en">Login</span>
+                    <span class="lang-ar" style="display:none;">تسجيل الدخول</span>
+                </a>
+                <a href="{{ url_for('choose_signup_role') }}" class="dropdown-item">
+                    <i class="fas fa-user-plus"></i>
+                    <span class="lang-en">Sign Up</span>
+                    <span class="lang-ar" style="display:none;">إنشاء حساب</span>
+                </a>
+                <a href="{{ url_for('explore_teachers_page') }}" class="dropdown-item">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    <span class="lang-en">Explore Teachers</span>
+                    <span class="lang-ar" style="display:none;">استكشف المعلمين</span>
+                </a>
+            {% endif %}
+
+            <hr class="dropdown-divider"> 
+
+            {# زر تبديل اللغة (يظهر هنا فقط في قائمة الهامبرجر) #}
+            <a href="#" id="languageToggleMobile" class="dropdown-item"> {# ID مختلف لزر الموبايل #}
+                <i class="fas fa-language"></i> 
+                <span class="lang-en">Switch to عربي</span> 
+                <span class="lang-ar" style="display:none;">Switch to English</span>
+            </a>
+            
+            {# === بداية: كود زر تبديل الثيم المحدث للموبايل === #}
+            <div class="dropdown-item theme-toggle-mobile-wrapper">
+                <button id="themeToggleMobile" class="theme-switch theme-switch--mobile" 
+                        aria-label-light="{% if current_lang == 'ar' %}التبديل إلى الوضع الليلي{% else %}Switch to Dark Mode{% endif %}"
+                        aria-label-dark="{% if current_lang == 'ar' %}التبديل إلى الوضع النهاري{% else %}Switch to Light Mode{% endif %}"
+                        title="{% if current_lang == 'ar' %}تبديل الوضع{% else %}Toggle Theme{% endif %}">
+                    <span class="theme-switch__track">
+                        <span class="theme-switch__icon theme-switch__icon--sun">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="14" height="14"> <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.106a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 17.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z" /></svg>
+                        </span>
+                        <span class="theme-switch__icon theme-switch__icon--moon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="14" height="14"> <path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-3.51 1.713-6.638 4.383-8.531a.75.75 0 01.818.161z" clip-rule="evenodd" /></svg>
+                        </span>
+                    </span>
+                    <span class="theme-switch__knob">
+                        <svg class="knob-icon--sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"> <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.106a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 17.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z" /></svg>
+                        <svg class="knob-icon--moon" style="display:none;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">  <path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-3.51 1.713-6.638 4.383-8.531a.75.75 0 01.818.161z" clip-rule="evenodd" /></svg>
+                    </span>
+                    <span class="theme-switch-mobile-label">
+                        <span class="lang-en">Light Mode</span> 
+                        <span class="lang-ar" style="display:none;">الوضع النهاري</span>
+                    </span>
+                </button>
+            </div>
+            {# === نهاية: كود زر تبديل الثيم المحدث للموبايل === #}
+        </div>
+    </div>
+</header>

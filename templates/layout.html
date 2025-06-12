@@ -1,241 +1,176 @@
 <!DOCTYPE html>
-{# يتم التحكم باللغة والاتجاه بواسطة JavaScript الرئيسي (main.js) بناءً على إعدادات المستخدم المحفوظة #}
-{# الافتراضي الأولي عند أول تحميل بدون إعدادات محفوظة هو ما يتم تعيينه هنا أو في <body> #}
-<html lang="en" dir="ltr"> {# يتم تحديث هذه السمات بواسطة JS #}
+{#
+  هذا الملف هو القالب الأساسي لجميع الصفحات.
+  يستخدم Jinja2 لوراثة المحتوى وتضمين الأجزاء المشتركة.
+  يتحكم في اللغة والاتجاه (RTL/LTR) والثيم العام للصفحة.
+#}
+<html lang="{{ current_lang }}" dir="{{ 'rtl' if current_lang == 'ar' else 'ltr' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {# يتم تعيين العنوان الافتراضي، ويمكن للصفحات الفرعية تغييره باستخدام {% block title %} #}
     <title>
         {% block title %}
-            {# عنوان افتراضي، سيتم تغييره من الصفحات التي ترث #}
-            {# والنصوص ستُعرض بناءً على اللغة المختارة بواسطة JS #}
-            <span class="lang-en">Ektbariny Platform</span>
-            <span class="lang-ar" style="display:none;">منصة اختبرني</span>
+            {% if current_lang == 'ar' %}اختبرني - منصة التعليم والاختبارات{% else %}Ektbariny - Learning & Quiz Platform{% endif %}
         {% endblock %}
     </title>
-    {# ربط ملف CSS الرئيسي #}
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    {# ربط Font Awesome للأيقونات #}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
     
     {% block head_extra %}
-    {# 
-        هذا البلوك مخصص لأي إضافات خاصة بالصفحة إلى وسم <head> 
-        (مثل <meta> tags إضافية أو <link> لملفات CSS أخرى خاصة بالصفحة).
-        حاول إبقائه نظيفًا أو أضف فقط وسوم meta/link صالحة.
-    #}
+    {# هذا البلوك مخصص لأي إضافات خاصة بالصفحة إلى وسم <head> #}
     {% endblock %}
 </head>
+{#
+  وسم <body>:
+  - `theme-dark`: كلاس افتراضي للثيم (سيتم تحديثه بواسطة JS بناءً على تفضيلات المستخدم).
+  - `data-current-theme`, `data-current-lang`: سمات بيانات لتتبع الحالة الحالية بواسطة JavaScript.
+#}
 <body class="theme-dark" data-current-theme="dark" data-current-lang="en"> 
-    {# 
-      data-current-theme و data-current-lang يتم تحديثهما بواسطة main.js 
-      class="theme-dark" هو الثيم الافتراضي عند أول تحميل بدون إعدادات محفوظة
-    #}
 
-    <header class="main-header">
-        <div class="logo">
-            <a href="{{ url_for('home') }}" id="platformLogo">
-                 {# النص هنا أيضًا سيعتمد على اللغة المطبقة بواسطة JS #}
-                 <span class="lang-en">Ektbariny</span>
-                 <span class="lang-ar" style="display:none;">اختبرني</span>
-            </a>
-        </div>
-        
-        {# شريط التنقل الرئيسي - يتم عرضه فقط إذا لم تكن الصفحة ذات تصميم مبسط #}
-        {% if not is_minimal_layout %} 
-        <nav class="main-nav">
-            {# روابط تظهر إذا كان المستخدم مسجل دخوله #}
-            {% if session.get('user_id') %}
-                <a href="{{ url_for('logout') }}">
-                    <span class="lang-en">Logout</span>
-                    <span class="lang-ar" style="display:none;">تسجيل الخروج</span>
-                </a>
-                {# روابط خاصة بالمعلم #}
-                {% if session.get('role') == 'teacher' %}
-                    <a href="{{ url_for('teacher_videos_list_page') }}">
-                        <span class="lang-en">My Videos</span>
-                        <span class="lang-ar" style="display:none;">فيديوهاتي</span>
-                    </a>
-                    <a href="{{ url_for('teacher_quizzes_list_page') }}" style="margin-left: 10px; margin-right: 10px;">
-                        <span class="lang-en">My Quizzes</span>
-                        <span class="lang-ar" style="display:none;">اختباراتي</span>
-                    </a>
-                    {# الرابط الجديد المضاف لصفحة استكشاف المعلمين (للمعلم) #}
-                    <a href="{{ url_for('explore_teachers_page') }}" style="margin-left: 10px; margin-right: 10px;">
-                        <span class="lang-en">Explore Teachers</span>
-                        <span class="lang-ar" style="display:none;">استكشف المعلمين</span>
-                    </a>
-                    {# يمكنك إعادة رابط Teacher Dashboard Placeholder إذا أردت لوحة تحكم عامة منفصلة لاحقًا #}
-                    {# <a href="{{ url_for('teacher_dashboard_placeholder') }}">
-                        <span class="lang-en">Dashboard</span>
-                        <span class="lang-ar" style="display:none;">لوحة التحكم</span>
-                    </a> #}
-                {# روابط خاصة بالطالب #}
-                {% elif session.get('role') == 'student' %}
-                     <a href="{{ url_for('student_dashboard_placeholder') }}">
-                        <span class="lang-en">Student Dashboard</span>
-                        <span class="lang-ar" style="display:none;">لوحة تحكم الطالب</span>
-                     </a>
-                    {# الرابط الجديد المضاف لصفحة استكشاف المعلمين (للطالب) #}
-                    <a href="{{ url_for('explore_teachers_page') }}" style="margin-left: 10px; margin-right: 10px;">
-                        <span class="lang-en">Explore Teachers</span>
-                        <span class="lang-ar" style="display:none;">استكشف المعلمين</span>
-                    </a>
-                {% endif %}
-                 <span class="username-display" style="padding: 0 12px; opacity: 0.8;"> {# إضافة تنسيق بسيط هنا #}
-                    <span class="lang-en">Hello, {{ session.get('username', 'User') }}</span>
-                    <span class="lang-ar" style="display:none;">أهلاً، {{ session.get('username', 'مستخدم') }}</span>
-                 </span>
-            {# روابط تظهر إذا لم يكن المستخدم مسجل دخوله #}
-            {% else %}
-                <a href="{{ url_for('login_page') }}">
-                    <span class="lang-en">Login</span>
-                    <span class="lang-ar" style="display:none;">تسجيل الدخول</span>
-                </a>
-                <a href="{{ url_for('choose_signup_role') }}" class="btn btn-signup"> {# زر تسجيل بارز #}
-                    <span class="lang-en">Sign Up</span>
-                    <span class="lang-ar" style="display:none;">إنشاء حساب</span>
-                </a>
-                {# الرابط الجديد المضاف لصفحة استكشاف المعلمين (للزوار) #}
-                <a href="{{ url_for('explore_teachers_page') }}" style="margin-left: 10px; margin-right: 10px;">
-                    <span class="lang-en">Explore Teachers</span>
-                    <span class="lang-ar" style="display:none;">استكشف المعلمين</span>
-                </a>
-            {% endif %}
-        </nav>
-        {% endif %} {# نهاية التحقق من is_minimal_layout #}
+    {# تضمين شريط التنقل العلوي الموحد (Navbar). يجب أن يكون الملف موجوداً في templates/includes/navbar.html #}
+    {% include 'includes/navbar.html' %}
 
-        {# حاوية قائمة الإعدادات (تبديل اللغة والثيم) #}
-        {# تم تحويلها لـ Hamburger Menu على الشاشات الصغيرة #}
-        <div class="settings-menu-container">
-            <button id="settingsMenuButton" class="settings-menu-button" 
-                    aria-label="Settings Menu" aria-expanded="false" 
-                    data-title-en="Settings" data-title-ar="الإعدادات">
-                <i class="fas fa-bars"></i> {# أيقونة القائمة (Hamburger) #}
-            </button>
-            <div id="settingsDropdown" class="settings-dropdown-menu"> {# تم إزالة style="display: none;" ليتم التحكم به بالـ CSS/JS #}
-                <button class="close-menu-button" id="closeMenuButton" aria-label="Close menu">
-                    <i class="fas fa-times"></i> {# أيقونة X للإغلاق #}
-                </button>
-                
-                {# الروابط اللي كانت في main-nav، هنقلها هنا عشان تظهر في قائمة الهامبرجر #}
-                {% if session.get('user_id') %}
-                    <div class="dropdown-item username-display-mobile"> {# عرض اسم المستخدم في القائمة #}
-                        <i class="fas fa-user-circle"></i>
-                        <span class="lang-en">Hello, {{ session.get('username', 'User') }}</span>
-                        <span class="lang-ar" style="display:none;">أهلاً، {{ session.get('username', 'مستخدم') }}</span>
+    {# حاوية لعرض رسائل Flash (التنبيهات). تظهر في أعلى الصفحة #}
+    <div class="flash-messages-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category else 'info' }} alert-dismissible fade show animated-slide-up" role="alert">
+                        {{ message | safe }} {# |safe للسماح بـ HTML بسيط في الرسالة #}
+                        {# زر إغلاق التنبيه مع دعم اللغة #}
+                        <button type="button" class="btn-close close-alert-btn" aria-label="{% if current_lang == 'ar' %}إغلاق التنبيه{% else %}Close alert{% endif %}">
+                        </button>
                     </div>
-                    <a href="{{ url_for('teacher_dashboard_placeholder') if session.get('role') == 'teacher' else url_for('student_dashboard_placeholder') }}" class="dropdown-item">
-                        <i class="fas fa-tachometer-alt"></i>
-                        <span class="lang-en">Dashboard</span>
-                        <span class="lang-ar" style="display:none;">لوحة التحكم</span>
-                    </a>
-                    {% if session.get('role') == 'teacher' %}
-                        <a href="{{ url_for('teacher_videos_list_page') }}" class="dropdown-item">
-                            <i class="fas fa-video"></i>
-                            <span class="lang-en">My Videos</span>
-                            <span class="lang-ar" style="display:none;">فيديوهاتي</span>
-                        </a>
-                        <a href="{{ url_for('teacher_quizzes_list_page') }}" class="dropdown-item">
-                            <i class="fas fa-question-circle"></i>
-                            <span class="lang-en">My Quizzes</span>
-                            <span class="lang-ar" style="display:none;">اختباراتي</span>
-                        </a>
-                        <a href="{{ url_for('edit_teacher_profile') }}" class="dropdown-item">
-                            <i class="fas fa-user-edit"></i>
-                            <span class="lang-en">Edit Profile</span>
-                            <span class="lang-ar" style="display:none;">تعديل ملفي الشخصي</span>
-                        </a>
-                    {% elif session.get('role') == 'student' %}
-                         <a href="{{ url_for('student_profile_page') }}" class="dropdown-item">
-                            <i class="fas fa-user"></i>
-                            <span class="lang-en">My Profile</span>
-                            <span class="lang-ar" style="display:none;">ملفي الشخصي</span>
-                        </a>
-                    {% endif %}
-                    <a href="{{ url_for('explore_teachers_page') }}" class="dropdown-item">
-                        <i class="fas fa-chalkboard-teacher"></i>
-                        <span class="lang-en">Explore Teachers</span>
-                        <span class="lang-ar" style="display:none;">استكشف المعلمين</span>
-                    </a>
-                    <a href="{{ url_for('logout') }}" class="dropdown-item">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span class="lang-en">Logout</span>
-                        <span class="lang-ar" style="display:none;">تسجيل الخروج</span>
-                    </a>
-                {% else %} {# للزوار غير المسجلين #}
-                    <a href="{{ url_for('login_page') }}" class="dropdown-item">
-                        <i class="fas fa-sign-in-alt"></i>
-                        <span class="lang-en">Login</span>
-                        <span class="lang-ar" style="display:none;">تسجيل الدخول</span>
-                    </a>
-                    <a href="{{ url_for('choose_signup_role') }}" class="dropdown-item">
-                        <i class="fas fa-user-plus"></i>
-                        <span class="lang-en">Sign Up</span>
-                        <span class="lang-ar" style="display:none;">إنشاء حساب</span>
-                    </a>
-                    <a href="{{ url_for('explore_teachers_page') }}" class="dropdown-item">
-                        <i class="fas fa-chalkboard-teacher"></i>
-                        <span class="lang-en">Explore Teachers</span>
-                        <span class="lang-ar" style="display:none;">استكشف المعلمين</span>
-                    </a>
-                {% endif %}
-
-                <hr style="border-color: rgba(255,255,255,0.1); margin: 8px 0;"> {# فاصل بين الروابط واعدادات اللغة/الثيم #}
-
-                {# زر تبديل اللغة #}
-                <a href="#" id="languageToggle" class="dropdown-item" data-lang-target="ar">
-                    <i class="fas fa-language"></i> 
-                    <span class="lang-en">Switch to عربي</span> 
-                    <span class="lang-ar" style="display:none;">Switch to English</span>
-                </a>
-                {# زر تبديل الثيم #}
-                <a href="#" id="themeToggle" class="dropdown-item" data-theme-target="light">
-                    <i class="fas fa-sun"></i> {# أيقونة الشمس للوضع النهاري كهدف أولي #}
-                    <span class="lang-en">Day Mode</span> 
-                    <span class="lang-ar" style="display:none;">الوضع النهاري</span>
-                </a>
-                {# يمكن إضافة المزيد من عناصر القائمة هنا لاحقًا #}
-            </div>
-        </div>
-    </header>
-
-    {# حاوية لعرض رسائل Flash (التنبيهات) #}
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <div class="flash-messages-container">
-        {% for category, message in messages %}
-          <div class="alert alert-{{ category if category else 'info' }}" role="alert">
-            {{ message | safe }} {# |safe للسماح بـ HTML بسيط في الرسالة إذا لزم الأمر #}
-            <button type="button" class="close-alert-btn" 
-                    data-aria-label-en="Close alert" 
-                    data-aria-label-ar="إغلاق التنبيه">×</button>
-          </div>
-        {% endfor %}
-        </div>
-      {% endif %}
-    {% endwith %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
         
-    {# البلوك الرئيسي الذي سيحتوي على محتوى كل صفحة فرعية #}
-    {% block content %}
-        <div class="container main-page-content"> {# كلاس main-page-content لتمييز المحتوى الرئيسي #}
-            <p class="lang-en" style="text-align: center; margin-top: 50px; font-size: 1.2em;">Default page content is loading...</p>
-            <p class="lang-ar" style="display:none; text-align: center; margin-top: 50px; font-size: 1.2em;">يتم تحميل محتوى الصفحة الافتراضي...</p>
-        </div>
+    {#
+      البلوك الرئيسي للمحتوى.
+      جميع الصفحات الفرعية التي ترث من هذا القالب ستضع محتواها داخل {% block content %} ... {% endblock %}.
+      `main-page-content` هو كلاس عام لتنسيق المحتوى الرئيسي.
+    #}
+    <main class="container main-page-content">
+        {% block content %}
+            {# محتوى افتراضي يظهر إذا لم تقم الصفحة الفرعية بتحديد محتوى لبلوك 'content' #}
+            <p style="text-align: center; margin-top: 50px; font-size: 1.2em;">
+                {% if current_lang == 'ar' %}يتم تحميل محتوى الصفحة الافتراضي...{% else %}Default page content is loading...{% endif %}
+            </p>
+        {% endblock %}
+    </main>
+
+    {# تضمين الفوتر السفلي الموحد. يجب أن يكون الملف موجوداً في templates/includes/footer.html #}
+    {% include 'includes/footer.html' %}
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    {% block scripts_extra %}
+    {# بلوك لإضافة أي سكربتات JavaScript خاصة بالصفحة الفرعية #}
     {% endblock %}
 
-    <footer class="main-footer">
-        <p>
-            {# يتم تحديث السنة بواسطة متغير 'now' من context_processor في app.py #}
-            <span class="lang-en">© {{ now.year if now else datetime.utcnow().year }} - Ektbariny Platform. All rights reserved.</span>
-            <span class="lang-ar" style="display:none;">© {{ now.year if now else datetime.utcnow().year }} - منصة اختبرني. جميع الحقوق محفوظة.</span>
-        </p>
-        {# يمكن إضافة روابط أخرى في الفوتر هنا #}
-    </footer>
-    
-    {# ربط ملف JavaScript الرئيسي #}
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    {# بلوك لإضافة أي سكربتات JavaScript خاصة بالصفحة الفرعية #}
-    {% block scripts_extra %}{% endblock %}
+    <script>
+        // هذا السكريبت ضروري لـ layout.html لتطبيق اللغة والثيم بشكل مبدئي
+        // قبل تحميل main.js بالكامل. main.js سيقوم بالتحكم في التفاعل الفعلي.
+        document.addEventListener('DOMContentLoaded', function() {
+            const htmlElement = document.documentElement;
+            const bodyElement = document.body;
+            const settingsMenuButton = document.getElementById('settingsMenuButton');
+            const themeToggle = document.getElementById('themeToggle');
+            const languageToggle = document.getElementById('languageToggle');
+            const currentLang = "{{ current_lang }}"; // يتم تمريرها من Jinja2
+
+            // وظيفة تطبيق أنماط اللغة
+            function applyLanguageStyles(lang) {
+                htmlElement.setAttribute('dir', (lang === 'ar') ? 'rtl' : 'ltr');
+                htmlElement.setAttribute('lang', lang);
+
+                // إظهار/إخفاء عناصر النص بناءً على اللغة (مثل <span class="lang-en"> و <span class="lang-ar">)
+                document.querySelectorAll('.lang-en').forEach(el => {
+                    el.style.display = (lang === 'en') ? '' : 'none'; // '' reverts to default display
+                });
+                document.querySelectorAll('.lang-ar').forEach(el => {
+                    el.style.display = (lang === 'ar') ? '' : 'none';
+                });
+
+                // تحديث سمات aria-label و title للأزرار (لتحسين إمكانية الوصول)
+                if (settingsMenuButton) {
+                    settingsMenuButton.setAttribute('aria-label', (lang === 'en' ? 'Settings Menu' : 'قائمة الإعدادات'));
+                    settingsMenuButton.setAttribute('title', (lang === 'en' ? 'Settings' : 'الإعدادات'));
+                }
+                document.querySelectorAll('.close-alert-btn').forEach(button => {
+                    button.setAttribute('aria-label', (lang === 'en' ? 'Close alert' : 'إغلاق التنبيه'));
+                });
+            }
+
+            // وظيفة تحديث نص وأيقونة زر تبديل الثيم
+            function updateThemeToggleButtonContent(theme) {
+                if (!themeToggle) return;
+                const icon = themeToggle.querySelector('i');
+                // تحديث نص الزر بناءً على اللغة الحالية
+                if (theme === 'dark') {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                    themeToggle.innerHTML = `<i class="fas fa-moon"></i> <span class="lang-en">Night Mode</span><span class="lang-ar">الوضع الليلي</span>`;
+                    themeToggle.setAttribute('data-theme-target', 'light'); // النقر التالي سيغير إلى الفاتح
+                } else { // light
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                    themeToggle.innerHTML = `<i class="fas fa-sun"></i> <span class="lang-en">Day Mode</span><span class="lang-ar">الوضع النهاري</span>`;
+                    themeToggle.setAttribute('data-theme-target', 'dark'); // النقر التالي سيغير إلى الداكن
+                }
+                // إعادة تطبيق أنماط اللغة لضمان ظهور النص الصحيح داخل الزر (إخفاء/إظهار spans)
+                applyLanguageStyles(currentLang); 
+            }
+
+            // تهيئة الثيم عند تحميل الصفحة بناءً على التخزين المحلي أو تفضيلات النظام
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                bodyElement.classList.add('theme-' + savedTheme);
+                bodyElement.setAttribute('data-current-theme', savedTheme);
+                updateThemeToggleButtonContent(savedTheme);
+            } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                bodyElement.classList.add('theme-dark');
+                bodyElement.setAttribute('data-current-theme', 'dark');
+                updateThemeToggleButtonContent('dark');
+            } else {
+                bodyElement.classList.add('theme-light');
+                bodyElement.setAttribute('data-current-theme', 'light');
+                updateThemeToggleButtonContent('light');
+            }
+
+            // تطبيق أنماط اللغة الأولية
+            applyLanguageStyles(currentLang);
+
+            // منطق اختفاء رسائل Flash (الإعداد الأولي للرسائل الموجودة عند تحميل الصفحة)
+            document.querySelectorAll('.flash-messages-container .close-alert-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const alertDiv = this.closest('.alert');
+                    if (alertDiv) {
+                        alertDiv.classList.remove('show');
+                        alertDiv.classList.add('d-none'); // إخفاء مباشر لتجنب مشاكل التخطيط
+                        setTimeout(() => alertDiv.remove(), 150); // إزالة بعد فترة قصيرة
+                    }
+                });
+            });
+            document.querySelectorAll('.flash-messages-container .alert:not(.d-none)').forEach((alert, index) => {
+                setTimeout(() => {
+                    const closeBtn = alert.querySelector('.close-alert-btn');
+                    if (closeBtn) closeBtn.click();
+                }, 5000 + (index * 300));
+            });
+
+            // ***************************************************************
+            // ملاحظة هامة: باقي منطق التفاعل (مثل تبديل القوائم المنسدلة لـ Navbar
+            // وأي تفاعلات زر الهامبرجر) سيتم إدارته بالكامل بواسطة main.js.
+            // تأكد من أن ملف main.js الذي سأرسله لك يحتوي على هذا المنطق.
+            // ***************************************************************
+        });
+    </script>
 </body>
 </html>

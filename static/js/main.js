@@ -6,182 +6,203 @@ document.addEventListener('DOMContentLoaded', () => {
     const bodyElement = document.body;
     const languageToggle = document.getElementById('languageToggle');
     const themeToggle = document.getElementById('themeToggle');
-    const platformLogo = document.getElementById('platformLogo');
-    const usernameDisplayMobile = document.querySelector('.username-display-mobile');
+    const platformLogo = document.getElementById('platformLogo'); // للتأكد من وجوده فقط
 
     // Retrieve saved preferences or set defaults
-    // Use 'dark' as default if no preference is found or set from server
     let currentTheme = localStorage.getItem('theme') || bodyElement.getAttribute('data-current-theme') || 'dark'; 
-    // Use 'en' as default language if not found
     let currentLang = localStorage.getItem('lang') || htmlElement.getAttribute('lang') || 'en';
 
-    // Apply saved preferences immediately
+    // Apply saved preferences immediately on load
     applyTheme(currentTheme);
-    applyLanguage(currentLang); // Apply language after theme to ensure text in toggles is correct
+    applyLanguage(currentLang); 
 
     // Event Listeners for Toggles
     if (languageToggle) {
         languageToggle.addEventListener('click', (e) => {
             e.preventDefault();
-            const targetLang = languageToggle.getAttribute('data-lang-target') || ((currentLang === 'en') ? 'ar' : 'en');
-            currentLang = targetLang; // Update currentLang with the target
-            applyLanguage(currentLang);
-            localStorage.setItem('lang', currentLang);
+            const newLang = (currentLang === 'en') ? 'ar' : 'en';
+            currentLang = newLang; 
+            localStorage.setItem('lang', currentLang); 
             
-            // --- MODIFICATION: Redirect to server to set language in session ---
-            // This ensures the server-side (Flask) also knows the current language
-            // and can render templates correctly on next page load.
-            // The flash message for language update will now come from the server.
-            window.location.href = `/switch_lang/${currentLang}`; // Make sure this route exists in Flask
-
-            // flashMessage('Language preference updated!', 'info'); // Remove client-side flash
+            // Redirect to Flask route to change language in session
+            window.location.href = `/switch_lang/${currentLang}`; 
         });
     }
 
     if (themeToggle) {
         themeToggle.addEventListener('click', (e) => {
             e.preventDefault();
-            const targetTheme = themeToggle.getAttribute('data-theme-target') || ((currentTheme === 'dark') ? 'light' : 'dark');
-            currentTheme = targetTheme; // Update currentTheme with the target
-            applyTheme(currentTheme);
-            localStorage.setItem('theme', currentTheme);
-            flashMessage('Theme preference updated!', 'info'); // Client-side flash is okay for theme
+            const newTheme = (currentTheme === 'dark') ? 'light' : 'dark';
+            currentTheme = newTheme; 
+            applyTheme(currentTheme); 
+            localStorage.setItem('theme', currentTheme); 
+            // Optional: flashMessage('Theme preference updated!', 'info'); // You can re-enable this if needed
         });
     }
 
+    /** Applies the selected theme class and updates the theme toggle button content. */
     function applyTheme(theme) {
-        bodyElement.classList.remove('theme-dark', 'theme-light'); // Remove both to be safe
+        bodyElement.classList.remove('theme-dark', 'theme-light'); 
         bodyElement.classList.add(`theme-${theme}`);
-        bodyElement.setAttribute('data-current-theme', theme); // Update data attribute
+        bodyElement.setAttribute('data-current-theme', theme); 
         
-        if (themeToggle) { // Check if themeToggle exists
+        if (themeToggle) {
+            const icon = themeToggle.querySelector('i');
+            // Ensure spans exist or create them
+            let langEnSpan = themeToggle.querySelector('.lang-en-theme-text');
+            let langArSpan = themeToggle.querySelector('.lang-ar-theme-text');
+
+            if (!langEnSpan) {
+                langEnSpan = document.createElement('span');
+                langEnSpan.classList.add('lang-en-theme-text', 'lang-en');
+                themeToggle.appendChild(langEnSpan);
+            }
+            if (!langArSpan) {
+                langArSpan = document.createElement('span');
+                langArSpan.classList.add('lang-ar-theme-text', 'lang-ar');
+                langArSpan.style.display = 'none'; // Initially hidden
+                themeToggle.appendChild(langArSpan);
+            }
+
             if (theme === 'dark') {
-                themeToggle.innerHTML = '<i class="fas fa-sun"></i> <span class="lang-en">Day Mode</span><span class="lang-ar" style="display:none;">الوضع النهاري</span>';
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                langEnSpan.textContent = 'Night Mode';
+                langArSpan.textContent = 'الوضع الليلي';
                 themeToggle.setAttribute('data-theme-target', 'light');
-            } else {
-                themeToggle.innerHTML = '<i class="fas fa-moon"></i> <span class="lang-en">Night Mode</span><span class="lang-ar" style="display:none;">الوضع الليلي</span>';
+            } else { // light
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                langEnSpan.textContent = 'Day Mode';
+                langArSpan.textContent = 'الوضع النهاري';
                 themeToggle.setAttribute('data-theme-target', 'dark');
             }
-            // After setting innerHTML, re-apply language display for the toggle's text
-            const langEnInToggle = themeToggle.querySelector('.lang-en');
-            const langArInToggle = themeToggle.querySelector('.lang-ar');
-            if (langEnInToggle) langEnInToggle.style.display = (currentLang === 'en') ? 'inline' : 'none';
-            if (langArInToggle) langArInToggle.style.display = (currentLang === 'ar') ? 'inline' : 'none';
+            updateLanguageSpecificElements(currentLang); 
         }
     }
 
+    /** Applies the selected language and updates all language-specific text elements. */
     function applyLanguage(lang) {
         htmlElement.setAttribute('lang', lang);
         htmlElement.setAttribute('dir', (lang === 'ar') ? 'rtl' : 'ltr');
-        
-        // Toggle visibility for all elements with lang-en and lang-ar classes
-        document.querySelectorAll('.lang-en').forEach(el => {
-            el.style.display = (lang === 'en') ? 'inline' : (el.tagName === 'SPAN' || el.tagName === 'A' ? 'none' : ''); // Respect block elements
-        });
-        document.querySelectorAll('.lang-ar').forEach(el => {
-            el.style.display = (lang === 'ar') ? 'inline' : (el.tagName === 'SPAN' || el.tagName === 'A' ? 'none' : '');
-        });
+        bodyElement.setAttribute('data-current-lang', lang); 
 
-        // Special handling for language toggle button itself if its text changes
+        updateLanguageSpecificElements(lang);
+        
         if (languageToggle) {
-            if (lang === 'ar') {
-                languageToggle.innerHTML = '<i class="fas fa-language"></i> <span class="lang-en" style="display:none;">English</span><span class="lang-ar">English</span>'; // Display "English" in Arabic
-                languageToggle.setAttribute('data-lang-target', 'en');
-            } else { // lang === 'en'
-                languageToggle.innerHTML = '<i class="fas fa-language"></i> <span class="lang-en">العربية</span><span class="lang-ar" style="display:none;">العربية</span>'; // Display "العربية" in English
-                languageToggle.setAttribute('data-lang-target', 'ar');
+            const icon = languageToggle.querySelector('i');
+            if (icon) { 
+                // We use spans for text now, so just update their content
+                languageToggle.querySelector('.lang-en').textContent = (lang === 'en' ? 'Switch to عربي' : 'Switch to English');
+                languageToggle.querySelector('.lang-ar').textContent = (lang === 'ar' ? 'Switch to English' : 'Switch to عربي');
             }
         }
-        // Re-apply theme to ensure theme toggle text is also updated according to the new language
         applyTheme(currentTheme); 
-        updateDynamicTextContent(lang); // Update placeholders, aria-labels etc.
+        
+        document.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang: lang } }));
     }
 
+    /** Helper to toggle visibility of elements based on current language. */
+    function updateLanguageSpecificElements(lang) {
+        document.querySelectorAll('.lang-en').forEach(el => {
+            el.style.display = (lang === 'en') ? '' : 'none'; 
+        });
+        document.querySelectorAll('.lang-ar').forEach(el => {
+            el.style.display = (lang === 'ar') ? '' : 'none';
+        });
 
-    function updateDynamicTextContent(lang) {
-        if (platformLogo) {
-            const enText = platformLogo.querySelector('.lang-en');
-            const arText = platformLogo.querySelector('.lang-ar');
-            if (enText) enText.style.display = (lang === 'en') ? 'inline' : 'none';
-            if (arText) arText.style.display = (lang === 'ar') ? 'inline' : 'none';
-        }
-
-        const settingsBtn = document.getElementById('settingsMenuButton');
-        if (settingsBtn) {
-            const titleEn = settingsBtn.getAttribute('data-title-en');
-            const titleAr = settingsBtn.getAttribute('data-title-ar');
-            if (titleEn && titleAr) { // Ensure attributes exist
-                settingsBtn.setAttribute('title', (lang === 'en' ? titleEn : titleAr));
-                settingsBtn.setAttribute('aria-label', (lang === 'en' ? titleEn : titleAr));
+        document.querySelectorAll('[data-title-en], [data-title-ar]').forEach(el => {
+            const titleEn = el.getAttribute('data-title-en');
+            const titleAr = el.getAttribute('data-title-ar');
+            if (titleEn && titleAr) {
+                el.setAttribute('title', (lang === 'en' ? titleEn : titleAr));
             }
-        }
-
-        document.querySelectorAll('.close-alert-btn').forEach(button => {
-            const labelEn = button.getAttribute('data-aria-label-en');
-            const labelAr = button.getAttribute('data-aria-label-ar');
+        });
+        document.querySelectorAll('[data-aria-label-en], [data-aria-label-ar]').forEach(el => {
+            const labelEn = el.getAttribute('data-aria-label-en');
+            const labelAr = el.getAttribute('data-aria-label-ar');
             if (labelEn && labelAr) {
-                button.setAttribute('aria-label', (lang === 'en' ? labelEn : labelAr));
+                el.setAttribute('aria-label', (lang === 'en' ? labelEn : labelAr));
             }
         });
-
-        document.querySelectorAll('[placeholder-en]').forEach(input => {
-            const placeholderEn = input.getAttribute('placeholder-en');
-            const placeholderAr = input.getAttribute('placeholder-ar');
-            if (placeholderEn && placeholderAr){
-                input.setAttribute('placeholder', (lang === 'en' ? placeholderEn : placeholderAr));
+        document.querySelectorAll('[placeholder-en], [placeholder-ar]').forEach(el => {
+            const placeholderEn = el.getAttribute('placeholder-en');
+            const placeholderAr = el.getAttribute('placeholder-ar');
+            if (placeholderEn && placeholderAr) {
+                el.setAttribute('placeholder', (lang === 'en' ? placeholderEn : placeholderAr));
             }
         });
-
-        if (usernameDisplayMobile) {
-            const enSpan = usernameDisplayMobile.querySelector('.lang-en');
-            const arSpan = usernameDisplayMobile.querySelector('.lang-ar');
-            if (enSpan) enSpan.style.display = (lang === 'en') ? 'inline' : 'none';
-            if (arSpan) arSpan.style.display = (lang === 'ar') ? 'inline' : 'none';
-        }
     }
 
     // --- 2. Flash Messages Dismissal ---
-    // Auto-dismiss and manual dismiss for existing flash messages on page load
-    const existingFlashMessages = document.querySelectorAll('.flash-messages-container .alert:not(.hidden-section)'); // Select only visible flash messages
-    existingFlashMessages.forEach(alert => {
-        // Add close button functionality if it doesn't have one from dynamic creation
-        if (!alert.querySelector('.close-alert-btn')) {
-            const closeBtnHTML = `<button type="button" class="close-alert-btn" data-aria-label-en="Close alert" data-aria-label-ar="إغلاق التنبيه" aria-label="${currentLang === 'en' ? 'Close alert' : 'إغلاق التنبيه'}">×</button>`;
-            alert.insertAdjacentHTML('beforeend', closeBtnHTML);
+    // This function can be called by Flask routes if needed, or by other JS
+    window.flashMessage = function(message, category = 'info', duration = 5000) {
+        const container = document.querySelector('.flash-messages-container');
+        if (!container) {
+            console.warn("Flash message container not found. Cannot display message:", message);
+            return;
         }
 
+        const alertDiv = document.createElement('div');
+        const validCategories = ['success', 'danger', 'warning', 'info'];
+        const alertCategory = validCategories.includes(category) ? category : 'info';
+
+        alertDiv.className = `alert alert-${alertCategory} animated-slide-up`; 
+        alertDiv.setAttribute('role', 'alert');
+        
+        const closeButtonLabel = (currentLang === 'en' ? 'Close alert' : 'إغلاق التنبيه');
+        alertDiv.innerHTML = `${message} <button type="button" class="close-alert-btn" aria-label="${closeButtonLabel}">×</button>`;
+
+        const closeButton = alertDiv.querySelector('.close-alert-btn');
+        if (closeButton) {
+            closeButton.addEventListener('click', () => {
+                alertDiv.style.opacity = '0';
+                alertDiv.style.transform = 'translateY(-20px) scale(0.95)';
+                setTimeout(() => alertDiv.remove(), 300); 
+            });
+        }
+        container.appendChild(alertDiv);
+
+        // Auto-dismiss after a delay
+        if (!alertDiv.classList.contains('no-auto-dismiss')) { 
+            setTimeout(() => {
+                if (alertDiv && alertDiv.parentElement) { 
+                   closeButton.click(); 
+                }
+            }, duration);
+        }
+    };
+
+    // Auto-dismiss and manual dismiss for existing flash messages on page load
+    document.querySelectorAll('.flash-messages-container .alert').forEach(alert => {
         const closeButton = alert.querySelector('.close-alert-btn');
         if (closeButton) {
             closeButton.addEventListener('click', () => {
                 alert.style.opacity = '0';
                 alert.style.transform = 'translateY(-20px) scale(0.95)';
-                setTimeout(() => alert.remove(), 300); // Remove after transition
+                setTimeout(() => alert.remove(), 300);
             });
-        }
-        
-        // Auto-dismiss after a delay
-        if (!alert.classList.contains('no-auto-dismiss')) { // Add 'no-auto-dismiss' to prevent auto-close if needed
-             setTimeout(() => {
-                if (alert && alert.parentElement) { // Check if alert still exists
-                    closeButton.click(); // Simulate click for consistent animation/removal
+            const duration = 5000 + (Array.from(document.querySelectorAll('.flash-messages-container .alert')).indexOf(alert) * 300);
+            setTimeout(() => {
+                if (alert && alert.parentElement) {
+                    closeButton.click();
                 }
-            }, 5000 + (Array.from(existingFlashMessages).indexOf(alert) * 300) ); // Stagger auto-dismissal
+            }, duration);
         }
     });
-
 
     // --- 3. Settings Dropdown Menu (Hamburger Menu) ---
     const settingsMenuButton = document.getElementById('settingsMenuButton');
     const settingsDropdown = document.getElementById('settingsDropdown');
     const closeMenuButton = document.getElementById('closeMenuButton');
 
-    if (settingsMenuButton && settingsDropdown) { // closeMenuButton is optional now
+    if (settingsMenuButton && settingsDropdown) {
         settingsMenuButton.addEventListener('click', (e) => {
-            e.stopPropagation(); // Prevent click from immediately closing due to document listener
+            e.stopPropagation(); 
             const isExpanded = settingsMenuButton.getAttribute('aria-expanded') === 'true';
             settingsMenuButton.setAttribute('aria-expanded', String(!isExpanded));
             settingsDropdown.classList.toggle('show');
-            document.body.classList.toggle('no-scroll', !isExpanded);
+            document.body.classList.toggle('no-scroll', !isExpanded); // Prevent body scroll when menu is open
         });
 
         if (closeMenuButton) {
@@ -203,119 +224,193 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 4. Password Toggle Visibility (Login/Signup Forms) ---
-    const passwordToggles = document.querySelectorAll('.password-toggle-icon');
-    passwordToggles.forEach(toggle => {
+    // --- 4. User Profile Dropdown Toggle Logic ---
+    const userProfileButton = document.getElementById('userProfileButton');
+    const userDropdown = document.getElementById('userDropdown');
+
+    if (userProfileButton && userDropdown) {
+        userProfileButton.addEventListener('click', function(e) {
+            e.stopPropagation(); // Prevent clicks on button from immediately closing the dropdown from document click listener
+            userDropdown.classList.toggle('show');
+            this.setAttribute('aria-expanded', userDropdown.classList.contains('show'));
+        });
+
+        document.addEventListener('click', function(event) {
+            if (userDropdown.classList.contains('show') && 
+                !userDropdown.contains(event.target) && 
+                !userProfileButton.contains(event.target)) {
+                userDropdown.classList.remove('show');
+                userProfileButton.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
+
+    // --- 5. Password Toggle Visibility (for login/signup forms) ---
+    function togglePasswordVisibility(fieldId, iconElement) {
+        const passwordField = document.getElementById(fieldId);
+        const icon = iconElement.querySelector('i');
+        const currentLang = document.documentElement.lang || 'en'; 
+
+        if (passwordField && icon) {
+            const type = passwordField.type === "password" ? "text" : "password";
+            passwordField.type = type;
+            icon.classList.toggle("fa-eye");
+            icon.classList.toggle("fa-eye-slash");
+            iconElement.setAttribute('aria-pressed', type === "text" ? 'true' : 'false');
+            
+            const newLabel = (type === "text") ? (currentLang === 'ar' ? 'إخفاء كلمة المرور' : 'Hide password') : (currentLang === 'ar' ? 'إظهار كلمة المرور' : 'Show password');
+            iconElement.setAttribute('aria-label', newLabel);
+            iconElement.setAttribute('title', newLabel);
+        }
+    }
+    document.querySelectorAll('.password-toggle-icon').forEach(toggle => {
         toggle.addEventListener('click', function() {
-            // Assuming the input is the previous sibling or inside a common parent
-            let passwordField = this.previousElementSibling;
-            if (passwordField && passwordField.tagName !== 'INPUT') { // Check if it's not an input, try to find it within parent
-                 passwordField = this.closest('.password-field-container').querySelector('input[type="password"], input[type="text"]');
-            }
-
-            if (passwordField) {
-                const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
-                passwordField.setAttribute('type', type);
-                // Toggle icon (assuming Font Awesome)
-                const icon = this.querySelector('i');
-                if (icon) {
-                    icon.classList.toggle('fa-eye');
-                    icon.classList.toggle('fa-eye-slash');
-                }
-            }
+            togglePasswordVisibility(this.previousElementSibling.id, this);
         });
+        const currentLang = document.documentElement.lang || 'en';
+        const isPasswordVisible = toggle.previousElementSibling.type === 'text';
+        const newLabel = (isPasswordVisible) ? (currentLang === 'ar' ? 'إخفاء كلمة المرور' : 'Hide password') : (currentLang === 'ar' ? 'إظهار كلمة المرور' : 'Show password');
+        toggle.setAttribute('aria-label', newLabel);
+        toggle.setAttribute('title', newLabel);
     });
 
-    // --- 5. Country Search Filter (for signup/login forms) ---
-    const countrySearchInputs = document.querySelectorAll('.country-search-input');
-    countrySearchInputs.forEach(searchInput => {
-        // Get the associated select element (assuming it's the next sibling with tagName 'SELECT')
-        let selectElement = searchInput.nextElementSibling;
-        while(selectElement && selectElement.tagName !== 'SELECT') {
-            selectElement = selectElement.nextElementSibling;
-        }
+    // --- 6. Country Search Filter (for signup/login forms) ---
+    window.filterCountriesSignup = function() { 
+        const input = document.getElementById('country_signup_search_input');
+        const filter = input.value.toLowerCase().trim();
+        const select = document.getElementById('country_signup_select');
+        const options = Array.from(select.options); 
+        const currentLang = document.documentElement.lang || 'en';
 
-        if (selectElement) {
-            // Store original options if not already stored
-            if (!selectElement.hasOwnProperty('originalOptions')) {
-                selectElement.originalOptions = Array.from(selectElement.options).map(opt => ({
-                    text: opt.text,
-                    value: opt.value,
-                    disabled: opt.disabled,
-                    selected: opt.selected
-                }));
-            }
+        select.innerHTML = ''; 
         
-            searchInput.addEventListener('keyup', function() {
-                const filter = this.value.toLowerCase().trim();
-                // Clear current options
-                selectElement.innerHTML = ''; 
-                
-                // Filter and add back original options
-                selectElement.originalOptions.forEach(optData => {
-                    if (optData.text.toLowerCase().includes(filter) || optData.value.toLowerCase().includes(filter) || filter === '') {
-                        const option = new Option(optData.text, optData.value);
-                        option.disabled = optData.disabled;
-                        option.selected = optData.selected && filter === ''; // Re-select only if filter is empty and it was originally selected
-                        selectElement.add(option);
-                    }
-                });
-                 // Ensure select reflects change for screen readers or other tools
-                if(selectElement.options.length > 0 && filter === '' && selectElement.originalOptions.find(o => o.selected)){
-                    // If filter is empty, try to set the originally selected option
-                    const originallySelected = selectElement.originalOptions.find(o => o.selected);
-                    if (originallySelected) selectElement.value = originallySelected.value;
-                } else if (selectElement.options.length > 0 && selectElement.selectedIndex === -1){
-                     // If nothing is selected (e.g. after filtering out the selected one), select the first available option.
-                    // selectElement.selectedIndex = 0; // Or handle as per UX preference
-                }
-            });
+        const defaultOptionData = options.find(opt => opt.value === "");
+        if (defaultOptionData) {
+            const defaultOption = new Option(defaultOptionData.text, defaultOptionData.value);
+            defaultOption.disabled = defaultOptionData.disabled;
+            defaultOption.selected = true; 
+            select.add(defaultOption);
         }
-    });
 
+        options.forEach(opt => {
+            if (opt.value === "") return; 
 
-    // --- 6. Role Selection Box (Signup Page) ---
-    const roleBoxes = document.querySelectorAll('.role-selection-box');
-    roleBoxes.forEach(box => {
-        box.addEventListener('click', () => {
-            roleBoxes.forEach(rb => rb.classList.remove('selected'));
-            box.classList.add('selected');
-            const radio = box.querySelector('.role-radio');
-            if (radio) {
-                radio.checked = true;
-                // Trigger change event for any listeners on the radio button itself
-                const event = new Event('change', { bubbles: true });
-                radio.dispatchEvent(event);
+            let textContentToSearch = '';
+            const dataTextEn = opt.getAttribute('data-text-en');
+            const dataTextAr = opt.getAttribute('data-text-ar');
+
+            if (currentLang === 'ar' && dataTextAr) {
+                textContentToSearch = dataTextAr.toLowerCase();
+            } else if (dataTextEn) {
+                textContentToSearch = dataTextEn.toLowerCase();
+            } else {
+                textContentToSearch = opt.textContent.toLowerCase();
+            }
+
+            if (textContentToSearch.includes(filter)) {
+                const option = new Option(opt.textContent, opt.value);
+                option.disabled = opt.disabled;
+                option.selected = opt.selected; 
+                select.add(option);
             }
         });
-    });
-    const initiallySelectedRadio = document.querySelector('.role-radio:checked');
-    if (initiallySelectedRadio) {
-        const parentBox = initiallySelectedRadio.closest('.role-selection-box');
-        if(parentBox) parentBox.classList.add('selected');
+
+        if (select.selectedIndex === -1 && select.options.length > 0) {
+            const originalSelectedOption = options.find(o => o.selected);
+            if (originalSelectedOption && options.some(o => o.value === originalSelectedOption.value && o.style.display !== 'none')) {
+                select.value = originalSelectedOption.value;
+            } else {
+                const firstAvailable = Array.from(select.options).find(o => !o.disabled && o.style.display !== 'none');
+                if (firstAvailable) {
+                    select.value = firstAvailable.value;
+                }
+            }
+        }
     }
 
 
-    // --- 7. Dynamic Visual Effects & Animations ---
-    // <<< MODIFIED TO INCLUDE .animated-auth-element >>>
+    // --- 7. Role Selection Box (Signup Page) ---
+    const roleBoxes = document.querySelectorAll('.role-selection-box');
+    const studentRadio = document.getElementById('role_student');
+    const teacherRadio = document.getElementById('role_teacher');
+    const selectedRoleTextEnSpan = document.getElementById('selectedRoleTextEn');
+    const selectedRoleTextArSpan = document.getElementById('selectedRoleTextAr');
+    const roleSelectionForm = document.getElementById('roleSelectionForm');
+
+    function updateRoleSelectionVisuals() {
+        let roleNameEn = '';
+        let roleNameAr = '';
+        
+        roleBoxes.forEach(box => {
+            box.classList.remove('selected');
+            box.setAttribute('aria-checked', 'false');
+        });
+        
+        if (studentRadio && studentRadio.checked) {
+            const box = studentRadio.closest('.role-selection-box');
+            if (box) {
+                box.classList.add('selected');
+                box.setAttribute('aria-checked', 'true');
+            }
+            roleNameEn = ' Student';
+            roleNameAr = ' طالب';
+        } else if (teacherRadio && teacherRadio.checked) {
+            const box = teacherRadio.closest('.role-selection-box');
+            if (box) {
+                box.classList.add('selected');
+                box.setAttribute('aria-checked', 'true');
+            }
+            roleNameEn = ' Teacher';
+            roleNameAr = ' معلم';
+        }
+        
+        if(selectedRoleTextEnSpan) selectedRoleTextEnSpan.textContent = roleNameEn;
+        if(selectedRoleTextArSpan) selectedRoleTextArSpan.textContent = roleNameAr;
+    }
+
+    roleBoxes.forEach(box => {
+        box.addEventListener('click', (e) => {
+            e.preventDefault(); 
+            const radio = box.querySelector('.role-radio');
+            if (radio) {
+                radio.checked = true;
+                updateRoleSelectionVisuals();
+            }
+        });
+    });
+
+    updateRoleSelectionVisuals(); 
+
+    if (roleSelectionForm) {
+        roleSelectionForm.addEventListener('submit', function(event) {
+            const selectedRoleRadio = document.querySelector('input[name="role"]:checked');
+            if (!selectedRoleRadio) {
+                event.preventDefault(); 
+                const alertMsg = (document.documentElement.lang === 'ar') ? 
+                                 'يرجى اختيار دورك (طالب أو معلم) للمتابعة.' : 
+                                 'Please choose your role (student or teacher) to continue.';
+                window.flashMessage(alertMsg, 'danger'); 
+            }
+        });
+    }
+
+    // --- 8. Dynamic Content Animations (Intersection Observer) ---
     const animatedElements = document.querySelectorAll(
         '.card, .teacher-card, .feature-item, .accordion-item, .animated-auth-element, .hero-text-content, .hero-image-content'
     ); 
     const observerOptions = {
-        root: null, // relative to the viewport
+        root: null, 
         rootMargin: '0px',
-        threshold: 0.1 // 10% of the item is visible
+        threshold: 0.1 
     };
 
     const observer = new IntersectionObserver((entries, observerInstance) => {
         entries.forEach((entry, index) => {
             if (entry.isIntersecting) {
-                // Stagger animation based on the actual index in the NodeList for all observed elements
-                // Calculate index relative to all elements being observed
-                const trueIndex = Array.from(animatedElements).indexOf(entry.target);
-                entry.target.style.animationDelay = `${trueIndex * 0.08}s`;
+                const trueIndex = Array.from(animatedElements).indexOf(entry.target); 
+                entry.target.style.animationDelay = `${trueIndex * 0.08}s`; 
                 entry.target.classList.add('animated-slide-up');
-                observerInstance.unobserve(entry.target); // Stop observing once animated
+                observerInstance.unobserve(entry.target); 
             }
         });
     }, observerOptions);
@@ -324,14 +419,14 @@ document.addEventListener('DOMContentLoaded', () => {
         observer.observe(el);
     });
 
-
+    // --- 9. Dashboard Stats Animation (for teacher/student dashboards) ---
     function animateNumber(element, start, end, duration) {
-        if (!element) return; // Guard clause
+        if (!element) return; 
         let startTimestamp = null;
         const step = (timestamp) => {
             if (!startTimestamp) startTimestamp = timestamp;
             const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-            element.textContent = Math.floor(progress * (end - start) + start).toLocaleString(); // Add toLocaleString for formatting
+            element.textContent = Math.floor(progress * (end - start) + start).toLocaleString(); 
             if (progress < 1) {
                 window.requestAnimationFrame(step);
             }
@@ -340,50 +435,65 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     const teacherDashboardContent = document.getElementById('teacherDashboardContent');
-    if (teacherDashboardContent) {
-        fetchDashboardStats();
-        // setInterval(fetchDashboardStats, 30000); // Optional refresh
+    const studentDashboardContent = document.getElementById('studentDashboardContent'); 
+
+    if (teacherDashboardContent || studentDashboardContent) {
+        fetchDashboardStats(); 
     }
 
     async function fetchDashboardStats() {
-        // This function remains the same as in your original file.
-        // It fetches data from '/api/teacher/dashboard_stats'
-        // and uses animateNumber to update the UI.
+        const userRole = bodyElement.getAttribute('data-user-role'); 
+        let apiUrl = '';
+        if (userRole === 'teacher') {
+            apiUrl = '/api/teacher/dashboard_stats'; 
+        } else if (userRole === 'student') {
+            apiUrl = '/api/student/dashboard_stats'; 
+        } else {
+            console.warn("User role not set or not recognized for dashboard stats API call.");
+            return;
+        }
+
         try {
-            const response = await fetch('/api/teacher/dashboard_stats'); // Ensure this API endpoint exists in Flask
+            const response = await fetch(apiUrl);
             if (!response.ok) {
                 const errorData = await response.text();
                 throw new Error(`Network response was not ok: ${response.status} ${errorData}`);
             }
             const stats = await response.json();
 
-            animateNumber(document.getElementById('subscribersCount'), 0, stats.subscribers || 0, 1000);
-            animateNumber(document.getElementById('totalViewsCount'), 0, stats.total_views || 0, 1500);
-            animateNumber(document.getElementById('quizzesMadeCount'), 0, stats.quizzes_count || 0, 800);
-            animateNumber(document.getElementById('questionsMadeCount'), 0, stats.questions_count || 0, 1200);
+            if (document.getElementById('subscribersCount')) animateNumber(document.getElementById('subscribersCount'), 0, stats.subscribers || 0, 1000);
+            if (document.getElementById('totalViewsCount')) animateNumber(document.getElementById('totalViewsCount'), 0, stats.total_views || 0, 1500);
+            if (document.getElementById('quizzesMadeCount')) animateNumber(document.getElementById('quizzesMadeCount'), 0, stats.quizzes_count || 0, 800);
+            if (document.getElementById('questionsMadeCount')) animateNumber(document.getElementById('questionsMadeCount'), 0, stats.questions_count || 0, 1200);
+            if (document.getElementById('videosWatchedCount')) animateNumber(document.getElementById('videosWatchedCount'), 0, stats.videos_watched_count || 0, 1000);
+            if (document.getElementById('quizzesTakenCount')) animateNumber(document.getElementById('quizzesTakenCount'), 0, stats.quizzes_taken_count || 0, 1000);
 
         } catch (error) {
             console.error('Error fetching dashboard stats:', error);
-            const statsContainer = document.querySelector('#teacherDashboardContent .row.mb-5'); // Adjust selector if needed
-            if (statsContainer) {
-                 statsContainer.innerHTML = `<div class="col-12 text-center text-danger"><p>Failed to load dashboard statistics. Please try again later.</p></div>`;
+            const dashboardSection = document.querySelector('.dashboard-section'); 
+            if (dashboardSection) {
+                 const messageDiv = document.createElement('div');
+                 messageDiv.className = 'alert alert-danger text-center mt-4';
+                 messageDiv.textContent = (currentLang === 'ar' ? 'فشل تحميل إحصائيات لوحة التحكم. يرجى المحاولة لاحقاً.' : 'Failed to load dashboard statistics. Please try again later.');
+                 dashboardSection.appendChild(messageDiv);
             }
         }
     }
 
+    // --- 10. Button Ripple Effect ---
     document.querySelectorAll('.btn').forEach(button => {
         button.addEventListener('click', function(e) {
-            if (!this.classList.contains('btn-ripple') && !this.closest('.no-ripple')) { // Add .no-ripple to parent to disable
+            if (!this.classList.contains('no-ripple') && !this.closest('.no-ripple')) { 
                 const existingRipple = this.querySelector('.btn-ripple');
-                if (existingRipple) existingRipple.remove();
+                if (existingRipple) existingRipple.remove(); 
 
                 const circle = document.createElement('span');
-                this.appendChild(circle);
+                this.appendChild(circle); 
+                
                 const diameter = Math.max(this.clientWidth, this.clientHeight);
                 const radius = diameter / 2;
+
                 circle.style.width = circle.style.height = `${diameter}px`;
-                
-                // Calculate position relative to the button, not viewport
                 const rect = this.getBoundingClientRect();
                 circle.style.left = `${e.clientX - rect.left - radius}px`;
                 circle.style.top = `${e.clientY - rect.top - radius}px`;
@@ -393,48 +503,3 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 }); // End of DOMContentLoaded
-
-// Helper function to show flash message dynamically
-function flashMessage(message, category = 'info', duration = 5000) {
-    const container = document.querySelector('.flash-messages-container');
-    if (!container) {
-        console.warn("Flash message container not found. Cannot display message:", message);
-        return;
-    }
-
-    const alertDiv = document.createElement('div');
-    // Ensure category is one of the expected alert types for styling
-    const validCategories = ['success', 'danger', 'warning', 'info'];
-    const alertCategory = validCategories.includes(category) ? category : 'info';
-
-    alertDiv.className = `alert alert-${alertCategory} animated-slide-up`; // Use className for multiple classes
-    alertDiv.setAttribute('role', 'alert');
-    
-    const currentLang = document.documentElement.getAttribute('lang') || 'en';
-    const closeButtonLabel = currentLang === 'en' ? 'Close alert' : 'إغلاق التنبيه';
-
-    alertDiv.innerHTML = `${message} <button type="button" class="close-alert-btn" aria-label="${closeButtonLabel}">×</button>`;
-
-    const closeButton = alertDiv.querySelector('.close-alert-btn');
-    if (closeButton) {
-        closeButton.addEventListener('click', () => {
-            alertDiv.style.opacity = '0';
-            alertDiv.style.transform = 'translateY(-20px) scale(0.95)';
-            setTimeout(() => alertDiv.remove(), 300); 
-        });
-    }
-    container.appendChild(alertDiv);
-
-    if (!alertDiv.classList.contains('no-auto-dismiss')) {
-        setTimeout(() => {
-            if (alertDiv && alertDiv.parentElement) { // Check if still in DOM
-               if(closeButton) closeButton.click(); // Trigger click for consistent removal
-               else { // Fallback if no close button (shouldn't happen with above code)
-                    alertDiv.style.opacity = '0';
-                    alertDiv.style.transform = 'translateY(-20px) scale(0.95)';
-                    setTimeout(() => alertDiv.remove(), 300);
-               }
-            }
-        }, duration);
-    }
-}

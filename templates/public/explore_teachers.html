@@ -1,77 +1,95 @@
-{% extends "layout.html" %}
+<!DOCTYPE html>
+<html lang="{{ current_lang }}" dir="{{ 'rtl' if current_lang == 'ar' else 'ltr' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        {% if current_lang == 'ar' %}
+        استكشف معلمينا
+        {% else %}
+        Explore Our Teachers
+        {% endif %}
+    </title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
+</head>
+<body>
+    {% include 'includes/navbar.html' %}
 
-{% block title %}
-    <span class="lang-en">Explore Teachers - Ektbariny</span>
-    <span class="lang-ar" style="display:none;">استكشف المعلمين - اختبرني</span>
-{% endblock %}
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">
+            {% if current_lang == 'ar' %}
+            استكشف معلمينا
+            {% else %}
+            Explore Our Teachers
+            {% endif %}
+        </h2>
 
-{% block content %}
-<div class="container main-page-content" style="margin-top: 30px; margin-bottom: 30px;">
-    <h2 class="section-main-title text-center">
-        <span class="lang-en">Explore Our Talented Teachers</span>
-        <span class="lang-ar" style="display:none;">استكشف معلمينا الموهوبين</span>
-    </h2>
-    <p class="section-subtitle text-center">
-        <span class="lang-en">Find the perfect teacher for your learning needs. Search by name, subject, or bio.</span>
-        <span class="lang-ar" style="display:none;">ابحث عن المعلم المثالي لاحتياجاتك التعليمية. ابحث بالاسم، الموضوع، أو النبذة.</span>
-    </p>
-
-    {# Search Form #}
-    <div class="card p-4 mb-4" style="max-width: 700px; margin: 0 auto;">
-        <form method="GET" action="{{ url_for('explore_teachers_page') }}">
+        <form class="mb-4" method="GET" action="{{ url_for('explore_teachers_page') }}">
             <div class="input-group">
-                <input type="text" class="form-control" name="search_query" 
-                       placeholder="{% if current_lang == 'ar' %}ابحث عن المعلمين...{% else %}Search teachers...{% endif %}" 
-                       value="{{ search_query if search_query }}" aria-label="Search teachers">
+                <input type="search" class="form-control" name="search_query"
+                       placeholder="{% if current_lang == 'ar' %}ابحث عن معلم...{% else %}Search for a teacher...{% endif %}"
+                       value="{{ search_query }}">
                 <button class="btn btn-primary" type="submit">
-                    <i class="fas fa-search me-1"></i>
-                    <span class="lang-en">Search</span>
-                    <span class="lang-ar" style="display:none;">بحث</span>
+                    {% if current_lang == 'ar' %}
+                    بحث
+                    {% else %}
+                    Search
+                    {% endif %}
                 </button>
             </div>
         </form>
-    </div>
 
-    {# Teachers List/Grid #}
-    <div class="teachers-grid">
-        {% if teachers %}
-            {% for teacher in teachers %}
-            <div class="teacher-card">
-                <div class="teacher-card-header">
-                    <img src="{{ url_for('static', filename=teacher.profile_picture_url) if teacher.profile_picture_url else url_for('static', filename='images/default_profile.png') }}" 
-                         alt="{% if current_lang == 'ar' %}صورة الملف الشخصي للمعلم{% else %}Teacher Profile Picture{% endif %}" 
-                         class="teacher-card-img">
-                    <div class="teacher-name-and-role">
-                        <a href="{{ url_for('public_teacher_profile_page', teacher_id=teacher.id) }}" class="teacher-name-link"> {# This link will go to teacher's public profile/videos page #}
-                            {{ teacher.first_name }} {{ teacher.last_name }}
-                        </a>
-                        <span class="teacher-role">
-                            <span class="lang-en">Teacher</span>
-                            <span class="lang-ar" style="display:none;">معلم</span>
-                        </span>
-                    </div>
-                </div>
-                <div class="teacher-card-body">
-                    <p class="teacher-bio">{{ teacher.bio | truncate(150, True) if teacher.bio else ('لا توجد نبذة تعريفية.' if current_lang == 'ar' else 'No bio available.') }}</p>
-                    {# You can add more info here, e.g., number of videos, quizzes #}
-                </div>
-                <div class="teacher-card-footer">
-                    <a href="{{ url_for('public_teacher_profile_page', teacher_id=teacher.id) }}" class="btn btn-sm btn-outline-primary"> {# This button will view teacher's videos/profile #}
-                        <i class="fas fa-video me-1"></i>
-                        <span class="lang-en">View Content</span>
-                        <span class="lang-ar" style="display:none;">عرض المحتوى</span>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% if teachers %}
+                {% for teacher in teachers %}
+                <div class="col">
+                    <a href="{{ url_for('public_teacher_profile_page', teacher_id=teacher.id) }}" class="teacher-card-link">
+                        <div class="card teacher-card h-100 shadow-sm border-0" data-teacher-id="{{ teacher.id }}">
+                            <div class="card-img-container">
+                                <img src="{{ url_for('static', filename=teacher.profile_picture_url if teacher.profile_picture_url else 'images/default_profile.png') }}"
+                                     class="card-img-top teacher-profile-img"
+                                     alt="{{ teacher.first_name }} {{ teacher.last_name }}">
+                                <div class="overlay"></div> </div>
+                            <div class="card-body text-center">
+                                <h5 class="card-title mb-1">{{ teacher.first_name }} {{ teacher.last_name }}</h5>
+                                <p class="card-text text-muted mb-2"><small>@{{ teacher.username }}</small></p>
+                                <p class="card-text teacher-bio">
+                                    {{ teacher.bio | truncate(100, True) if teacher.bio else ('لا يوجد نبذة تعريفية.' if current_lang == 'ar' else 'No bio available.') }}
+                                </p>
+                            </div>
+                            <div class="card-footer text-center">
+                                 <button class="btn btn-sm btn-outline-primary mt-2">
+                                    {% if current_lang == 'ar' %}
+                                    عرض الملف الشخصي
+                                    {% else %}
+                                    View Profile
+                                    {% endif %}
+                                 </button>
+                            </div>
+                        </div>
                     </a>
                 </div>
-            </div>
-            {% endfor %}
-        {% else %}
-            <div class="alert alert-info text-center w-100" style="grid-column: 1 / -1;">
-                <p class="mb-0">
-                    <span class="lang-en">No teachers found matching your search.</span>
-                    <span class="lang-ar" style="display:none;">لم يتم العثور على معلمين يطابقون بحثك.</span>
-                </p>
-            </div>
-        {% endif %}
+                {% endfor %}
+            {% else %}
+                <div class="col-12">
+                    <p class="text-center text-muted">
+                        {% if current_lang == 'ar' %}
+                        لا يوجد معلمون لعرضهم حاليًا أو لا توجد نتائج للبحث.
+                        {% else %}
+                        No teachers to display currently or no search results.
+                        {% endif %}
+                    </p>
+                </div>
+            {% endif %}
+        </div>
     </div>
-</div>
-{% endblock %}
+
+    {% include 'includes/footer.html' %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

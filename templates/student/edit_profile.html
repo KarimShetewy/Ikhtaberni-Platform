@@ -1,0 +1,88 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    {% if current_lang == 'ar' %}تعديل ملفي الشخصي (الطالب){% else %}Edit My Profile (Student){% endif %} - اختبرني
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card p-4 shadow-sm rounded-lg">
+        <h2 class="card-title text-center mb-4">
+            {% if current_lang == 'ar' %}تعديل ملفي الشخصي{% else %}Edit My Profile{% endif %}
+        </h2>
+
+        <form method="POST" action="{{ url_for('edit_student_profile') }}" enctype="multipart/form-data">
+            <div class="row mb-3">
+                <label for="first_name" class="col-md-3 col-form-label">
+                    {% if current_lang == 'ar' %}الاسم الأول:{% else %}First Name:{% endif %}
+                </label>
+                <div class="col-md-9">
+                    <input type="text" class="form-control" id="first_name" name="first_name" value="{{ form_data.first_name }}" required>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <label for="last_name" class="col-md-3 col-form-label">
+                    {% if current_lang == 'ar' %}اسم العائلة:{% else %}Last Name:{% endif %}
+                </label>
+                <div class="col-md-9">
+                    <input type="text" class="form-control" id="last_name" name="last_name" value="{{ form_data.last_name }}" required>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <label for="email" class="col-md-3 col-form-label">
+                    {% if current_lang == 'ar' %}البريد الإلكتروني:{% else %}Email Address:{% endif %}
+                </label>
+                <div class="col-md-9">
+                    <input type="email" class="form-control" id="email" name="email" value="{{ form_data.email }}" disabled>
+                    <small class="form-text text-muted">
+                        {% if current_lang == 'ar' %}لا يمكن تغيير البريد الإلكتروني.{% else %}Email cannot be changed.{% endif %}
+                    </small>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <label for="phone_number" class="col-md-3 col-form-label">
+                    {% if current_lang == 'ar' %}رقم الهاتف:{% else %}Phone Number:{% endif %}
+                </label>
+                <div class="col-md-9">
+                    <input type="tel" class="form-control" id="phone_number" name="phone_number" value="{{ form_data.phone_number }}">
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <label for="country" class="col-md-3 col-form-label">
+                    {% if current_lang == 'ar' %}الدولة:{% else %}Country:{% endif %}
+                </label>
+                <div class="col-md-9">
+                    <input type="text" class="form-control" id="country" name="country" value="{{ form_data.country }}">
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <label for="profile_picture" class="col-md-3 col-form-label">
+                    {% if current_lang == 'ar' %}صورة الملف الشخصي:{% else %}Profile Picture:{% endif %}
+                </label>
+                <div class="col-md-9">
+                    {% if current_profile_pic_url %}
+                    <img src="{{ url_for('static', filename=current_profile_pic_url) }}" alt="{% if current_lang == 'ar' %}الصورة الحالية{% else %}Current Profile Pic{% endif %}" class="img-thumbnail rounded-circle mb-2" style="width: 100px; height: 100px; object-fit: cover;">
+                    {% endif %}
+                    <input type="file" class="form-control" id="profile_picture" name="profile_picture" accept="image/*">
+                    <small class="form-text text-muted">
+                        {% if current_lang == 'ar' %}صيغ الصور المسموحة: PNG, JPG, JPEG, GIF, WEBP.{% else %}Allowed image formats: PNG, JPG, JPEG, GIF, WEBP.{% endif %}
+                    </small>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-12 text-center">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        {% if current_lang == 'ar' %}حفظ التغييرات{% else %}Save Changes{% endif %}
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
